@@ -94,11 +94,7 @@
             transform: translateY(0);
         }
         
-        .modal-hidden {
-            display: none;
-            visibility: hidden;
-            opacity: 0;
-        }
+        /* .modal-hidden is no longer needed as we redirect */
     </style>
 </head>
 <body class="min-h-screen">
@@ -332,25 +328,7 @@
         </div>
     </main>
     
-    <!-- Success Modal -->
-    <div id="successModal" class="fixed inset-0 flex items-center justify-center z-50 modal-hidden">
-        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div class="bg-white rounded-lg p-8 max-w-md w-full relative z-10 transform transition-all">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-                    <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-medium text-gray-900 mb-2">Pendaftaran Berhasil!</h3>
-                <p class="text-gray-600 mb-6">Data pendaftaran Anda telah berhasil dikirim. Silakan simpan password Anda untuk mengecek hasil seleksi nanti.</p>
-                <div class="bg-gray-100 p-4 rounded-md mb-6">
-                    <p class="text-sm text-gray-700">Password Anda: <span id="savedPassword" class="font-medium"></span></p>
-                </div>
-                <button id="closeModal" class="btn-primary w-full py-2 rounded-md font-medium">Tutup</button>
-            </div>
-        </div>
-    </div>
+    <!-- Success Modal is removed as we redirect to success.html -->
 
     <footer class="bg-theme-black text-white py-4 mt-12">
         <div class="container mx-auto px-4 text-center text-sm">
@@ -410,11 +388,6 @@
             const nrpError = document.getElementById('nrpError');
             const whatsappError = document.getElementById('whatsappError');
             const practicumError = document.getElementById('practicumError');
-            
-            // Modal
-            const successModal = document.getElementById('successModal');
-            const closeModal = document.getElementById('closeModal');
-            const savedPassword = document.getElementById('savedPassword');
             
             // Update priority value display
             priorityInput.addEventListener('input', function() {
@@ -541,7 +514,6 @@
                 let isValid = true;
                 
                 if (!document.querySelector('input[name="canOperate"]:checked')) {
-                    // Consider adding a visual indicator for this radio button group
                     isValid = false;
                 }
                 
@@ -561,7 +533,6 @@
                 }
                 
                 if (!document.querySelector('input[name="availability"]:checked')) {
-                    // Consider adding a visual indicator for this radio button group
                     isValid = false;
                 }
                 
@@ -645,10 +616,24 @@
                 // Disable submit button to prevent multiple submissions
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Mengirim...';
+                submitBtn.classList.add('animate-pulse'); // Add pulse animation
 
                 async function uploadFile(file, path) {
                     const storageRef = storage.ref(path);
-                    await storageRef.put(file);
+                    const uploadTask = storageRef.put(file);
+
+                    // You can add progress tracking here if needed
+                    // uploadTask.on('state_changed', 
+                    //     (snapshot) => {
+                    //         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    //         console.log('Upload is ' + progress + '% done');
+                    //     }, 
+                    //     (error) => {
+                    //         throw error; // Re-throw to be caught by outer catch block
+                    //     }
+                    // );
+
+                    await uploadTask; // Wait for the upload to complete
                     return await storageRef.getDownloadURL();
                 }
 
@@ -657,13 +642,13 @@
 
                 try {
                     // Upload files
-                    if (cvInput.files[0]) {
-                        cvUrl = await uploadFile(cvInput.files[0], `pendaftaran/${nrpInput.value}/cv.pdf`);
-                    }
+                    console.log("Attempting to upload CV...");
+                    cvUrl = await uploadFile(cvInput.files[0], `pendaftaran/${nrpInput.value}/cv.pdf`);
+                    console.log("CV uploaded:", cvUrl);
                     
-                    if (transcriptInput.files[0]) {
-                        transcriptUrl = await uploadFile(transcriptInput.files[0], `pendaftaran/${nrpInput.value}/transkrip.pdf`);
-                    }
+                    console.log("Attempting to upload Transcript...");
+                    transcriptUrl = await uploadFile(transcriptInput.files[0], `pendaftaran/${nrpInput.value}/transkrip.pdf`);
+                    console.log("Transcript uploaded:", transcriptUrl);
 
                     // Collect all form data
                     const formData = {
@@ -684,14 +669,15 @@
                     };
 
                     // Save to Firestore
+                    console.log("Attempting to save data to Firestore...");
                     await db.collection("pendaftaran").add(formData);
+                    console.log("Data saved to Firestore successfully.");
                     
-                    // Store password in localStorage for success page/modal
+                    // Store password in localStorage for success page
                     localStorage.setItem('savedPassword', formData.password);
                     
-                    // Show success modal
-                    savedPassword.textContent = formData.password;
-                    successModal.classList.remove('modal-hidden');
+                    // Redirect to success page
+                    window.location.href = "/success.html";
 
                 } catch (error) {
                     console.error("Error during form submission:", error);
@@ -700,26 +686,8 @@
                     // Re-enable submit button regardless of success or failure
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Kirim Pendaftaran';
+                    submitBtn.classList.remove('animate-pulse'); // Remove pulse animation
                 }
-            });
-            
-            // Close modal and reset form
-            closeModal.addEventListener('click', function() {
-                successModal.classList.add('modal-hidden');
-                
-                form.reset();
-                // Reset file input display names
-                cvFileName.textContent = 'Belum ada file yang dipilih';
-                transcriptFileName.textContent = 'Belum ada file yang dipilih';
-                // Reset priority slider display
-                priorityValue.textContent = '5';
-
-                // Navigate back to the first section
-                section3.classList.remove('active');
-                section3.classList.add('hidden');
-                section1.classList.remove('hidden');
-                section1.classList.add('active');
-                progressBar.style.width = '0%';
             });
             
             // Initialize form sections
