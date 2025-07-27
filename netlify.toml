@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/*?form-submission=success"
+  to = "/success.html"
+  status = 301
+  force = true
