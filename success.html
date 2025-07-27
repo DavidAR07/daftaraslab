@@ -1,7 +1,3 @@
-  </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'965d7335617e37f4',t:'MTc1MzYzMzA3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -25,37 +21,122 @@
         .bg-theme-black {
             background-color: #1a1a1a;
         }
+        
+        .text-theme-red {
+            color: #c41e3a;
+        }
+        
+        .btn-primary {
+            background-color: #c41e3a;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #a01a30;
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 m-4">
-        <div class="text-center">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-                <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
+<body class="min-h-screen flex flex-col">
+    <header class="bg-theme-black text-white py-4 shadow-md">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-theme-red flex items-center justify-center mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold">Fisika Laboratorium 1</h1>
+                    <p class="text-xs text-gray-300">Departemen Fisika ITS</p>
+                </div>
             </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-2">Pendaftaran Berhasil!</h3>
-            <p class="text-gray-600 mb-6">Data pendaftaran Anda telah berhasil dikirim. Silakan simpan password Anda untuk mengecek hasil seleksi nanti.</p>
-            <div class="bg-gray-100 p-4 rounded-md mb-6">
-                <p class="text-sm text-gray-700">Password Anda: <span id="savedPassword" class="font-medium"></span></p>
-            </div>
-            <a href="/" class="bg-theme-red text-white py-2 px-4 rounded-md font-medium inline-block hover:bg-opacity-90 transition">Kembali ke Beranda</a>
         </div>
-    </div>
-    
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
+                    <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Pendaftaran Berhasil!</h2>
+                <p class="text-gray-600 mb-6">Data pendaftaran Anda telah berhasil dikirim. Silakan simpan password Anda untuk mengecek hasil seleksi nanti.</p>
+                
+                <div class="bg-gray-100 p-6 rounded-md mb-8">
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Informasi Penting</h3>
+                    <p class="text-sm text-gray-700 mb-4">Simpan password Anda dengan baik. Password ini akan digunakan untuk mengecek hasil seleksi.</p>
+                    <div class="bg-white p-4 rounded border border-gray-300">
+                        <p class="text-sm text-gray-700">Password Anda:</p>
+                        <p id="savedPassword" class="text-lg font-medium text-theme-red mt-1">Memuat...</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <a href="/" class="btn-primary w-full py-3 rounded-md font-medium inline-block">Kembali ke Beranda</a>
+                    <button id="copyPassword" class="w-full py-3 bg-gray-200 rounded-md font-medium text-gray-700 hover:bg-gray-300 transition flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        Salin Password
+                    </button>
+                </div>
+                
+                <p class="text-xs text-gray-500 mt-8">Jika Anda memiliki pertanyaan, silakan hubungi kami melalui email: fislab1@its.ac.id</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-theme-black text-white py-3">
+        <div class="container mx-auto px-4 text-center text-xs">
+            <p>&copy; 2025 Fisika Laboratorium 1 - Departemen Fisika ITS</p>
+        </div>
+    </footer>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Ambil password dari localStorage
             const savedPassword = localStorage.getItem('savedPassword');
+            const passwordElement = document.getElementById('savedPassword');
+            
             if (savedPassword) {
-                document.getElementById('savedPassword').textContent = savedPassword;
-                // Hapus password dari localStorage setelah ditampilkan
-                localStorage.removeItem('savedPassword');
+                passwordElement.textContent = savedPassword;
+                // Hapus password dari localStorage setelah ditampilkan untuk keamanan
+                // localStorage.removeItem('savedPassword');
             } else {
-                document.getElementById('savedPassword').textContent = "(tidak tersedia)";
+                passwordElement.textContent = "(tidak tersedia)";
+                passwordElement.classList.add('text-gray-500');
             }
+            
+            // Fungsi untuk menyalin password ke clipboard
+            const copyButton = document.getElementById('copyPassword');
+            copyButton.addEventListener('click', function() {
+                if (savedPassword) {
+                    navigator.clipboard.writeText(savedPassword).then(function() {
+                        // Ubah teks tombol sementara untuk memberi feedback
+                        const originalText = copyButton.innerHTML;
+                        copyButton.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Password Tersalin!
+                        `;
+                        copyButton.classList.remove('bg-gray-200', 'text-gray-700');
+                        copyButton.classList.add('bg-green-100', 'text-green-700');
+                        
+                        setTimeout(function() {
+                            copyButton.innerHTML = originalText;
+                            copyButton.classList.remove('bg-green-100', 'text-green-700');
+                            copyButton.classList.add('bg-gray-200', 'text-gray-700');
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('Tidak dapat menyalin teks: ', err);
+                    });
+                }
+            });
         });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'965d8a0930aefdac',t:'MTc1MzYzNDAxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
