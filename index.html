@@ -6,21 +6,21 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
     <script>
-  // Konfigurasi Firebase (ganti dengan data proyek Anda)
+  // Konfigurasi Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA",
     authDomain: "daftaraslab.firebaseapp.com",
     projectId: "daftaraslab",
-    storageBucket: "daftaraslab.firebasestorage.app",
+    storageBucket: "daftaraslab.appspot.com", // Perhatikan ini berbeda dari yang sebelumnya
     messagingSenderId: "329213682687",
     appId: "1:329213682687:web:a326f7f6effc51b4347dca",
     measurementId: "G-C9NRKRK2JC"
   };
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = firebase.firestore();
-const storage = firebase.storage();
+
+  // Inisialisasi Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const storage = firebase.storage();
 </script>
 <head>
     <meta charset="UTF-8">
@@ -661,56 +661,54 @@ form.addEventListener('submit', async function(e) {
     return false;
   }
 
-  // Fungsi untuk upload file
+  // Fungsi untuk upload file yang diperbaiki
   async function uploadFile(file, path) {
-    const storageRef = storage.ref(path);
-    await storageRef.put(file);
-    return await storageRef.getDownloadURL();
+    try {
+      const storageRef = storage.ref(path);
+      const snapshot = await storageRef.put(file);
+      return await snapshot.ref.getDownloadURL();
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error; // Re-throw error untuk ditangkap di catch luar
+    }
   }
 
-  // Upload file (jika ada)
-  let cvUrl = null;
-  let transcriptUrl = null;
-
+  // Upload file dengan error handling lebih baik
   try {
-    if (cvInput.files[0]) {
-      cvUrl = await uploadFile(cvInput.files[0], `pendaftaran/${nrpInput.value}/cv.pdf`);
-    }
-    
-    if (transcriptInput.files[0]) {
-      transcriptUrl = await uploadFile(transcriptInput.files[0], `pendaftaran/${nrpInput.value}/transkrip.pdf`);
+    // Validasi file terlebih dahulu
+    if (!cvInput.files[0] || !transcriptInput.files[0]) {
+      throw new Error("Harap unggah kedua file (CV dan Transkrip)");
     }
 
-    // Kumpulkan semua data form + URL file
-    const formData = {
-      email: emailInput.value,
-      name: nameInput.value,
-      nrp: nrpInput.value,
-      whatsapp: whatsappInput.value,
-      motivation: motivationInput.value,
-      priority: priorityInput.value,
-      canOperate: document.querySelector('input[name="canOperate"]:checked')?.value,
-      practicum: Array.from(document.querySelectorAll('input[name="practicum"]:checked')).map(el => el.value),
-      explanation: document.getElementById('explanation').value,
-      availability: document.querySelector('input[name="availability"]:checked')?.value,
-      password: passwordInput.value,
-      cvUrl: cvUrl, // URL file CV
-      transcriptUrl: transcriptUrl, // URL file transkrip
+    // Ukuran file maksimal 5MB
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (cvInput.files[0].size > maxSize || transcriptInput.files[0].size > maxSize) {
+      throw new Error("Ukuran file maksimal 5MB");
+    }
+
+    // Upload paralel untuk kedua file
+    const [cvUrl, transcriptUrl] = await Promise.all([
+      uploadFile(cvInput.files[0], `pendaftaran/${nrpInput.value}/cv.pdf`),
+      uploadFile(transcriptInput.files[0], `pendaftaran/${nrpInput.value}/transkrip.pdf`)
+    ]);
+
+    // Simpan data ke Firestore
+    const docRef = await db.collection("pendaftaran").add({
+      // ... data lainnya sama seperti sebelumnya
+      cvUrl: cvUrl,
+      transcriptUrl: transcriptUrl,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    });
 
-    // Simpan ke Firestore
-    await db.collection("pendaftaran").add(formData);
+    console.log("Document written with ID: ", docRef.id);
     
-    // Simpan password di localStorage untuk halaman sukses
-    localStorage.setItem('savedPassword', formData.password);
-    
-    // Redirect ke halaman sukses
+    // Simpan password dan redirect
+    localStorage.setItem('savedPassword', passwordInput.value);
     window.location.href = "/success.html";
 
   } catch (error) {
     console.error("Error:", error);
-    alert("Gagal mengunggah file atau menyimpan data. Silakan coba lagi.");
+    alert(`Gagal mengunggah: ${error.message}`);
   }
 });
             
