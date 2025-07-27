@@ -1,5 +1,27 @@
 <!DOCTYPE html>
 <html lang="id">
+    <head>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+</head>
+    <script>
+  // Konfigurasi Firebase (ganti dengan data proyek Anda)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA",
+    authDomain: "daftaraslab.firebaseapp.com",
+    projectId: "daftaraslab",
+    storageBucket: "daftaraslab.firebasestorage.app",
+    messagingSenderId: "329213682687",
+    appId: "1:329213682687:web:a326f7f6effc51b4347dca",
+    measurementId: "G-C9NRKRK2JC"
+  };
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = firebase.firestore();
+const storage = firebase.storage();
+</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -631,27 +653,66 @@
                 });
             });
             
-            // Form submission
-            form.addEventListener('submit', function(e) {
-                // Validasi form sebelum submit
-                if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8) {
-                    e.preventDefault();
-                    return false;
-                }
-                
-                // Simpan password di localStorage untuk ditampilkan di halaman sukses
-                localStorage.setItem('savedPassword', passwordInput.value);
-                
-                // Lanjutkan dengan submit form (Netlify akan menangani)
-                progressBar.style.width = '100%';
-                
-                // Untuk demo, tampilkan modal sukses
-                // Dalam implementasi nyata dengan Netlify, ini tidak diperlukan
-                // karena Netlify akan me-redirect ke halaman sukses
-                // e.preventDefault();
-                // savedPassword.textContent = passwordInput.value;
-                // successModal.classList.remove('modal-hidden');
-            });
+form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  // Validasi form
+  if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8) {
+    return false;
+  }
+
+  // Fungsi untuk upload file
+  async function uploadFile(file, path) {
+    const storageRef = storage.ref(path);
+    await storageRef.put(file);
+    return await storageRef.getDownloadURL();
+  }
+
+  // Upload file (jika ada)
+  let cvUrl = null;
+  let transcriptUrl = null;
+
+  try {
+    if (cvInput.files[0]) {
+      cvUrl = await uploadFile(cvInput.files[0], `pendaftaran/${nrpInput.value}/cv.pdf`);
+    }
+    
+    if (transcriptInput.files[0]) {
+      transcriptUrl = await uploadFile(transcriptInput.files[0], `pendaftaran/${nrpInput.value}/transkrip.pdf`);
+    }
+
+    // Kumpulkan semua data form + URL file
+    const formData = {
+      email: emailInput.value,
+      name: nameInput.value,
+      nrp: nrpInput.value,
+      whatsapp: whatsappInput.value,
+      motivation: motivationInput.value,
+      priority: priorityInput.value,
+      canOperate: document.querySelector('input[name="canOperate"]:checked')?.value,
+      practicum: Array.from(document.querySelectorAll('input[name="practicum"]:checked')).map(el => el.value),
+      explanation: document.getElementById('explanation').value,
+      availability: document.querySelector('input[name="availability"]:checked')?.value,
+      password: passwordInput.value,
+      cvUrl: cvUrl, // URL file CV
+      transcriptUrl: transcriptUrl, // URL file transkrip
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    // Simpan ke Firestore
+    await db.collection("pendaftaran").add(formData);
+    
+    // Simpan password di localStorage untuk halaman sukses
+    localStorage.setItem('savedPassword', formData.password);
+    
+    // Redirect ke halaman sukses
+    window.location.href = "/success.html";
+
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Gagal mengunggah file atau menyimpan data. Silakan coba lagi.");
+  }
+});
             
             // Close modal
             closeModal.addEventListener('click', function() {
