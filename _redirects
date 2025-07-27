@@ -1,0 +1,2 @@
+/success.html              /success.html   200
+/?form-submission=success  /success.html   301
