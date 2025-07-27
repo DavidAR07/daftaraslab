@@ -153,13 +153,7 @@
                 </div>
                 
                 <!-- Form dengan Netlify Forms -->
-                <form id="registrationForm" 
-      name="pendaftaran-asisten" 
-      method="POST" 
-      data-netlify="true" 
-      data-netlify-honeypot="bot-field" 
-      enctype="multipart/form-data"
-      action="/success.html">
+                <form id="registrationForm" class="space-y-8" name="pendaftaran-asisten" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" enctype="multipart/form-data">
                     <!-- Field tersembunyi untuk Netlify -->
                     <input type="hidden" name="form-name" value="pendaftaran-asisten" />
                     <input type="hidden" name="bot-field" />
@@ -348,6 +342,32 @@
             </div>
         </div>
     </main>
+    
+    <!-- Success Modal - Fixed to be properly hidden -->
+    <div id="successModal" class="fixed inset-0 flex items-center justify-center z-50 modal-hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="bg-white rounded-lg p-8 max-w-md w-full relative z-10 transform transition-all">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+                    <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">Pendaftaran Berhasil!</h3>
+                <p class="text-gray-600 mb-6">Data pendaftaran Anda telah berhasil dikirim. Silakan simpan password Anda untuk mengecek hasil seleksi nanti.</p>
+                <div class="bg-gray-100 p-4 rounded-md mb-6">
+                    <p class="text-sm text-gray-700">Password Anda: <span id="savedPassword" class="font-medium"></span></p>
+                </div>
+                <button id="closeModal" class="btn-primary w-full py-2 rounded-md font-medium">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-theme-black text-white py-4 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>&copy; 2025 Fisika Laboratorium 1 - Departemen Fisika ITS</p>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -612,22 +632,18 @@
             });
             
             // Form submission
-form.addEventListener('submit', function(e) {
-  // Validasi form sebelum submit
-  if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8) {
-    e.preventDefault();
-    return false;
-  }
-  
-  // Simpan password di localStorage untuk ditampilkan di halaman sukses
-  localStorage.setItem('savedPassword', passwordInput.value);
-  
-  // Lanjutkan dengan submit form (Netlify akan menangani)
-  progressBar.style.width = '100%';
-  
-  // Tidak perlu e.preventDefault() karena kita ingin form submit normal
-  // Netlify akan mengarahkan ke action="/success.html" setelah submit berhasil
-});
+            form.addEventListener('submit', function(e) {
+                // Validasi form sebelum submit
+                if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Simpan password di localStorage untuk ditampilkan di halaman sukses
+                localStorage.setItem('savedPassword', passwordInput.value);
+                
+                // Lanjutkan dengan submit form (Netlify akan menangani)
+                progressBar.style.width = '100%';
                 
                 // Untuk demo, tampilkan modal sukses
                 // Dalam implementasi nyata dengan Netlify, ini tidak diperlukan
