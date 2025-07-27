@@ -1,16 +1,13 @@
-Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang, termasuk inisialisasi Firebase, CSS, dan JavaScript. Saya telah memastikan semua bagian berfungsi dengan baik dan tidak ada potongan kode.
-
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendaftaran Asisten Fisika Laboratorium 1</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -525,7 +522,7 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                     whatsappInput.classList.add('border-red-500');
                     isValid = false;
                 } else {
-                    whatsappError.classList.add('hidden');
+                    whatsappInput.classList.add('hidden');
                     whatsappInput.classList.remove('border-red-500');
                 }
                 
@@ -544,6 +541,7 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                 let isValid = true;
                 
                 if (!document.querySelector('input[name="canOperate"]:checked')) {
+                    // Consider adding a visual indicator for this radio button group
                     isValid = false;
                 }
                 
@@ -563,6 +561,7 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                 }
                 
                 if (!document.querySelector('input[name="availability"]:checked')) {
+                    // Consider adding a visual indicator for this radio button group
                     isValid = false;
                 }
                 
@@ -579,6 +578,8 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                         section2.classList.add('active');
                     }, 10);
                     progressBar.style.width = '33%';
+                } else {
+                    alert("Harap lengkapi semua bidang yang diperlukan di bagian Data Diri.");
                 }
             });
             
@@ -601,6 +602,8 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                         section3.classList.add('active');
                     }, 10);
                     progressBar.style.width = '66%';
+                } else {
+                    alert("Harap lengkapi semua bidang yang diperlukan di bagian Kemampuan.");
                 }
             });
             
@@ -621,6 +624,7 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                     const checked = document.querySelectorAll('input[name="practicum"]:checked');
                     if (checked.length > 2) {
                         this.checked = false;
+                        alert("Anda hanya dapat memilih maksimal 2 judul praktikum.");
                     }
                     
                     if (checked.length === 2) {
@@ -632,10 +636,15 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
-                if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8) {
-                    alert("Harap lengkapi semua bidang yang diperlukan dan pastikan password minimal 8 karakter.");
+                // Final validation before submission
+                if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8 || !cvInput.files[0] || !transcriptInput.files[0]) {
+                    alert("Harap lengkapi semua bidang yang diperlukan dan pastikan password minimal 8 karakter serta semua dokumen telah diunggah.");
                     return false;
                 }
+
+                // Disable submit button to prevent multiple submissions
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Mengirim...';
 
                 async function uploadFile(file, path) {
                     const storageRef = storage.ref(path);
@@ -647,6 +656,7 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                 let transcriptUrl = null;
 
                 try {
+                    // Upload files
                     if (cvInput.files[0]) {
                         cvUrl = await uploadFile(cvInput.files[0], `pendaftaran/${nrpInput.value}/cv.pdf`);
                     }
@@ -655,6 +665,7 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                         transcriptUrl = await uploadFile(transcriptInput.files[0], `pendaftaran/${nrpInput.value}/transkrip.pdf`);
                     }
 
+                    // Collect all form data
                     const formData = {
                         email: emailInput.value,
                         name: nameInput.value,
@@ -672,34 +683,43 @@ Tentu, berikut adalah kode HTML lengkap yang telah diperbaiki dan disusun ulang,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     };
 
+                    // Save to Firestore
                     await db.collection("pendaftaran").add(formData);
                     
+                    // Store password in localStorage for success page/modal
                     localStorage.setItem('savedPassword', formData.password);
                     
-                    // Show success modal instead of redirecting
+                    // Show success modal
                     savedPassword.textContent = formData.password;
                     successModal.classList.remove('modal-hidden');
 
                 } catch (error) {
-                    console.error("Error:", error);
-                    alert("Gagal mengunggah file atau menyimpan data. Silakan coba lagi.");
+                    console.error("Error during form submission:", error);
+                    alert("Gagal mengunggah file atau menyimpan data. Silakan coba lagi. Detail error: " + error.message);
+                } finally {
+                    // Re-enable submit button regardless of success or failure
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Kirim Pendaftaran';
                 }
             });
             
-            // Close modal
+            // Close modal and reset form
             closeModal.addEventListener('click', function() {
                 successModal.classList.add('modal-hidden');
                 
-                // Reset form dan kembali ke section 1
                 form.reset();
+                // Reset file input display names
+                cvFileName.textContent = 'Belum ada file yang dipilih';
+                transcriptFileName.textContent = 'Belum ada file yang dipilih';
+                // Reset priority slider display
+                priorityValue.textContent = '5';
+
+                // Navigate back to the first section
                 section3.classList.remove('active');
                 section3.classList.add('hidden');
                 section1.classList.remove('hidden');
                 section1.classList.add('active');
                 progressBar.style.width = '0%';
-                cvFileName.textContent = 'Belum ada file yang dipilih';
-                transcriptFileName.textContent = 'Belum ada file yang dipilih';
-                priorityValue.textContent = '5';
             });
             
             // Initialize form sections
