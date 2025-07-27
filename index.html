@@ -145,7 +145,12 @@
                     </div>
                 </div>
                 
-                <form id="registrationForm" class="space-y-8">
+                <!-- Form dengan Netlify Forms -->
+                <form id="registrationForm" class="space-y-8" name="pendaftaran-asisten" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" enctype="multipart/form-data">
+                    <!-- Field tersembunyi untuk Netlify -->
+                    <input type="hidden" name="form-name" value="pendaftaran-asisten" />
+                    <input type="hidden" name="bot-field" />
+                    
                     <!-- Section 1: Personal Data -->
                     <div id="section1" class="form-section active">
                         <h3 class="text-xl font-semibold mb-4 text-theme-red">Data Diri</h3>
@@ -621,26 +626,31 @@
             
             // Form submission
             form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Final validation
-                if (validateSection1() && validateSection2() && passwordInput.value.length >= 8) {
-                    progressBar.style.width = '100%';
-                    
-                    // Show success modal
-                    savedPassword.textContent = passwordInput.value;
-                    successModal.classList.remove('hidden');
-                    
-                    // Reset form (in a real application, you would send the data to a server here)
-                    // form.reset();
+                // Validasi form sebelum submit
+                if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8) {
+                    e.preventDefault();
+                    return false;
                 }
+                
+                // Simpan password di localStorage untuk ditampilkan di halaman sukses
+                localStorage.setItem('savedPassword', passwordInput.value);
+                
+                // Lanjutkan dengan submit form (Netlify akan menangani)
+                progressBar.style.width = '100%';
+                
+                // Untuk demo, tampilkan modal sukses
+                // Dalam implementasi nyata dengan Netlify, ini tidak diperlukan
+                // karena Netlify akan me-redirect ke halaman sukses
+                // e.preventDefault();
+                // savedPassword.textContent = passwordInput.value;
+                // successModal.classList.remove('hidden');
             });
             
             // Close modal
             closeModal.addEventListener('click', function() {
                 successModal.classList.add('hidden');
                 
-                // Reset form and go back to section 1
+                // Reset form dan kembali ke section 1
                 form.reset();
                 section3.classList.remove('active');
                 section3.classList.add('hidden');
@@ -656,5 +666,63 @@
             section1.classList.add('active');
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'965d4ffbd025fd9b',t:'MTc1MzYzMTYzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'965d7335617e37f4',t:'MTc1MzYzMzA3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Berhasil - Asisten Fisika Laboratorium 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .bg-theme-red {
+            background-color: #c41e3a;
+        }
+        
+        .bg-theme-black {
+            background-color: #1a1a1a;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 m-4">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+                <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">Pendaftaran Berhasil!</h3>
+            <p class="text-gray-600 mb-6">Data pendaftaran Anda telah berhasil dikirim. Silakan simpan password Anda untuk mengecek hasil seleksi nanti.</p>
+            <div class="bg-gray-100 p-4 rounded-md mb-6">
+                <p class="text-sm text-gray-700">Password Anda: <span id="savedPassword" class="font-medium"></span></p>
+            </div>
+            <a href="/" class="bg-theme-red text-white py-2 px-4 rounded-md font-medium inline-block hover:bg-opacity-90 transition">Kembali ke Beranda</a>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ambil password dari localStorage
+            const savedPassword = localStorage.getItem('savedPassword');
+            if (savedPassword) {
+                document.getElementById('savedPassword').textContent = savedPassword;
+                // Hapus password dari localStorage setelah ditampilkan
+                localStorage.removeItem('savedPassword');
+            } else {
+                document.getElementById('savedPassword').textContent = "(tidak tersedia)";
+            }
+        });
+    </script>
+</body>
 </html>
