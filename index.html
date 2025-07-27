@@ -101,6 +101,13 @@
         .animate-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        
+        /* Fix for modal visibility */
+        .modal-hidden {
+            display: none;
+            visibility: hidden;
+            opacity: 0;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -336,8 +343,8 @@
         </div>
     </main>
     
-    <!-- Success Modal -->
-    <div id="successModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+    <!-- Success Modal - Fixed to be properly hidden -->
+    <div id="successModal" class="fixed inset-0 flex items-center justify-center z-50 modal-hidden">
         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
         <div class="bg-white rounded-lg p-8 max-w-md w-full relative z-10 transform transition-all">
             <div class="text-center">
@@ -643,11 +650,12 @@
                 // karena Netlify akan me-redirect ke halaman sukses
                 // e.preventDefault();
                 // savedPassword.textContent = passwordInput.value;
-                // successModal.classList.remove('hidden');
+                // successModal.classList.remove('modal-hidden');
             });
-          // Close modal
-                closeModal.addEventListener('click', function() {
-                successModal.classList.add('hidden');
+            
+            // Close modal
+            closeModal.addEventListener('click', function() {
+                successModal.classList.add('modal-hidden');
                 
                 // Reset form dan kembali ke section 1
                 form.reset();
@@ -660,3 +668,10 @@
                 transcriptFileName.textContent = 'Belum ada file yang dipilih';
                 priorityValue.textContent = '5';
             });
+            
+            // Initialize form sections
+            section1.classList.add('active');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'965d7da283d5c3c2',t:'MTc1MzYzMzUwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
