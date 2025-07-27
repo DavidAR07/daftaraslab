@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendaftaran Asisten Fisika Laboratorium 1</title>
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Firestore masih digunakan untuk menyimpan data formulir) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <!-- Firebase Storage tidak lagi diperlukan jika menggunakan link Drive -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script> -->
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -60,6 +61,7 @@
             border-color: #c41e3a;
         }
         
+        /* File input label styles are no longer strictly needed but can be kept for consistency */
         .file-input-label {
             background-color: #f0f0f0;
             border: 1px dashed #ccc;
@@ -93,8 +95,6 @@
             opacity: 1;
             transform: translateY(0);
         }
-        
-        /* .modal-hidden is no longer needed as we redirect */
     </style>
 </head>
 <body class="min-h-screen">
@@ -139,7 +139,7 @@
                     </div>
                 </div>
                 
-                <form id="registrationForm" class="space-y-8" name="pendaftaran-asisten" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" enctype="multipart/form-data">
+                <form id="registrationForm" class="space-y-8" name="pendaftaran-asisten" method="POST" data-netlify="true" data-netlify-honeypot="bot-field">
                     <input type="hidden" name="form-name" value="pendaftaran-asisten" />
                     <input type="hidden" name="bot-field" />
                     
@@ -281,27 +281,9 @@
                         <h3 class="text-xl font-semibold mb-4 text-theme-red">Dokumen</h3>
                         
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Curriculum Vitae (ATS atau Kreatif) <span class="text-theme-red">*</span></label>
-                            <div class="file-input-label flex flex-col items-center justify-center p-6 rounded-md cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                                <p class="text-sm text-gray-600 mb-1">Klik untuk mengunggah CV (PDF)</p>
-                                <p class="text-xs text-gray-500" id="cvFileName">Belum ada file yang dipilih</p>
-                                <input type="file" id="cv" name="cv" class="hidden" accept=".pdf" required>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Transkrip Nilai Sementara <span class="text-theme-red">*</span></label>
-                            <div class="file-input-label flex flex-col items-center justify-center p-6 rounded-md cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                                <p class="text-sm text-gray-600 mb-1">Klik untuk mengunggah Transkrip (PDF)</p>
-                                <p class="text-xs text-gray-500" id="transcriptFileName">Belum ada file yang dipilih</p>
-                                <input type="file" id="transcript" name="transcript" class="hidden" accept=".pdf" required>
-                            </div>
+                            <label for="driveLink" class="block text-sm font-medium text-gray-700 mb-2">Link Google Drive (CV dan Transkrip dalam satu folder/file) <span class="text-theme-red">*</span></label>
+                            <input type="url" id="driveLink" name="driveLink" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" placeholder="Contoh: https://drive.google.com/drive/folders/..." required>
+                            <p class="mt-1 text-xs text-gray-500">Pastikan link dapat diakses oleh publik atau siapa saja yang memiliki link.</p>
                         </div>
                         
                         <div class="mb-6">
@@ -328,8 +310,6 @@
         </div>
     </main>
     
-    <!-- Success Modal is removed as we redirect to success.html -->
-
     <footer class="bg-theme-black text-white py-4 mt-12">
         <div class="container mx-auto px-4 text-center text-sm">
             <p>&copy; 2025 Fisika Laboratorium 1 - Departemen Fisika ITS</p>
@@ -342,7 +322,7 @@
             apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA",
             authDomain: "daftaraslab.firebaseapp.com",
             projectId: "daftaraslab",
-            storageBucket: "daftaraslab.firebasestorage.app",
+            storageBucket: "daftaraslab.firebasestorage.app", // Storage tidak lagi digunakan, tapi config tetap ada
             messagingSenderId: "329213682687",
             appId: "1:329213682687:web:a326f7f6effc51b4347dca",
             measurementId: "G-C9NRKRK2JC"
@@ -351,7 +331,7 @@
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
+        // const storage = firebase.storage(); // Storage tidak lagi diperlukan
 
         document.addEventListener('DOMContentLoaded', function() {
             // Form sections navigation
@@ -376,10 +356,7 @@
             const motivationInput = document.getElementById('motivation');
             const priorityInput = document.getElementById('priority');
             const priorityValue = document.getElementById('priorityValue');
-            const cvInput = document.getElementById('cv');
-            const transcriptInput = document.getElementById('transcript');
-            const cvFileName = document.getElementById('cvFileName');
-            const transcriptFileName = document.getElementById('transcriptFileName');
+            const driveLinkInput = document.getElementById('driveLink'); // New input for Drive link
             const passwordInput = document.getElementById('password');
             const togglePassword = document.getElementById('togglePassword');
             
@@ -392,32 +369,6 @@
             // Update priority value display
             priorityInput.addEventListener('input', function() {
                 priorityValue.textContent = this.value;
-            });
-            
-            // File input handling
-            const fileInputLabels = document.querySelectorAll('.file-input-label');
-            fileInputLabels[0].addEventListener('click', function() {
-                cvInput.click();
-            });
-            
-            fileInputLabels[1].addEventListener('click', function() {
-                transcriptInput.click();
-            });
-            
-            cvInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    cvFileName.textContent = this.files[0].name;
-                } else {
-                    cvFileName.textContent = 'Belum ada file yang dipilih';
-                }
-            });
-            
-            transcriptInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    transcriptFileName.textContent = this.files[0].name;
-                } else {
-                    transcriptFileName.textContent = 'Belum ada file yang dipilih';
-                }
             });
             
             // Toggle password visibility
@@ -608,8 +559,8 @@
                 e.preventDefault();
 
                 // Final validation before submission
-                if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8 || !cvInput.files[0] || !transcriptInput.files[0]) {
-                    alert("Harap lengkapi semua bidang yang diperlukan dan pastikan password minimal 8 karakter serta semua dokumen telah diunggah.");
+                if (!validateSection1() || !validateSection2() || passwordInput.value.length < 8 || !driveLinkInput.value.trim()) {
+                    alert("Harap lengkapi semua bidang yang diperlukan, pastikan password minimal 8 karakter, dan sertakan link Google Drive.");
                     return false;
                 }
 
@@ -618,38 +569,7 @@
                 submitBtn.textContent = 'Mengirim...';
                 submitBtn.classList.add('animate-pulse'); // Add pulse animation
 
-                async function uploadFile(file, path) {
-                    const storageRef = storage.ref(path);
-                    const uploadTask = storageRef.put(file);
-
-                    // You can add progress tracking here if needed
-                    // uploadTask.on('state_changed', 
-                    //     (snapshot) => {
-                    //         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    //         console.log('Upload is ' + progress + '% done');
-                    //     }, 
-                    //     (error) => {
-                    //         throw error; // Re-throw to be caught by outer catch block
-                    //     }
-                    // );
-
-                    await uploadTask; // Wait for the upload to complete
-                    return await storageRef.getDownloadURL();
-                }
-
-                let cvUrl = null;
-                let transcriptUrl = null;
-
                 try {
-                    // Upload files
-                    console.log("Attempting to upload CV...");
-                    cvUrl = await uploadFile(cvInput.files[0], `pendaftaran/${nrpInput.value}/cv.pdf`);
-                    console.log("CV uploaded:", cvUrl);
-                    
-                    console.log("Attempting to upload Transcript...");
-                    transcriptUrl = await uploadFile(transcriptInput.files[0], `pendaftaran/${nrpInput.value}/transkrip.pdf`);
-                    console.log("Transcript uploaded:", transcriptUrl);
-
                     // Collect all form data
                     const formData = {
                         email: emailInput.value,
@@ -663,8 +583,7 @@
                         explanation: document.getElementById('explanation').value,
                         availability: document.querySelector('input[name="availability"]:checked')?.value,
                         password: passwordInput.value,
-                        cvUrl: cvUrl,
-                        transcriptUrl: transcriptUrl,
+                        driveLink: driveLinkInput.value, // Save the Drive link
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     };
 
@@ -681,7 +600,7 @@
 
                 } catch (error) {
                     console.error("Error during form submission:", error);
-                    alert("Gagal mengunggah file atau menyimpan data. Silakan coba lagi. Detail error: " + error.message);
+                    alert("Gagal menyimpan data. Silakan coba lagi. Detail error: " + error.message);
                 } finally {
                     // Re-enable submit button regardless of success or failure
                     submitBtn.disabled = false;
