@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Asisten Fisika Laboratorium 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .bg-theme-red {
+            background-color: #c41e3a;
+        }
+        
+        .bg-theme-black {
+            background-color: #1a1a1a;
+        }
+        
+        .text-theme-red {
+            color: #c41e3a;
+        }
+        
+        .border-theme-red {
+            border-color: #c41e3a;
+        }
+        
+        .form-input:focus {
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.2);
+        }
+        
+        .btn-primary {
+            background-color: #c41e3a;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #a01a30;
+        }
+        
+        .btn-primary:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+        
+        .checkbox-red:checked {
+            background-color: #c41e3a;
+            border-color: #c41e3a;
+        }
+        
+        .file-input-label {
+            background-color: #f0f0f0;
+            border: 1px dashed #ccc;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input-label:hover {
+            border-color: #c41e3a;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #c41e3a;
+            transition: width 0.3s ease;
+        }
+        
+        .form-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .form-section.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="bg-theme-black text-white py-6 shadow-md">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="w-12 h-12 rounded-full bg-theme-red flex items-center justify-center mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold">Fisika Laboratorium 1</h1>
+                        <p class="text-sm text-gray-300">Departemen Fisika ITS</p>
+                    </div>
+                </div>
+                <div class="bg-theme-red px-4 py-2 rounded-md shadow-lg">
+                    <h2 class="text-lg font-semibold">Pendaftaran Asisten Fislab 1 2025</h2>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 md:px-6 py-8">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-theme-red text-white p-6">
+                <h2 class="text-2xl font-bold">Formulir Pendaftaran Asisten Fisika Laboratorium 1</h2>
+                <p class="mt-2">Silakan lengkapi semua informasi yang diperlukan untuk mendaftar</p>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-sm text-gray-600">
+                        <span>Data Diri</span>
+                        <span>Kemampuan</span>
+                        <span>Dokumen</span>
+                        <span>Selesai</span>
+                    </div>
+                </div>
+                
+                <form id="registrationForm" class="space-y-8">
+                    <!-- Section 1: Personal Data -->
+                    <div id="section1" class="form-section active">
+                        <h3 class="text-xl font-semibold mb-4 text-theme-red">Data Diri</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Pribadi (Non ITS) <span class="text-theme-red">*</span></label>
+                                <input type="email" id="email" name="email" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
+                                <p id="emailError" class="mt-1 text-sm text-red-600 hidden">Email tidak valid</p>
+                            </div>
+                            
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span class="text-theme-red">*</span></label>
+                                <input type="text" id="name" name="name" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
+                            </div>
+                            
+                            <div>
+                                <label for="nrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                                <input type="text" id="nrp" name="nrp" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required pattern="[0-9]{10}" title="NRP harus 10 digit angka">
+                                <p id="nrpError" class="mt-1 text-sm text-red-600 hidden">NRP harus 10 digit angka</p>
+                            </div>
+                            
+                            <div>
+                                <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp <span class="text-theme-red">*</span></label>
+                                <input type="tel" id="whatsapp" name="whatsapp" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
+                                <p id="whatsappError" class="mt-1 text-sm text-red-600 hidden">Nomor WhatsApp tidak valid</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label for="motivation" class="block text-sm font-medium text-gray-700 mb-1">Motivasi Mendaftar Asisten Fisika Laboratorium 1 <span class="text-theme-red">*</span></label>
+                            <textarea id="motivation" name="motivation" rows="4" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required></textarea>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Skala Prioritas (1-10, dengan 10 merupakan tertinggi) <span class="text-theme-red">*</span></label>
+                            <div class="flex items-center">
+                                <input type="range" id="priority" name="priority" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" required>
+                                <span id="priorityValue" class="ml-3 font-medium text-theme-red">5</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 flex justify-end">
+                            <button type="button" id="nextToSection2" class="btn-primary px-6 py-2 rounded-md font-medium">Selanjutnya</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 2: Skills -->
+                    <div id="section2" class="form-section hidden">
+                        <h3 class="text-xl font-semibold mb-4 text-theme-red">Kemampuan</h3>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Bisa mengoperasikan Tinkercad dan Proteus <span class="text-theme-red">*</span></label>
+                            <div class="flex space-x-6">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="canOperate" value="yes" class="checkbox-red w-4 h-4" required>
+                                    <span class="ml-2">Ya</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="canOperate" value="no" class="checkbox-red w-4 h-4" required>
+                                    <span class="ml-2">Tidak</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Pilih 2 judul praktikum yang kamu pahami <span class="text-theme-red">*</span></label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Analisis Rangkaian Node dan Mesh" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Analisis Rangkaian Node dan Mesh</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Teorema Thevenin dan Norton" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Teorema Thevenin dan Norton</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Karakteristik Diode" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Karakteristik Diode</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Transistor Dwikutub" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Transistor Dwikutub</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Rangkaian Non-Linier Orde 1 dan 2" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Rangkaian Non-Linier Orde 1 dan 2</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Op-Amp sebagai Penguat Sinyal" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Op-Amp sebagai Penguat Sinyal</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Pengolahan Sinyal Analog menggunakan Op-amp" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Pengolahan Sinyal Analog menggunakan Op-amp</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Rangkaian Filter Pasif" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Rangkaian Filter Pasif</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="practicum" value="Metode Transformasi Wye-Delta" class="checkbox-red w-4 h-4">
+                                    <span class="ml-2">Metode Transformasi Wye-Delta</span>
+                                </label>
+                            </div>
+                            <p id="practicumError" class="mt-1 text-sm text-red-600 hidden">Pilih tepat 2 judul praktikum</p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="explanation" class="block text-sm font-medium text-gray-700 mb-1">Berikan penjelasan singkat mengenai judul yang dipilih <span class="text-theme-red">*</span></label>
+                            <textarea id="explanation" name="explanation" rows="5" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required></textarea>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Apakah bersedia sudah berada di Surabaya pada tanggal 22 Agustus 2025 untuk mengikuti seluruh rangkaian pelatihan aslab? <span class="text-theme-red">*</span></label>
+                            <div class="flex space-x-6">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="availability" value="yes" class="checkbox-red w-4 h-4" required>
+                                    <span class="ml-2">Ya</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="availability" value="no" class="checkbox-red w-4 h-4" required>
+                                    <span class="ml-2">Tidak</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 flex justify-between">
+                            <button type="button" id="backToSection1" class="px-6 py-2 bg-gray-200 rounded-md font-medium text-gray-700 hover:bg-gray-300 transition">Kembali</button>
+                            <button type="button" id="nextToSection3" class="btn-primary px-6 py-2 rounded-md font-medium">Selanjutnya</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 3: Documents -->
+                    <div id="section3" class="form-section hidden">
+                        <h3 class="text-xl font-semibold mb-4 text-theme-red">Dokumen</h3>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Curriculum Vitae (ATS atau Kreatif) <span class="text-theme-red">*</span></label>
+                            <div class="file-input-label flex flex-col items-center justify-center p-6 rounded-md cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <p class="text-sm text-gray-600 mb-1">Klik untuk mengunggah CV (PDF)</p>
+                                <p class="text-xs text-gray-500" id="cvFileName">Belum ada file yang dipilih</p>
+                                <input type="file" id="cv" name="cv" class="hidden" accept=".pdf" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Transkrip Nilai Sementara <span class="text-theme-red">*</span></label>
+                            <div class="file-input-label flex flex-col items-center justify-center p-6 rounded-md cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <p class="text-sm text-gray-600 mb-1">Klik untuk mengunggah Transkrip (PDF)</p>
+                                <p class="text-xs text-gray-500" id="transcriptFileName">Belum ada file yang dipilih</p>
+                                <input type="file" id="transcript" name="transcript" class="hidden" accept=".pdf" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password (digunakan untuk cek kelulusan) <span class="text-theme-red">*</span></label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required minlength="8">
+                                <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Password minimal 8 karakter</p>
+                        </div>
+                        
+                        <div class="mt-8 flex justify-between">
+                            <button type="button" id="backToSection2" class="px-6 py-2 bg-gray-200 rounded-md font-medium text-gray-700 hover:bg-gray-300 transition">Kembali</button>
+                            <button type="submit" id="submitBtn" class="btn-primary px-6 py-2 rounded-md font-medium">Kirim Pendaftaran</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="bg-white rounded-lg p-8 max-w-md w-full relative z-10 transform transition-all">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+                    <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">Pendaftaran Berhasil!</h3>
+                <p class="text-gray-600 mb-6">Data pendaftaran Anda telah berhasil dikirim. Silakan simpan password Anda untuk mengecek hasil seleksi nanti.</p>
+                <div class="bg-gray-100 p-4 rounded-md mb-6">
+                    <p class="text-sm text-gray-700">Password Anda: <span id="savedPassword" class="font-medium"></span></p>
+                </div>
+                <button id="closeModal" class="btn-primary w-full py-2 rounded-md font-medium">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-theme-black text-white py-4 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>&copy; 2025 Fisika Laboratorium 1 - Departemen Fisika ITS</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form sections navigation
+            const section1 = document.getElementById('section1');
+            const section2 = document.getElementById('section2');
+            const section3 = document.getElementById('section3');
+            const progressBar = document.getElementById('progressBar');
+            
+            // Buttons
+            const nextToSection2 = document.getElementById('nextToSection2');
+            const backToSection1 = document.getElementById('backToSection1');
+            const nextToSection3 = document.getElementById('nextToSection3');
+            const backToSection2 = document.getElementById('backToSection2');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Form elements
+            const form = document.getElementById('registrationForm');
+            const emailInput = document.getElementById('email');
+            const nameInput = document.getElementById('name');
+            const nrpInput = document.getElementById('nrp');
+            const whatsappInput = document.getElementById('whatsapp');
+            const motivationInput = document.getElementById('motivation');
+            const priorityInput = document.getElementById('priority');
+            const priorityValue = document.getElementById('priorityValue');
+            const cvInput = document.getElementById('cv');
+            const transcriptInput = document.getElementById('transcript');
+            const cvFileName = document.getElementById('cvFileName');
+            const transcriptFileName = document.getElementById('transcriptFileName');
+            const passwordInput = document.getElementById('password');
+            const togglePassword = document.getElementById('togglePassword');
+            
+            // Error messages
+            const emailError = document.getElementById('emailError');
+            const nrpError = document.getElementById('nrpError');
+            const whatsappError = document.getElementById('whatsappError');
+            const practicumError = document.getElementById('practicumError');
+            
+            // Modal
+            const successModal = document.getElementById('successModal');
+            const closeModal = document.getElementById('closeModal');
+            const savedPassword = document.getElementById('savedPassword');
+            
+            // Update priority value display
+            priorityInput.addEventListener('input', function() {
+                priorityValue.textContent = this.value;
+            });
+            
+            // File input handling
+            const fileInputLabels = document.querySelectorAll('.file-input-label');
+            fileInputLabels[0].addEventListener('click', function() {
+                cvInput.click();
+            });
+            
+            fileInputLabels[1].addEventListener('click', function() {
+                transcriptInput.click();
+            });
+            
+            cvInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    cvFileName.textContent = this.files[0].name;
+                } else {
+                    cvFileName.textContent = 'Belum ada file yang dipilih';
+                }
+            });
+            
+            transcriptInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    transcriptFileName.textContent = this.files[0].name;
+                } else {
+                    transcriptFileName.textContent = 'Belum ada file yang dipilih';
+                }
+            });
+            
+            // Toggle password visibility
+            togglePassword.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    this.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                    `;
+                } else {
+                    passwordInput.type = 'password';
+                    this.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    `;
+                }
+            });
+            
+            // Validation functions
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(String(email).toLowerCase());
+            }
+            
+            function validateNRP(nrp) {
+                const re = /^[0-9]{10}$/;
+                return re.test(nrp);
+            }
+            
+            function validateWhatsApp(number) {
+                // Allow numbers with at least 10 digits
+                const re = /^[0-9]{10,15}$/;
+                return re.test(number);
+            }
+            
+            function validatePracticum() {
+                const checkboxes = document.querySelectorAll('input[name="practicum"]:checked');
+                return checkboxes.length === 2;
+            }
+            
+            // Section 1 validation
+            function validateSection1() {
+                let isValid = true;
+                
+                // Check if email is valid
+                if (!emailInput.value || !validateEmail(emailInput.value)) {
+                    emailError.classList.remove('hidden');
+                    emailInput.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    emailError.classList.add('hidden');
+                    emailInput.classList.remove('border-red-500');
+                }
+                
+                // Check if name is filled
+                if (!nameInput.value.trim()) {
+                    nameInput.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    nameInput.classList.remove('border-red-500');
+                }
+                
+                // Check if NRP is valid
+                if (!nrpInput.value || !validateNRP(nrpInput.value)) {
+                    nrpError.classList.remove('hidden');
+                    nrpInput.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    nrpError.classList.add('hidden');
+                    nrpInput.classList.remove('border-red-500');
+                }
+                
+                // Check if WhatsApp number is valid
+                if (!whatsappInput.value || !validateWhatsApp(whatsappInput.value)) {
+                    whatsappError.classList.remove('hidden');
+                    whatsappInput.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    whatsappError.classList.add('hidden');
+                    whatsappInput.classList.remove('border-red-500');
+                }
+                
+                // Check if motivation is filled
+                if (!motivationInput.value.trim()) {
+                    motivationInput.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    motivationInput.classList.remove('border-red-500');
+                }
+                
+                return isValid;
+            }
+            
+            // Section 2 validation
+            function validateSection2() {
+                let isValid = true;
+                
+                // Check if can operate is selected
+                if (!document.querySelector('input[name="canOperate"]:checked')) {
+                    isValid = false;
+                }
+                
+                // Check if exactly 2 practicum topics are selected
+                if (!validatePracticum()) {
+                    practicumError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    practicumError.classList.add('hidden');
+                }
+                
+                // Check if explanation is filled
+                const explanationInput = document.getElementById('explanation');
+                if (!explanationInput.value.trim()) {
+                    explanationInput.classList.add('border-red-500');
+                    isValid = false;
+                } else {
+                    explanationInput.classList.remove('border-red-500');
+                }
+                
+                // Check if availability is selected
+                if (!document.querySelector('input[name="availability"]:checked')) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            // Navigation between sections
+            nextToSection2.addEventListener('click', function() {
+                if (validateSection1()) {
+                    section1.classList.remove('active');
+                    section1.classList.add('hidden');
+                    section2.classList.remove('hidden');
+                    setTimeout(() => {
+                        section2.classList.add('active');
+                    }, 10);
+                    progressBar.style.width = '33%';
+                }
+            });
+            
+            backToSection1.addEventListener('click', function() {
+                section2.classList.remove('active');
+                setTimeout(() => {
+                    section2.classList.add('hidden');
+                    section1.classList.remove('hidden');
+                    section1.classList.add('active');
+                }, 300);
+                progressBar.style.width = '0%';
+            });
+            
+            nextToSection3.addEventListener('click', function() {
+                if (validateSection2()) {
+                    section2.classList.remove('active');
+                    section2.classList.add('hidden');
+                    section3.classList.remove('hidden');
+                    setTimeout(() => {
+                        section3.classList.add('active');
+                    }, 10);
+                    progressBar.style.width = '66%';
+                }
+            });
+            
+            backToSection2.addEventListener('click', function() {
+                section3.classList.remove('active');
+                setTimeout(() => {
+                    section3.classList.add('hidden');
+                    section2.classList.remove('hidden');
+                    section2.classList.add('active');
+                }, 300);
+                progressBar.style.width = '33%';
+            });
+            
+            // Limit practicum selection to exactly 2
+            const practicumCheckboxes = document.querySelectorAll('input[name="practicum"]');
+            practicumCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const checked = document.querySelectorAll('input[name="practicum"]:checked');
+                    if (checked.length > 2) {
+                        this.checked = false;
+                    }
+                    
+                    if (checked.length === 2) {
+                        practicumError.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Final validation
+                if (validateSection1() && validateSection2() && passwordInput.value.length >= 8) {
+                    progressBar.style.width = '100%';
+                    
+                    // Show success modal
+                    savedPassword.textContent = passwordInput.value;
+                    successModal.classList.remove('hidden');
+                    
+                    // Reset form (in a real application, you would send the data to a server here)
+                    // form.reset();
+                }
+            });
+            
+            // Close modal
+            closeModal.addEventListener('click', function() {
+                successModal.classList.add('hidden');
+                
+                // Reset form and go back to section 1
+                form.reset();
+                section3.classList.remove('active');
+                section3.classList.add('hidden');
+                section1.classList.remove('hidden');
+                section1.classList.add('active');
+                progressBar.style.width = '0%';
+                cvFileName.textContent = 'Belum ada file yang dipilih';
+                transcriptFileName.textContent = 'Belum ada file yang dipilih';
+                priorityValue.textContent = '5';
+            });
+            
+            // Initialize form sections
+            section1.classList.add('active');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'965d4ffbd025fd9b',t:'MTc1MzYzMTYzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
