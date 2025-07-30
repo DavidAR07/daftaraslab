@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Aturan untuk koleksi pendaftaran
+    match /pendaftaran/{docId} {
+      // Izinkan pembacaan untuk semua pengguna (untuk halaman cek status)
+      // PERINGATAN: Untuk aplikasi produksi, pertimbangkan untuk membatasi ini
+      // misalnya, hanya izinkan membaca jika request.auth.uid == resource.data.userId
+      // atau melalui Cloud Function yang terautentikasi.
+      allow read: if true; 
+
+      // Izinkan penulisan (create, update, delete) HANYA jika permintaan datang dari Cloud Function
+      // Karena Cloud Function menggunakan Admin SDK, ia akan melewati aturan ini.
+      // Namun, ini adalah praktik yang baik untuk secara eksplisit menolak penulisan langsung dari klien.
+      // Jika Anda tidak memiliki aturan ini, klien bisa menulis langsung jika tidak ada aturan lain.
+      allow write: if false; // Klien tidak boleh menulis langsung ke sini
+    }
+
+    // Aturan default untuk koleksi lain (jika ada)
+    match /{document=**} {
+      allow read, write: if false; // Default to deny for all other collections
+    }
+  }
+}
