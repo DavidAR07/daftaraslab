@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Impor Kelulusan</title>
+    <title>Admin Panel - Impor & Kelola Kelulusan</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -55,6 +55,50 @@
         .file-input-label:hover {
             border-color: #c41e3a;
         }
+
+        .table-container {
+            max-height: 500px; /* Batasi tinggi tabel */
+            overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background-color: #f3f4f6;
+        }
+
+        td input[type="text"], td select {
+            width: 100%;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        td input[type="text"]:focus, td select:focus {
+            outline: none;
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -102,6 +146,21 @@
             
             <div class="p-6">
                 <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-2">Format File CSV</h3>
+                    <p class="text-gray-700 mb-2">File CSV harus memiliki header berikut (case-sensitive) dan urutan kolom tidak masalah:</p>
+                    <ul class="list-disc list-inside ml-4 text-gray-600 mb-4">
+                        <li>`Nama`: Nama lengkap pendaftar.</li>
+                        <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
+                        <li>`Status`: Status kelulusan (`Lulus`, `Tidak Lulus`, atau `Menunggu`).</li>
+                    </ul>
+                    <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Status
+Budi Santoso,1234567890,Lulus
+Siti Aminah,0987654321,Tidak Lulus
+Joko Susilo,1122334455,Menunggu</code></pre>
+                </div>
+
+                <div class="mb-6">
                     <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Pilih File CSV <span class="text-theme-red">*</span></label>
                     <label for="csvFile" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,6 +171,25 @@
                     </label>
                     <p id="fileError" class="mt-1 text-sm text-red-600 hidden">Pilih file CSV yang valid.</p>
                 </div>
+
+                <div id="csvPreview" class="mb-6 hidden">
+                    <h3 class="text-lg font-semibold mb-2">Pratinjau Data CSV</h3>
+                    <div class="table-container">
+                        <table class="min-w-full bg-white">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>NRP</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="csvPreviewBody">
+                                <!-- CSV data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="previewError" class="mt-2 text-sm text-red-600 hidden">Data pratinjau tidak valid atau kosong.</p>
+                </div>
                 
                 <div class="mt-6 flex justify-end">
                     <button type="button" id="uploadBtn" class="btn-primary px-6 py-2 rounded-md font-medium" disabled>Unggah & Proses</button>
@@ -120,6 +198,37 @@
                 <div id="uploadResult" class="mt-8 hidden">
                     <!-- Upload results will be displayed here -->
                 </div>
+            </div>
+        </div>
+
+        <div id="manageSection" class="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mt-8 hidden">
+            <div class="bg-theme-red text-white p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold">Kelola Data Pendaftar</h2>
+                <button id="refreshDataBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Refresh Data</button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4 flex justify-end space-x-2">
+                    <button id="saveChangesBtn" class="btn-primary px-4 py-2 rounded-md font-medium" disabled>Simpan Perubahan</button>
+                    <button id="deleteSelectedBtn" class="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition" disabled>Hapus Terpilih</button>
+                </div>
+                <div class="table-container">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="w-10"><input type="checkbox" id="selectAllCheckbox"></th>
+                                <th>Nama</th>
+                                <th>NRP</th>
+                                <th>Status</th>
+                                <th>Link Drive</th>
+                                <th>Detail Interview</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicantsTableBody">
+                            <!-- Applicant data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="manageDataStatus" class="mt-4 text-sm text-gray-600"></p>
             </div>
         </div>
     </main>
@@ -145,12 +254,14 @@
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
         const storage = firebase.storage();
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
                 authSection: document.getElementById('authSection'),
                 importSection: document.getElementById('importSection'),
+                manageSection: document.getElementById('manageSection'),
                 adminEmailInput: document.getElementById('adminEmail'),
                 adminPasswordLoginInput: document.getElementById('adminPasswordLogin'),
                 loginBtn: document.getElementById('loginBtn'),
@@ -160,11 +271,26 @@
                 csvFileInput: document.getElementById('csvFile'),
                 fileNameDisplay: document.getElementById('fileName'),
                 fileError: document.getElementById('fileError'),
+                csvPreview: document.getElementById('csvPreview'),
+                csvPreviewBody: document.getElementById('csvPreviewBody'),
+                previewError: document.getElementById('previewError'),
                 uploadBtn: document.getElementById('uploadBtn'),
-                uploadResultDiv: document.getElementById('uploadResult')
+                uploadResultDiv: document.getElementById('uploadResult'),
+
+                refreshDataBtn: document.getElementById('refreshDataBtn'),
+                saveChangesBtn: document.getElementById('saveChangesBtn'),
+                deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
+                selectAllCheckbox: document.getElementById('selectAllCheckbox'),
+                applicantsTableBody: document.getElementById('applicantsTableBody'),
+                manageDataStatus: document.getElementById('manageDataStatus')
             };
 
             let selectedFile = null;
+            let currentApplicantsData = []; // To store data from Firestore for editing
+            let editedApplicants = new Set(); // To track which documents have been edited
+            let selectedForDeletion = new Set(); // To track selected documents for deletion
+
+            // --- Helper Functions ---
 
             function showError(element, message) {
                 element.textContent = message;
@@ -173,6 +299,15 @@
 
             function hideError(element) {
                 element.classList.add('hidden');
+            }
+
+            function validateNRP(nrp) {
+                return /^[0-9]{10}$/.test(nrp);
+            }
+
+            function validateStatus(status) {
+                const validStatuses = ['Lulus', 'Tidak Lulus', 'Menunggu'];
+                return validStatuses.includes(status);
             }
 
             function updateUploadButtonState() {
@@ -207,20 +342,141 @@
                 DOMElements.uploadBtn.classList.remove('animate-pulse');
             }
 
+            function renderCsvPreview(data) {
+                DOMElements.csvPreviewBody.innerHTML = '';
+                if (data.length === 0) {
+                    showError(DOMElements.previewError, 'Tidak ada data valid untuk pratinjau.');
+                    DOMElements.csvPreview.classList.add('hidden');
+                    return;
+                }
+                hideError(DOMElements.previewError);
+                DOMElements.csvPreview.classList.remove('hidden');
+
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.Nama}</td>
+                        <td>${row.NRP}</td>
+                        <td>${row.Status}</td>
+                    `;
+                    DOMElements.csvPreviewBody.appendChild(tr);
+                });
+            }
+
+            async function loadApplicantsData() {
+                DOMElements.manageDataStatus.textContent = 'Memuat data...';
+                DOMElements.applicantsTableBody.innerHTML = '';
+                currentApplicantsData = [];
+                editedApplicants.clear();
+                selectedForDeletion.clear();
+                DOMElements.saveChangesBtn.disabled = true;
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.selectAllCheckbox.checked = false;
+
+                try {
+                    const snapshot = await db.collection('pendaftaran').orderBy('timestamp', 'desc').get();
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        currentApplicantsData.push({ id: doc.id, ...data });
+                    });
+                    renderApplicantsTable();
+                    DOMElements.manageDataStatus.textContent = `Data berhasil dimuat. Total: ${currentApplicantsData.length} pendaftar.`;
+                } catch (error) {
+                    console.error("Error loading applicants data:", error);
+                    DOMElements.manageDataStatus.textContent = `Gagal memuat data: ${error.message}`;
+                }
+            }
+
+            function renderApplicantsTable() {
+                DOMElements.applicantsTableBody.innerHTML = '';
+                currentApplicantsData.forEach(applicant => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.id = applicant.id;
+                    tr.innerHTML = `
+                        <td><input type="checkbox" class="delete-checkbox" data-id="${applicant.id}" ${selectedForDeletion.has(applicant.id) ? 'checked' : ''}></td>
+                        <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="nrp" value="${applicant.nrp || ''}"></td>
+                        <td>
+                            <select class="edit-field" data-field="statusKelulusan">
+                                <option value="Menunggu" ${applicant.statusKelulusan === 'Menunggu' ? 'selected' : ''}>Menunggu</option>
+                                <option value="Lulus" ${applicant.statusKelulusan === 'Lulus' ? 'selected' : ''}>Lulus</option>
+                                <option value="Tidak Lulus" ${applicant.statusKelulusan === 'Tidak Lulus' ? 'selected' : ''}>Tidak Lulus</option>
+                            </select>
+                        </td>
+                        <td><a href="${applicant.driveLink || '#'}" target="_blank" class="text-blue-600 hover:underline text-sm">${applicant.driveLink ? 'Lihat Dokumen' : '-'}</a></td>
+                        <td>
+                            <div class="flex flex-col space-y-1 text-sm">
+                                <input type="text" class="edit-field" data-field="interviewDetails.time" placeholder="Waktu" value="${applicant.interviewDetails?.time || ''}">
+                                <input type="text" class="edit-field" data-field="interviewDetails.zoomLink" placeholder="Link Zoom" value="${applicant.interviewDetails?.zoomLink || ''}">
+                                <input type="text" class="edit-field" data-field="interviewDetails.breakoutRoom" placeholder="Breakout Room" value="${applicant.interviewDetails?.breakoutRoom || ''}">
+                                <input type="text" class="edit-field" data-field="interviewDetails.technicalDocLink" placeholder="Link Dokumen Teknis" value="${applicant.interviewDetails?.technicalDocLink || ''}">
+                            </div>
+                        </td>
+                    `;
+                    DOMElements.applicantsTableBody.appendChild(tr);
+                });
+
+                // Add event listeners for editing
+                DOMElements.applicantsTableBody.querySelectorAll('.edit-field').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const docId = e.target.closest('tr').dataset.id;
+                        const field = e.target.dataset.field;
+                        const value = e.target.value;
+
+                        const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
+                        if (applicantIndex > -1) {
+                            // Handle nested fields for interviewDetails
+                            if (field.includes('.')) {
+                                const [parentField, childField] = field.split('.');
+                                if (!currentApplicantsData[applicantIndex][parentField]) {
+                                    currentApplicantsData[applicantIndex][parentField] = {};
+                                }
+                                currentApplicantsData[applicantIndex][parentField][childField] = value;
+                            } else {
+                                currentApplicantsData[applicantIndex][field] = value;
+                            }
+                            editedApplicants.add(docId);
+                            DOMElements.saveChangesBtn.disabled = false;
+                        }
+                    });
+                });
+
+                // Add event listeners for delete checkboxes
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const docId = e.target.dataset.id;
+                        if (e.target.checked) {
+                            selectedForDeletion.add(docId);
+                        } else {
+                            selectedForDeletion.delete(docId);
+                        }
+                        DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
+                        DOMElements.selectAllCheckbox.checked = selectedForDeletion.size === currentApplicantsData.length && currentApplicantsData.length > 0;
+                    });
+                });
+            }
+
+            // --- Authentication State Listener ---
             auth.onAuthStateChanged(user => {
                 if (user) {
+                    // User is signed in, show import and manage sections
                     DOMElements.authSection.classList.add('hidden');
                     DOMElements.importSection.classList.remove('hidden');
-                    DOMElements.importSection.classList.add('active');
+                    DOMElements.manageSection.classList.remove('hidden');
+                    loadApplicantsData(); // Load data when admin logs in
                     console.log("Admin logged in:", user.email);
                 } else {
+                    // User is signed out, show login section
                     DOMElements.authSection.classList.remove('hidden');
                     DOMElements.importSection.classList.add('hidden');
-                    DOMElements.importSection.classList.remove('active');
+                    DOMElements.manageSection.classList.add('hidden');
                     console.log("Admin logged out.");
                 }
             });
 
+            // --- Event Listeners ---
+
+            // Login button click
             DOMElements.loginBtn.addEventListener('click', async () => {
                 const email = DOMElements.adminEmailInput.value;
                 const password = DOMElements.adminPasswordLoginInput.value;
@@ -245,6 +501,7 @@
                 }
             });
 
+            // Logout button click
             DOMElements.logoutBtn.addEventListener('click', async () => {
                 try {
                     await auth.signOut();
@@ -254,24 +511,61 @@
                 }
             });
 
+            // File input change (for CSV import)
             DOMElements.csvFileInput.addEventListener('change', function(event) {
                 selectedFile = event.target.files[0];
                 if (selectedFile) {
                     if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv')) {
                         DOMElements.fileNameDisplay.textContent = selectedFile.name;
                         hideError(DOMElements.fileError);
+                        
+                        // Read file for preview
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const text = e.target.result;
+                            const lines = text.split('\n').filter(line => line.trim() !== '');
+                            if (lines.length > 1) { // Check if there's at least a header and one data row
+                                const headers = lines[0].split(',').map(h => h.trim());
+                                const expectedHeaders = ['Nama', 'NRP', 'Status'];
+                                if (expectedHeaders.every(h => headers.includes(h))) {
+                                    const previewData = [];
+                                    for (let i = 1; i < lines.length; i++) {
+                                        const values = lines[i].split(',').map(v => v.trim());
+                                        if (values.length === headers.length) {
+                                            const row = {};
+                                            headers.forEach((header, index) => {
+                                                row[header] = values[index];
+                                            });
+                                            previewData.push(row);
+                                        }
+                                    }
+                                    renderCsvPreview(previewData);
+                                } else {
+                                    showError(DOMElements.previewError, 'Header CSV tidak valid. Harap gunakan: Nama,NRP,Status');
+                                    DOMElements.csvPreview.classList.add('hidden');
+                                }
+                            } else {
+                                showError(DOMElements.previewError, 'File CSV kosong atau hanya berisi header.');
+                                DOMElements.csvPreview.classList.add('hidden');
+                            }
+                        };
+                        reader.readAsText(selectedFile);
+
                     } else {
                         showError(DOMElements.fileError, 'Hanya file CSV yang diizinkan.');
                         selectedFile = null;
                         DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                        DOMElements.csvPreview.classList.add('hidden');
                     }
                 } else {
                     DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
                     hideError(DOMElements.fileError);
+                    DOMElements.csvPreview.classList.add('hidden');
                 }
                 updateUploadButtonState();
             });
 
+            // Upload button click (for CSV import)
             DOMElements.uploadBtn.addEventListener('click', async function() {
                 if (!selectedFile) {
                     showError(DOMElements.fileError, 'Pilih file CSV terlebih dahulu.');
@@ -294,11 +588,129 @@
                     selectedFile = null;
                     DOMElements.csvFileInput.value = '';
                     DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                    DOMElements.csvPreview.classList.add('hidden'); // Hide preview after upload
+                    loadApplicantsData(); // Refresh data after potential import
                 } catch (error) {
                     console.error("Error uploading file:", error);
                     displayUploadResult('error', `Gagal mengunggah file: ${error.message}`);
                 } finally {
                     resetUploadButton();
+                }
+            });
+
+            // Refresh Data button
+            DOMElements.refreshDataBtn.addEventListener('click', loadApplicantsData);
+
+            // Select All checkbox
+            DOMElements.selectAllCheckbox.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                    const docId = checkbox.dataset.id;
+                    if (isChecked) {
+                        selectedForDeletion.add(docId);
+                    } else {
+                        selectedForDeletion.delete(docId);
+                    }
+                });
+                DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
+            });
+
+            // Save Changes button
+            DOMElements.saveChangesBtn.addEventListener('click', async () => {
+                if (editedApplicants.size === 0) {
+                    DOMElements.manageDataStatus.textContent = 'Tidak ada perubahan untuk disimpan.';
+                    return;
+                }
+
+                DOMElements.saveChangesBtn.disabled = true;
+                DOMElements.saveChangesBtn.textContent = 'Menyimpan...';
+                DOMElements.manageDataStatus.textContent = 'Menyimpan perubahan...';
+
+                const batch = db.batch();
+                let updateCount = 0;
+                let errorCount = 0;
+
+                for (const docId of editedApplicants) {
+                    const applicant = currentApplicantsData.find(app => app.id === docId);
+                    if (applicant) {
+                        const docRef = db.collection('pendaftaran').doc(docId);
+                        const dataToUpdate = { ...applicant };
+                        delete dataToUpdate.id; // Remove ID before updating Firestore
+
+                        // Basic validation before saving
+                        if (!validateNRP(dataToUpdate.nrp)) {
+                            console.error(`Invalid NRP for ${dataToUpdate.name}: ${dataToUpdate.nrp}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: NRP tidak valid untuk ${dataToUpdate.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+                        if (!validateStatus(dataToUpdate.statusKelulusan)) {
+                            console.error(`Invalid status for ${dataToUpdate.name}: ${dataToUpdate.statusKelulusan}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Status tidak valid untuk ${dataToUpdate.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+
+                        batch.update(docRef, dataToUpdate);
+                        updateCount++;
+                    }
+                }
+
+                try {
+                    await batch.commit();
+                    DOMElements.manageDataStatus.textContent = `Perubahan berhasil disimpan! ${updateCount} data diupdate.`;
+                    editedApplicants.clear();
+                    DOMElements.saveChangesBtn.disabled = true;
+                } catch (error) {
+                    console.error("Error saving changes:", error);
+                    DOMElements.manageDataStatus.textContent = `Gagal menyimpan perubahan: ${error.message}`;
+                } finally {
+                    DOMElements.saveChangesBtn.textContent = 'Simpan Perubahan';
+                    // Re-enable if there are still uncommitted edits or if an error occurred
+                    if (editedApplicants.size > 0 || errorCount > 0) {
+                        DOMElements.saveChangesBtn.disabled = false;
+                    }
+                }
+            });
+
+            // Delete Selected button
+            DOMElements.deleteSelectedBtn.addEventListener('click', async () => {
+                if (selectedForDeletion.size === 0) {
+                    DOMElements.manageDataStatus.textContent = 'Tidak ada data yang dipilih untuk dihapus.';
+                    return;
+                }
+
+                if (!confirm(`Anda yakin ingin menghapus ${selectedForDeletion.size} pendaftar yang dipilih?`)) {
+                    return;
+                }
+
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.deleteSelectedBtn.textContent = 'Menghapus...';
+                DOMElements.manageDataStatus.textContent = 'Menghapus data terpilih...';
+
+                const batch = db.batch();
+                let deleteCount = 0;
+                let errorCount = 0;
+
+                for (const docId of selectedForDeletion) {
+                    const docRef = db.collection('pendaftaran').doc(docId);
+                    batch.delete(docRef);
+                    deleteCount++;
+                }
+
+                try {
+                    await batch.commit();
+                    DOMElements.manageDataStatus.textContent = `${deleteCount} pendaftar berhasil dihapus.`;
+                    selectedForDeletion.clear();
+                    DOMElements.deleteSelectedBtn.disabled = true;
+                    DOMElements.selectAllCheckbox.checked = false;
+                    loadApplicantsData(); // Reload data after deletion
+                } catch (error) {
+                    console.error("Error deleting selected applicants:", error);
+                    DOMElements.manageDataStatus.textContent = `Gagal menghapus data: ${error.message}`;
+                } finally {
+                    DOMElements.deleteSelectedBtn.textContent = 'Hapus Terpilih';
                 }
             });
         });
