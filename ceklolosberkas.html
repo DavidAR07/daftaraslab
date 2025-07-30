@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cek Kelulusan Asisten Fisika Laboratorium 1</title>
+    <title>Admin Panel - Impor & Kelola Kelulusan</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app/');
         
         body {
             font-family: 'Poppins', sans-serif;
@@ -43,104 +44,78 @@
             cursor: not-allowed;
         }
 
-        /* Animasi untuk tombol saat diklik */
-        .btn-primary.animate-bounce-click {
-            animation: bounceClick 0.3s ease-in-out;
+        .file-input-label {
+            background-color: #f0f0f0;
+            border: 1px dashed #ccc;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
-        @keyframes bounceClick {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.95); }
-            100% { transform: scale(1); }
+        
+        .file-input-label:hover {
+            border-color: #c41e3a;
         }
 
-        /* Gaya untuk Modal Pop-up */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .table-container {
+            max-height: 500px; /* Batasi tinggi tabel */
+            overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        table {
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            border-collapse: collapse;
         }
 
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
         }
 
-        .modal-content {
-            background-color: white;
-            border-radius: 0.75rem; /* Sedikit lebih bulat */
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3); /* Shadow lebih kuat */
-            max-width: 550px; /* Sedikit lebih lebar */
-            width: 90%;
-            transform: scale(0.8); /* Mulai dari skala kecil */
-            opacity: 0; /* Mulai dari transparan */
-            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease; /* Animasi bounce */
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background-color: #f3f4f6;
+        }
+
+        td input[type="text"], td select, td input[type="datetime-local"] {
+            width: 100%;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        td input[type="text"]:focus, td select:focus, td input[type="datetime-local"]:focus {
+            outline: none;
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
+        }
+        /* CSS tambahan untuk CSV upload dari ppp.html */
+        .csv-upload {
+            position: relative;
             overflow: hidden;
         }
-
-        .modal-overlay.show .modal-content {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        /* Gaya untuk status card di dalam modal */
-        .status-card-modal {
-            border-left-width: 6px;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            margin-top: 0;
-            box-shadow: none;
-            text-align: center; /* Pusatkan teks */
-        }
-        .status-lulus { border-color: #22c55e; background-color: #ecfdf5; color: #16a34a; }
-        .status-tidak-lulus { border-color: #ef4444; background-color: #fef2f2; color: #dc2626; }
-        .status-menunggu { border-color: #f59e0b; background-color: #fffbeb; color: #d97706; }
-        .status-not-found { border-color: #6b7280; background-color: #f3f4f6; color: #4b5563; }
-
-        /* Gaya untuk ikon status */
-        .status-icon {
-            width: 64px; /* Ukuran ikon lebih besar */
-            height: 64px;
-            margin: 0 auto 1.5rem auto; /* Pusatkan dan beri margin bawah */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2.5rem; /* Ukuran font ikon */
-            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Animasi pop-in untuk ikon */
-        }
-        .status-lulus .status-icon { background-color: #22c55e; }
-        .status-tidak-lulus .status-icon { background-color: #ef4444; }
-        .status-menunggu .status-icon { background-color: #f59e0b; }
-        .status-not-found .status-icon { background-color: #6b7280; }
-
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            70% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); }
-        }
-
-        .status-card-modal h4 {
-            font-size: 1.875rem; /* Ukuran judul lebih besar */
-            font-weight: 700; /* Lebih tebal */
-            margin-bottom: 1rem;
-        }
-        .status-card-modal p {
-            font-size: 1.125rem; /* Ukuran paragraf sedikit lebih besar */
-            line-height: 1.6;
-        }
-        .status-card-modal strong {
-            font-weight: 700; /* Pastikan bold benar-benar tebal */
+        .csv-upload input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            cursor: pointer;
+            display: block;
         }
     </style>
 </head>
@@ -160,47 +135,195 @@
                     </div>
                 </div>
                 <div class="bg-theme-red px-4 py-2 rounded-md shadow-lg">
-                    <h2 class="text-lg font-semibold">Cek Kelulusan Asisten Fislab 1 2025</h2>
+                    <h2 class="text-lg font-semibold">Admin Panel</h2>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 md:px-6 py-8">
-        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-            <div class="bg-theme-red text-white p-6">
-                <h2 class="text-2xl font-bold">Cek Status Pendaftaran Asisten</h2>
-                <p class="mt-2">Masukkan NRP dan Password Anda untuk melihat status kelulusan.</p>
+        <div id="authSection" class="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden p-6">
+            <h3 class="text-xl font-semibold mb-4 text-theme-red">Login Admin</h3>
+            <div class="mb-4">
+                <label for="adminEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Admin</label>
+                <input type="email" id="adminEmail" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
+            </div>
+            <div class="mb-6">
+                <label for="adminPasswordLogin" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="adminPasswordLogin" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
+                <p id="loginError" class="mt-1 text-sm text-red-600 hidden">Email atau password salah.</p>
+            </div>
+            <button type="button" id="loginBtn" class="btn-primary w-full px-6 py-2 rounded-md font-medium">Login</button>
+        </div>
+
+        <div id="importSection" class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden hidden">
+            <div class="bg-theme-red text-white p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold">Impor Data Kelulusan Asisten</h2>
+                <button id="logoutBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Logout</button>
             </div>
             
             <div class="p-6">
-                <form id="checkStatusForm" class="space-y-6">
-                    <div>
-                        <label for="nrpCheck" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
-                        <input type="text" id="nrpCheck" name="nrpCheck" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required pattern="[0-9]{10}" title="NRP harus 10 digit angka">
-                        <p id="nrpCheckError" class="mt-1 text-sm text-red-600 hidden">NRP harus 10 digit angka</p>
-                    </div>
-                    
-                    <div>
-                        <label for="passwordCheck" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-theme-red">*</span></label>
-                        <div class="relative">
-                            <input type="password" id="passwordCheck" name="passwordCheck" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required minlength="8">
-                            <button type="button" id="togglePasswordCheck" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </button>
+                <!-- Global Interview Settings Section -->
+                <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Pengaturan Global Interview</h3>
+                    <p class="text-gray-700 mb-3">Link Zoom dan Dokumen Teknis ini akan berlaku untuk semua pendaftar yang Lolos.</p>
+                    <form id="globalSettingsForm" class="space-y-3">
+                        <div>
+                            <label for="globalZoomLink" class="block text-sm font-medium text-gray-700 mb-1">Link Zoom Global</label>
+                            <input type="url" id="globalZoomLink" name="globalZoomLink" placeholder="Contoh: https://zoom.us/j/1234567890"
+                                class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                         </div>
-                        <p id="passwordCheckError" class="mt-1 text-sm text-red-600 hidden">Password minimal 8 karakter</p>
-                    </div>
-                    
-                    <div class="mt-6">
-                        <button type="submit" id="checkStatusBtn" class="btn-primary w-full px-6 py-2 rounded-md font-medium">Cek Status</button>
-                    </div>
-                </form>
+                        <div>
+                            <label for="globalTechnicalDocLink" class="block text-sm font-medium text-gray-700 mb-1">Link Dokumen Teknis Global</label>
+                            <input type="url" id="globalTechnicalDocLink" name="globalTechnicalDocLink" placeholder="Contoh: https://example.com/doc.pdf"
+                                class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <button type="submit" id="saveGlobalSettingsBtn" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
+                            Simpan Pengaturan Global
+                        </button>
+                        <p id="globalSettingsStatus" class="mt-2 text-sm text-gray-600"></p>
+                    </form>
+                </div>
 
-                <div id="statusResult" class="mt-8 hidden"></div>
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-2">Format File CSV</h3>
+                    <p class="text-gray-700 mb-2">File CSV harus memiliki header berikut (case-sensitive) dan urutan kolom tidak masalah:</p>
+                    <ul class="list-disc list-inside ml-4 text-gray-600 mb-4">
+                        <li>`Nama`: Nama lengkap pendaftar.</li>
+                        <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
+                        <li>`Keterangan`: Status kelulusan (`Lolos` atau `Tidak Lolos`).</li>
+                        <li>`Password`: Kata sandi untuk login pendaftar.</li>
+                        <li>`Waktu Interview` (Opsional): Tanggal dan waktu interview spesifik per pendaftar. Contoh: `2025-01-10T10:00`</li>
+                        <li>`Breakout Room` (Opsional): Nomor atau nama breakout room spesifik per pendaftar.</li>
+                    </ul>
+                    <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan,Password,Waktu Interview,Breakout Room
+Budi Santoso,1234567890,Lolos,passbudi,2025-01-10T10:00,Room A
+Siti Aminah,0987654321,Tidak Lolos,passsiti,
+Joko Susilo,1122334455,Lolos,passjoko,2025-01-11T13:00,Room B</code></pre>
+                </div>
+
+                <div class="mb-6">
+                    <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Pilih File CSV <span class="text-theme-red">*</span></label>
+                    <label for="csvFileInput" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red csv-upload">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a3 3 0 013 3v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                        </svg>
+                        <span id="fileName">Seret & Lepas file CSV di sini atau Klik untuk memilih</span>
+                        <input type="file" id="csvFileInput" accept=".csv,.txt" class="hidden">
+                    </label>
+                    <p id="fileError" class="mt-1 text-sm text-red-600 hidden">Pilih file CSV yang valid.</p>
+                </div>
+
+                <div id="csvPreview" class="mb-6 hidden">
+                    <h3 class="text-lg font-semibold mb-2">Pratinjau Data CSV</h3>
+                    <div class="table-container">
+                        <table class="min-w-full bg-white">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>NRP</th>
+                                    <th>Keterangan</th>
+                                    <th>Password</th>
+                                    <th>Waktu Interview</th>
+                                    <th>Breakout Room</th>
+                                </tr>
+                            </thead>
+                            <tbody id="csvPreviewBody">
+                                <!-- CSV data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="previewError" class="mt-2 text-sm text-red-600 hidden">Data pratinjau tidak valid atau kosong.</p>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-2">
+                    <button type="button" id="importCsvButton" class="btn-primary px-6 py-2 rounded-md font-medium" disabled>Pratinjau & Proses</button>
+                    <button type="button" id="confirmImportButton" class="btn-primary px-6 py-2 rounded-md font-medium hidden">Konfirmasi Impor</button>
+                </div>
+
+                <div id="uploadResult" class="mt-8 hidden">
+                    <!-- Upload results will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="manageSection" class="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mt-8 hidden">
+            <div class="bg-theme-red text-white p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold">Kelola Data Pendaftar</h2>
+                <button id="refreshDataBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Refresh Data</button>
+            </div>
+            <div class="p-6">
+                <!-- Add Candidate Form -->
+                <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Tambah Kandidat Baru</h3>
+                    <form id="addCandidateForm" class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label for="newName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newName" name="newName" required 
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newNrp" name="newNrp" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newPassword" name="newPassword" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-theme-red">*</span></label>
+                                <select id="newStatus" name="newStatus" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                    <option value="Lolos">Lolos</option>
+                                    <option value="Tidak Lolos">Tidak Lolos</option>
+                                </select>
+                            </div>
+                            <!-- New fields for interview details -->
+                            <div>
+                                <label for="newInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
+                                <input type="datetime-local" id="newInterviewTime" name="newInterviewTime"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
+                                <input type="text" id="newBreakoutRoom" name="newBreakoutRoom" placeholder="Contoh: Room A"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
+                            Tambah Kandidat
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mb-4 flex justify-end space-x-2">
+                    <button id="saveChangesBtn" class="btn-primary px-4 py-2 rounded-md font-medium" disabled>Simpan Perubahan</button>
+                    <button id="deleteSelectedBtn" class="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition" disabled>Hapus Terpilih</button>
+                </div>
+                <div class="table-container">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="w-10"><input type="checkbox" id="selectAllCheckbox"></th>
+                                <th>Nama</th>
+                                <th>NRP</th>
+                                <th>Keterangan</th>
+                                <th>Password</th>
+                                <th>Waktu Interview</th> 
+                                <th>Breakout Room</th> <!-- New column -->
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicantsTableBody">
+                            <!-- Applicant data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="manageDataStatus" class="mt-4 text-sm text-gray-600"></p>
             </div>
         </div>
     </main>
@@ -211,16 +334,83 @@
         </div>
     </footer>
 
-    <!-- Modal Pop-up untuk Hasil Status -->
-    <div id="statusModalOverlay" class="modal-overlay"> 
-        <div id="statusModalContent" class="modal-content">
+    <!-- Edit Candidate Modal -->
+    <div id="editCandidateModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
+            <div class="bg-theme-red text-white p-4 text-center">
+                <h3 class="text-xl font-bold">Edit Kandidat</h3>
+            </div>
             <div class="p-6">
-                <div id="modalStatusCard" class="status-card-modal">
-                    <!-- Isi status akan masuk di sini -->
+                <form id="editCandidateForm" class="space-y-4">
+                    <input type="hidden" id="editCandidateId">
+                    
+                    <div>
+                        <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editName" name="editName" required 
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editNrp" name="editNrp" required 
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-theme-red">*</span></label>
+                        <select id="editStatus" name="editStatus" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                            <option value="Lolos">Lolos</option>
+                            <option value="Tidak Lolos">Tidak Lolos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="editPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editPassword" name="editPassword" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <!-- New fields for interview details in edit modal -->
+                    <div>
+                        <label for="editInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
+                        <input type="datetime-local" id="editInterviewTime" name="editInterviewTime"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
+                        <input type="text" id="editBreakoutRoom" name="editBreakoutRoom" placeholder="Contoh: Room A"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button type="submit" 
+                            class="flex-1 btn-primary py-2 px-4 rounded-md font-medium">
+                            Simpan
+                        </button>
+                        
+                        <button type="button" id="cancelEdit" 
+                            class="flex-1 bg-gray-300 text-gray-800 hover:bg-gray-400 py-2 px-4 rounded-md font-medium transition-colors duration-300">
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hayoo Modal (untuk pesan error login admin) -->
+    <div id="hayooModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
+            <div class="bg-red-500 text-white p-4 text-center">
+                <div class="mx-auto mb-2 w-16 h-16 flex items-center justify-center rounded-full bg-white bg-opacity-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
                 </div>
-                <div class="mt-6 text-center">
-                    <button id="closeStatusModalBtn" class="btn-primary px-8 py-3 rounded-lg font-semibold text-lg">Tutup</button>
-                </div>
+                <h3 class="text-2xl font-bold">Akses Ditolak!</h3>
+            </div>
+            <div class="p-6 text-center">
+                <p class="text-gray-700 mb-4">Anda tidak memiliki akses untuk masuk ke halaman admin!</p>
+                <button id="closeHayooModal" class="btn-primary w-full py-2 px-4 rounded-md font-medium">
+                    Tutup
+                </button>
             </div>
         </div>
     </div>
@@ -228,239 +418,821 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", 
-            authDomain: "daftaraslab.firebaseapp.com", 
-            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", 
-            projectId: "daftaraslab", 
-            storageBucket: "daftaraslab.firebasestorage.app", 
-            messagingSenderId: "329213682687", 
-            appId: "1:329213682687:web:a326f7f6effc51b4347dca", 
-            measurementId: "G-C9NRKRK2JC" 
+            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", // GANTI DENGAN API KEY ANDA
+            authDomain: "daftaraslab.firebaseapp.com", // GANTI DENGAN AUTH DOMAIN ANDA
+            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", // GANTI DENGAN DATABASE URL REALTIME DATABASE ANDA
+            projectId: "daftaraslab", // GANTI DENGAN PROJECT ID ANDA
+            storageBucket: "daftaraslab.firebasestorage.app", // GANTI DENGAN STORAGE BUCKET ANDA
+            messagingSenderId: "329213682687", // GANTI DENGAN MESSAGING SENDER ID ANDA
+            appId: "1:329213682687:web:a326f7f6effc51b4347dca", // GANTI DENGAN APP ID ANDA
+            measurementId: "G-C9NRKRK2JC" // GANTI DENGAN MEASUREMENT ID ANDA
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database(); 
+        const auth = firebase.auth();
+        const database = firebase.database(); // Menggunakan Realtime Database
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
-                form: document.getElementById('checkStatusForm'),
-                nrpInput: document.getElementById('nrpCheck'),
-                passwordInput: document.getElementById('passwordCheck'),
-                togglePasswordBtn: document.getElementById('togglePasswordCheck'),
-                checkStatusBtn: document.getElementById('checkStatusBtn'),
-                statusResultDiv: document.getElementById('statusResult'), 
-                nrpError: document.getElementById('nrpCheckError'),
-                passwordError: document.getElementById('passwordCheckError'),
+                authSection: document.getElementById('authSection'),
+                importSection: document.getElementById('importSection'),
+                manageSection: document.getElementById('manageSection'),
+                adminEmailInput: document.getElementById('adminEmail'),
+                adminPasswordLoginInput: document.getElementById('adminPasswordLogin'),
+                loginBtn: document.getElementById('loginBtn'),
+                loginError: document.getElementById('loginError'),
+                logoutBtn: document.getElementById('logoutBtn'),
 
-                statusModalOverlay: document.getElementById('statusModalOverlay'),
-                statusModalContent: document.getElementById('statusModalContent'),
-                modalStatusCard: document.getElementById('modalStatusCard'),
-                closeStatusModalBtn: document.getElementById('closeStatusModalBtn')
+                // Global Settings
+                globalSettingsForm: document.getElementById('globalSettingsForm'),
+                globalZoomLink: document.getElementById('globalZoomLink'),
+                globalTechnicalDocLink: document.getElementById('globalTechnicalDocLink'),
+                saveGlobalSettingsBtn: document.getElementById('saveGlobalSettingsBtn'),
+                globalSettingsStatus: document.getElementById('globalSettingsStatus'),
+
+                csvFileInput: document.getElementById('csvFileInput'),
+                fileNameDisplay: document.getElementById('fileName'),
+                fileError: document.getElementById('fileError'),
+                csvPreview: document.getElementById('csvPreview'),
+                csvPreviewBody: document.getElementById('csvPreviewBody'),
+                previewError: document.getElementById('previewError'),
+                importCsvButton: document.getElementById('importCsvButton'),
+                confirmImportButton: document.getElementById('confirmImportButton'),
+                uploadResultDiv: document.getElementById('uploadResult'),
+
+                refreshDataBtn: document.getElementById('refreshDataBtn'),
+                saveChangesBtn: document.getElementById('saveChangesBtn'),
+                deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
+                selectAllCheckbox: document.getElementById('selectAllCheckbox'),
+                applicantsTableBody: document.getElementById('applicantsTableBody'),
+                manageDataStatus: document.getElementById('manageDataStatus'),
+
+                // Elemen untuk Tambah Kandidat Baru
+                addCandidateForm: document.getElementById('addCandidateForm'),
+                newName: document.getElementById('newName'),
+                newNrp: document.getElementById('newNrp'),
+                newPassword: document.getElementById('newPassword'),
+                newStatus: document.getElementById('newStatus'),
+                newInterviewTime: document.getElementById('newInterviewTime'),
+                newBreakoutRoom: document.getElementById('newBreakoutRoom'),
+
+                // Elemen untuk Edit Kandidat Modal
+                editCandidateModal: document.getElementById('editCandidateModal'),
+                editCandidateForm: document.getElementById('editCandidateForm'),
+                editCandidateId: document.getElementById('editCandidateId'),
+                editName: document.getElementById('editName'),
+                editNrp: document.getElementById('editNrp'),
+                editStatus: document.getElementById('editStatus'),
+                editPassword: document.getElementById('editPassword'),
+                editInterviewTime: document.getElementById('editInterviewTime'),
+                editBreakoutRoom: document.getElementById('editBreakoutRoom'),
+                cancelEdit: document.getElementById('cancelEdit'),
+
+                hayooModal: document.getElementById('hayooModal'),
+                closeHayooModal: document.getElementById('closeHayooModal')
             };
 
-            function showError(inputElement, errorElement) {
-                inputElement.classList.add('border-red-500');
-                errorElement.classList.remove('hidden');
+            let selectedFile = null;
+            let currentApplicantsData = []; 
+            let editedApplicants = new Set(); 
+            let selectedForDeletion = new Set(); 
+            let parsedCsvData = []; 
+
+            // --- Helper Functions ---
+
+            function showError(element, message) {
+                element.textContent = message;
+                element.classList.remove('hidden');
             }
 
-            function hideError(inputElement, errorElement) {
-                inputElement.classList.remove('border-red-500'); 
-                errorElement.classList.add('hidden');
+            function hideError(element) {
+                element.classList.add('hidden');
             }
 
             function validateNRP(nrp) {
-                const re = /^[0-9]{10}$/;
-                return re.test(nrp);
+                return /^[0-9]{10}$/.test(nrp);
             }
 
-            function displayStatus(status, data = {}) {
-                let content = '';
+            function validateKeterangan(keterangan) {
+                return keterangan === 'Lolos' || keterangan === 'Tidak Lolos';
+            }
+
+            function displayUploadResult(type, message) {
                 let className = '';
                 let title = '';
-                let iconSvg = '';
-                const applicantName = `<strong>${data.name || 'pendaftar'}</strong>`; 
-
-                DOMElements.modalStatusCard.className = 'status-card-modal'; 
-
-                switch (status) {
-                    case 'Lolos':
-                        title = 'Selamat, Anda Lolos Tahap Administrasi!';
-                        className = 'status-lulus';
-                        iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        `;
-                        
-                        // Ambil detail interview dari data
-                        const interviewTime = data.interviewDetails?.time || 'Akan diinformasikan';
-                        const zoomLink = data.interviewDetails?.zoomLink || '#';
-                        const breakoutRoom = data.interviewDetails?.breakoutRoom || 'Akan diinformasikan';
-                        const technicalDocLink = data.interviewDetails?.technicalDocLink || '#';
-
-                        content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
-                            <p class="text-base font-semibold mb-2">Selanjutnya, Anda diundang untuk mengikuti tahap interview:</p>
-                            <ul class="list-disc list-inside ml-4 mb-4 text-gray-700 text-left">
-                                <li><strong>Waktu:</strong> ${interviewTime}</li>
-                                <li><strong>Link Zoom:</strong> ${zoomLink !== '#' ? `<a href="${zoomLink}" target="_blank" class="text-blue-600 hover:underline">${zoomLink}</a>` : 'Link belum tersedia'}</li>
-                                <li><strong>Breakout Room:</strong> ${breakoutRoom}</li>
-                            </ul>
-                            <p class="text-base mb-4">Mohon persiapkan diri Anda dengan baik. Untuk panduan teknis interview, silakan unduh dokumen berikut:</p>
-                            ${technicalDocLink !== '#' ? `
-                                <a href="${technicalDocLink}" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd" />
-                                    </svg>
-                                    Unduh Dokumen Teknis Interview
-                                </a>
-                            ` : `<p class="text-sm text-gray-500">Dokumen teknis belum tersedia.</p>`}
-                        `;
+                switch (type) {
+                    case 'success':
+                        className = 'border-green-500 bg-green-50 text-green-800';
+                        title = 'Unggah Berhasil!';
                         break;
-                    case 'Tidak Lolos':
-                        title = 'Mohon Maaf';
-                        className = 'status-tidak-lulus';
-                        iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        `;
-                        content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> sebagai Asisten Fisika Laboratorium 1.</p>
-                            <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan minat Anda untuk mendaftar. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
-                        `;
+                    case 'error':
+                        className = 'border-red-500 bg-red-50 text-red-800';
+                        title = 'Unggah Gagal!';
                         break;
-                    case 'Menunggu':
-                        title = 'Status Pendaftaran';
-                        className = 'status-menunggu';
-                        iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        `;
-                        content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, status pendaftaran Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
-                            <p class="text-base mb-4">Mohon bersabar, informasi lebih lanjut akan segera diumumkan.</p>
-                        `;
-                        break;
-                    case 'Tidak Ditemukan':
-                    default:
-                        title = 'Data Tidak Ditemukan';
-                        className = 'status-not-found';
-                        iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        `;
-                        content = `
-                            <p class="text-base mb-4">NRP atau Password yang Anda masukkan salah, atau data pendaftaran tidak ditemukan.</p>
-                            <p class="text-base mb-4">Mohon periksa kembali NRP dan Password Anda, atau pastikan Anda sudah mendaftar.</p>
-                        `;
+                    case 'warning':
+                        className = 'border-yellow-500 bg-yellow-50 text-yellow-800';
+                        title = 'Peringatan Unggah';
                         break;
                 }
-
-                DOMElements.modalStatusCard.classList.add(className);
-                DOMElements.modalStatusCard.innerHTML = `
-                    <div class="status-icon">${iconSvg}</div>
-                    <h4 class="text-xl font-bold mb-2">${title}</h4>
-                    ${content}
-                `;
-                
-                setTimeout(() => {
-                    DOMElements.statusModalOverlay.classList.add('show');
-                }, 100); 
+                DOMElements.uploadResultDiv.className = `mt-8 p-4 rounded-md border-l-4 ${className}`;
+                DOMElements.uploadResultDiv.innerHTML = `<h4 class="font-bold">${title}</h4><p>${message}</p>`;
+                DOMElements.uploadResultDiv.classList.remove('hidden');
             }
 
-            DOMElements.togglePasswordBtn.addEventListener('click', function() {
-                if (DOMElements.passwordInput.type === 'password') {
-                    DOMElements.passwordInput.type = 'text';
-                    this.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                        </svg>
+            function resetImportButtons() {
+                DOMElements.importCsvButton.disabled = false;
+                DOMElements.importCsvButton.textContent = 'Pratinjau & Proses';
+                DOMElements.confirmImportButton.classList.add('hidden');
+            }
+
+            // Fungsi parsing CSV yang disesuaikan
+            function parseCSV(text) {
+                function isBinaryContent(content) {
+                    const nonPrintableChars = content.split('').filter(char => {
+                        const code = char.charCodeAt(0);
+                        return (code < 32 && code !== 9 && code !== 10 && code !== 13) || code > 126;
+                    }).length;
+                    return (nonPrintableChars / content.length) > 0.05;
+                }
+
+                if (isBinaryContent(text)) {
+                    alert('File yang Anda unggah sepertinya bukan file CSV yang valid. File terdeteksi sebagai binary (Excel/ZIP/dll). Pastikan file dalam format CSV (text) dan bukan format binary.');
+                    return [];
+                }
+
+                let cleanedText = '';
+                let inTextData = false;
+                for (let i = 0; i < text.length; i++) {
+                    const charCode = text.charCodeAt(i);
+                    if ((charCode >= 32 && charCode <= 126) || charCode === 9 || charCode === 10 || charCode === 13) {
+                        if (!inTextData) {
+                            inTextData = true;
+                        }
+                        cleanedText += text[i];
+                    } else if (inTextData) {
+                        cleanedText += '\n';
+                        inTextData = false;
+                    }
+                }
+                cleanedText = cleanedText.replace(/\n\s*\n/g, '\n').trim();
+
+                let separator = ',';
+                if (cleanedText.indexOf(';') > -1 && cleanedText.indexOf(',') === -1) {
+                    separator = ';';
+                }
+
+                const lines = cleanedText.split('\n');
+                const result = [];
+
+                if (lines.length > 0) {
+                    const headers = lines[0].split(separator).map(h => h.trim());
+                    const expectedHeaders = ['Nama', 'NRP', 'Keterangan', 'Password'];
+                    const optionalHeaders = ['Waktu Interview', 'Breakout Room']; // Hanya ini yang dari CSV
+
+                    const hasCoreHeaders = expectedHeaders.every(expectedH => 
+                        headers.some(h => h.toLowerCase() === expectedH.toLowerCase())
+                    );
+
+                    if (!hasCoreHeaders) {
+                        alert('Header CSV tidak valid. Harap gunakan minimal: Nama,NRP,Keterangan,Password (urutan tidak masalah).');
+                        return [];
+                    }
+
+                    const headerMap = {};
+                    headers.forEach((h, i) => headerMap[h.toLowerCase()] = i);
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line === '') continue;
+                        if (line.charCodeAt(0) < 32 || line.charCodeAt(0) > 126) {
+                            continue;
+                        }
+
+                        const values = line.split(separator).map(val => val.trim().replace(/^["']|["']$/g, ''));
+                        
+                        if (values.length === headers.length) {
+                            let keteranganValue = values[headerMap['keterangan']] || '';
+                            if (keteranganValue.toLowerCase() === 'lolos') {
+                                keteranganValue = 'Lolos';
+                            } else if (keteranganValue.toLowerCase() === 'tidak lolos') {
+                                keteranganValue = 'Tidak Lolos';
+                            } else {
+                                keteranganValue = 'Tidak Lolos'; 
+                            }
+
+                            const candidate = {
+                                name: values[headerMap['nama']] || '',
+                                nrp: values[headerMap['nrp']] || '',
+                                keterangan: keteranganValue,
+                                password: values[headerMap['password']] || '',
+                                interviewDetails: {}
+                            };
+
+                            if (headerMap['waktu interview'] !== undefined) candidate.interviewDetails.time = values[headerMap['waktu interview']] || '';
+                            if (headerMap['breakout room'] !== undefined) candidate.interviewDetails.breakoutRoom = values[headerMap['breakout room']] || '';
+                            
+                            // Hapus interviewDetails jika semua propertinya kosong
+                            if (Object.values(candidate.interviewDetails).every(val => val === '')) {
+                                delete candidate.interviewDetails;
+                            }
+
+                            if (candidate.name && validateNRP(candidate.nrp) && validateKeterangan(candidate.keterangan) && candidate.password) {
+                                result.push(candidate);
+                            } else {
+                                console.warn(`Baris dilewati karena data tidak valid: ${line}`);
+                            }
+                        } else {
+                            console.warn(`Baris dilewati karena jumlah kolom tidak sesuai: ${line}`);
+                        }
+                    }
+                }
+                return result;
+            }
+
+            function renderCsvPreview(data) {
+                DOMElements.csvPreviewBody.innerHTML = '';
+                if (data.length === 0) {
+                    showError(DOMElements.previewError, 'Tidak ada data valid untuk pratinjau.');
+                    DOMElements.csvPreview.classList.add('hidden');
+                    DOMElements.confirmImportButton.classList.add('hidden');
+                    return;
+                }
+                hideError(DOMElements.previewError);
+                DOMElements.csvPreview.classList.remove('hidden');
+                DOMElements.confirmImportButton.classList.remove('hidden'); 
+
+                const previewRows = data.slice(0, 10);
+
+                previewRows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.name || '-'}</td>
+                        <td>${row.nrp || '-'}</td>
+                        <td>${row.keterangan || '-'}</td>
+                        <td>${row.password || '-'}</td>
+                        <td>${row.interviewDetails?.time || '-'}</td>
+                        <td>${row.interviewDetails?.breakoutRoom || '-'}</td>
                     `;
-                } else {
-                    DOMElements.passwordInput.type = 'password';
-                    this.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
+                    DOMElements.csvPreviewBody.appendChild(tr);
+                });
+
+                if (data.length > 10) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td colspan="6" class="py-2 px-3 text-center text-gray-400">
+                            ... dan ${data.length - 10} data lainnya (total ${data.length} data)
+                        </td>
                     `;
+                    DOMElements.csvPreviewBody.appendChild(tr);
+                }
+            }
+
+            async function loadApplicantsData() {
+                DOMElements.manageDataStatus.textContent = 'Memuat data...';
+                DOMElements.applicantsTableBody.innerHTML = '';
+                currentApplicantsData = [];
+                editedApplicants.clear();
+                selectedForDeletion.clear();
+                DOMElements.saveChangesBtn.disabled = true;
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.selectAllCheckbox.checked = false;
+
+                try {
+                    const snapshot = await database.ref('applicants').once('value');
+                    
+                    if (!snapshot.exists()) {
+                        DOMElements.manageDataStatus.textContent = 'Tidak ada data pendaftar.';
+                        return;
+                    }
+
+                    snapshot.forEach(childSnapshot => {
+                        const data = childSnapshot.val();
+                        currentApplicantsData.push({ id: childSnapshot.key, ...data });
+                    });
+                    renderApplicantsTable();
+                    DOMElements.manageDataStatus.textContent = `Data berhasil dimuat. Total: ${currentApplicantsData.length} pendaftar.`;
+                } catch (error) {
+                    console.error("Error loading applicants data:", error);
+                    DOMElements.manageDataStatus.textContent = `Gagal memuat data: ${error.message}`;
+                }
+            }
+
+            function renderApplicantsTable() {
+                DOMElements.applicantsTableBody.innerHTML = '';
+                currentApplicantsData.forEach(applicant => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.id = applicant.id;
+                    tr.innerHTML = `
+                        <td><input type="checkbox" class="delete-checkbox" data-id="${applicant.id}" ${selectedForDeletion.has(applicant.id) ? 'checked' : ''}></td>
+                        <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="nrp" value="${applicant.nrp || ''}"></td>
+                        <td>
+                            <select class="edit-field" data-field="keterangan">
+                                <option value="Lolos" ${applicant.keterangan === 'Lolos' ? 'selected' : ''}>Lolos</option>
+                                <option value="Tidak Lolos" ${applicant.keterangan === 'Tidak Lolos' ? 'selected' : ''}>Tidak Lolos</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
+                        <td><input type="datetime-local" class="edit-field" data-field="interviewDetails.time" value="${applicant.interviewDetails?.time || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="interviewDetails.breakoutRoom" value="${applicant.interviewDetails?.breakoutRoom || ''}" placeholder="Room A"></td>
+                        <td>
+                            <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
+                            <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
+                        </td>
+                    `;
+                    DOMElements.applicantsTableBody.appendChild(tr);
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.edit-field').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const docId = e.target.closest('tr').dataset.id;
+                        const fieldPath = e.target.dataset.field; 
+                        const value = e.target.value;
+
+                        const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
+                        if (applicantIndex > -1) {
+                            const parts = fieldPath.split('.');
+                            let current = currentApplicantsData[applicantIndex];
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                if (!current[parts[i]]) {
+                                    current[parts[i]] = {};
+                                }
+                                current = current[parts[i]];
+                            }
+                            current[parts[parts.length - 1]] = value;
+                            editedApplicants.add(docId);
+                            DOMElements.saveChangesBtn.disabled = false;
+                        }
+                    });
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const docId = e.target.dataset.id;
+                        if (e.target.checked) {
+                            selectedForDeletion.add(docId);
+                        } else {
+                            selectedForDeletion.delete(docId);
+                        }
+                        DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
+                        DOMElements.selectAllCheckbox.checked = selectedForDeletion.size === currentApplicantsData.length && currentApplicantsData.length > 0;
+                    });
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-single-button').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.dataset.id;
+                        if (confirm(`Anda yakin ingin menghapus pendaftar ini (ID: ${docId})?`)) {
+                            try {
+                                await database.ref('applicants/' + docId).remove();
+                                DOMElements.manageDataStatus.textContent = `Pendaftar ${docId} berhasil dihapus.`;
+                                loadApplicantsData(); 
+                            } catch (error) {
+                                console.error("Error deleting single applicant:", error);
+                                DOMElements.manageDataStatus.textContent = `Gagal menghapus pendaftar: ${error.message}`;
+                            }
+                        }
+                    });
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.edit-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const docId = e.target.dataset.id;
+                        const applicant = currentApplicantsData.find(app => app.id === docId);
+                        if (applicant) {
+                            DOMElements.editCandidateId.value = applicant.id;
+                            DOMElements.editName.value = applicant.name || '';
+                            DOMElements.editNrp.value = applicant.nrp || '';
+                            DOMElements.editStatus.value = applicant.keterangan || 'Tidak Lolos';
+                            DOMElements.editPassword.value = applicant.password || '';
+                            DOMElements.editInterviewTime.value = applicant.interviewDetails?.time || '';
+                            DOMElements.editBreakoutRoom.value = applicant.interviewDetails?.breakoutRoom || '';
+                            DOMElements.editCandidateModal.classList.remove('hidden');
+                        }
+                    });
+                });
+            }
+
+            // --- Global Settings Functions ---
+            async function loadGlobalSettings() {
+                try {
+                    const snapshot = await database.ref('settings/globalInterviewDetails').once('value');
+                    if (snapshot.exists()) {
+                        const settings = snapshot.val();
+                        DOMElements.globalZoomLink.value = settings.zoomLink || '';
+                        DOMElements.globalTechnicalDocLink.value = settings.technicalDocLink || '';
+                    } else {
+                        DOMElements.globalZoomLink.value = '';
+                        DOMElements.globalTechnicalDocLink.value = '';
+                    }
+                    DOMElements.globalSettingsStatus.textContent = 'Pengaturan global dimuat.';
+                } catch (error) {
+                    console.error("Error loading global settings:", error);
+                    DOMElements.globalSettingsStatus.textContent = `Gagal memuat pengaturan global: ${error.message}`;
+                }
+            }
+
+            DOMElements.globalSettingsForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                DOMElements.saveGlobalSettingsBtn.disabled = true;
+                DOMElements.saveGlobalSettingsBtn.textContent = 'Menyimpan...';
+                DOMElements.globalSettingsStatus.textContent = 'Menyimpan pengaturan...';
+
+                const settings = {
+                    zoomLink: DOMElements.globalZoomLink.value,
+                    technicalDocLink: DOMElements.globalTechnicalDocLink.value
+                };
+
+                try {
+                    await database.ref('settings/globalInterviewDetails').set(settings);
+                    DOMElements.globalSettingsStatus.textContent = 'Pengaturan global berhasil disimpan!';
+                } catch (error) {
+                    console.error("Error saving global settings:", error);
+                    DOMElements.globalSettingsStatus.textContent = `Gagal menyimpan pengaturan global: ${error.message}`;
+                } finally {
+                    DOMElements.saveGlobalSettingsBtn.disabled = false;
+                    DOMElements.saveGlobalSettingsBtn.textContent = 'Simpan Pengaturan Global';
                 }
             });
 
-            DOMElements.form.addEventListener('submit', async function(e) {
-                e.preventDefault();
 
-                let isValid = true;
-                const nrp = DOMElements.nrpInput.value.trim();
-                const password = DOMElements.passwordInput.value;
-
-                if (!nrp || !validateNRP(nrp)) {
-                    showError(DOMElements.nrpInput, DOMElements.nrpError);
-                    isValid = false;
+            // --- Authentication State Listener ---
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    DOMElements.authSection.classList.add('hidden');
+                    DOMElements.importSection.classList.remove('hidden');
+                    DOMElements.manageSection.classList.remove('hidden');
+                    loadApplicantsData(); 
+                    loadGlobalSettings(); // Load global settings when admin logs in
+                    console.log("Admin logged in:", user.email);
                 } else {
-                    hideError(DOMElements.nrpInput, DOMElements.nrpError);
+                    DOMElements.authSection.classList.remove('hidden');
+                    DOMElements.importSection.classList.add('hidden');
+                    DOMElements.manageSection.classList.add('hidden');
+                    console.log("Admin logged out.");
                 }
+            });
 
-                if (!password || password.length < 8) {
-                    showError(DOMElements.passwordInput, DOMElements.passwordError);
-                    isValid = false;
-                } else {
-                    hideError(DOMElements.passwordInput, DOMElements.passwordError);
-                }
+            // --- Event Listeners ---
 
-                if (!isValid) {
+            DOMElements.loginBtn.addEventListener('click', async () => {
+                const email = DOMElements.adminEmailInput.value;
+                const password = DOMElements.adminPasswordLoginInput.value;
+
+                if (!email || !password) {
+                    showError(DOMElements.loginError, 'Email dan password harus diisi.');
                     return;
                 }
 
-                DOMElements.checkStatusBtn.classList.add('animate-bounce-click');
-                DOMElements.checkStatusBtn.disabled = true;
-                DOMElements.checkStatusBtn.textContent = 'Mengecek...';
-                
+                DOMElements.loginBtn.disabled = true;
+                DOMElements.loginBtn.textContent = 'Logging in...';
+                hideError(DOMElements.loginError);
+
                 try {
-                    const applicantsRef = database.ref('applicants');
-                    
-                    const snapshot = await applicantsRef.orderByChild('nrp').equalTo(nrp).once('value');
-
-                    if (snapshot.exists()) {
-                        let found = false;
-                        snapshot.forEach(childSnapshot => {
-                            const applicantData = childSnapshot.val();
-                            if (applicantData.password === password) {
-                                found = true;
-                                const status = applicantData.keterangan || 'Menunggu'; 
-                                displayStatus(status, applicantData);
-                            }
-                        });
-
-                        if (!found) {
-                            displayStatus('Tidak Ditemukan'); 
-                        }
-                    } else {
-                        displayStatus('Tidak Ditemukan'); 
-                    }
-
+                    await auth.signInWithEmailAndPassword(email, password);
                 } catch (error) {
-                    console.error("Error checking status:", error);
-                    displayStatus('Terjadi Kesalahan');
+                    console.error("Login error:", error);
+                    DOMElements.hayooModal.classList.remove('hidden');
                 } finally {
-                    DOMElements.checkStatusBtn.disabled = false;
-                    DOMElements.checkStatusBtn.textContent = 'Cek Status';
-                    DOMElements.checkStatusBtn.classList.remove('animate-bounce-click'); 
+                    DOMElements.loginBtn.disabled = false;
+                    DOMElements.loginBtn.textContent = 'Login';
                 }
             });
 
-            DOMElements.closeStatusModalBtn.addEventListener('click', () => {
-                DOMElements.statusModalOverlay.classList.remove('show');
+            DOMElements.logoutBtn.addEventListener('click', async () => {
+                try {
+                    await auth.signOut();
+                } catch (error) {
+                    console.error("Logout error:", error);
+                    alert("Gagal logout. Silakan coba lagi.");
+                }
             });
 
-            DOMElements.statusModalOverlay.addEventListener('click', (e) => {
-                if (e.target === DOMElements.statusModalOverlay) {
-                    DOMElements.statusModalOverlay.classList.remove('show');
+            DOMElements.closeHayooModal.addEventListener('click', () => {
+                DOMElements.hayooModal.classList.add('hidden');
+            });
+
+            DOMElements.csvFileInput.addEventListener('change', function(event) {
+                selectedFile = event.target.files[0];
+                if (selectedFile) {
+                    if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv') || selectedFile.name.endsWith('.txt')) {
+                        DOMElements.fileNameDisplay.textContent = selectedFile.name;
+                        hideError(DOMElements.fileError);
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const text = e.target.result;
+                            parsedCsvData = parseCSV(text); 
+                            renderCsvPreview(parsedCsvData);
+                        };
+                        reader.readAsText(selectedFile);
+
+                    } else {
+                        showError(DOMElements.fileError, 'Hanya file CSV atau TXT yang diizinkan.');
+                        selectedFile = null;
+                        DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                        DOMElements.csvPreview.classList.add('hidden');
+                        DOMElements.confirmImportButton.classList.add('hidden');
+                    }
+                } else {
+                    DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                    hideError(DOMElements.fileError);
+                    DOMElements.csvPreview.classList.add('hidden');
+                    DOMElements.confirmImportButton.classList.add('hidden');
                 }
+                DOMElements.importCsvButton.disabled = !selectedFile;
+            });
+
+            DOMElements.importCsvButton.addEventListener('click', function() {
+                if (!selectedFile) {
+                    showError(DOMElements.fileError, 'Pilih file CSV terlebih dahulu.');
+                    return;
+                }
+                DOMElements.csvFileInput.dispatchEvent(new Event('change'));
+            });
+
+            DOMElements.confirmImportButton.addEventListener('click', async function() {
+                if (!parsedCsvData || parsedCsvData.length === 0) {
+                    alert('Tidak ada data yang diimpor.');
+                    return;
+                }
+
+                DOMElements.confirmImportButton.disabled = true;
+                DOMElements.confirmImportButton.textContent = 'Mengimpor...';
+                DOMElements.uploadResultDiv.classList.add('hidden');
+                DOMElements.uploadResultDiv.innerHTML = '';
+
+                const applicantsRef = database.ref('applicants'); 
+                let importCount = 0;
+                let errorCount = 0;
+
+                displayUploadResult('warning', `Memulai import ${parsedCsvData.length} data...`);
+
+                const batchSize = 50;
+                const totalBatches = Math.ceil(parsedCsvData.length / batchSize);
+
+                for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+                    const startIdx = batchIndex * batchSize;
+                    const endIdx = Math.min(startIdx + batchSize, parsedCsvData.length);
+                    const currentBatch = parsedCsvData.slice(startIdx, endIdx);
+
+                    const promises = currentBatch.map(applicant => {
+                        const dataToSave = {
+                            name: applicant.name,
+                            nrp: applicant.nrp,
+                            keterangan: applicant.keterangan,
+                            password: applicant.password,
+                            code: 'N/A', 
+                            timestamp: firebase.database.ServerValue.TIMESTAMP 
+                        };
+
+                        if (applicant.interviewDetails && Object.keys(applicant.interviewDetails).length > 0) {
+                            dataToSave.interviewDetails = applicant.interviewDetails;
+                        }
+
+                        if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeterangan(dataToSave.keterangan) || !dataToSave.password) {
+                            console.error("Data tidak valid (Nama/NRP/Keterangan/Password kosong/salah format):", applicant);
+                            errorCount++;
+                            return Promise.resolve(); 
+                        }
+
+                        return applicantsRef.push(dataToSave)
+                            .then(() => {
+                                importCount++;
+                            })
+                            .catch(error => {
+                                console.error("Error saat mengimpor data:", error);
+                                errorCount++;
+                            });
+                    });
+                    await Promise.all(promises); 
+                }
+
+                if (errorCount === 0) {
+                    displayUploadResult('success', `Import selesai! ${importCount} data berhasil diimpor.`);
+                } else {
+                    displayUploadResult('warning', `Import selesai dengan ${importCount} data berhasil diimpor dan ${errorCount} data gagal/dilewati.`);
+                }
+                
+                selectedFile = null;
+                DOMElements.csvFileInput.value = '';
+                DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                DOMElements.csvPreview.classList.add('hidden'); 
+                resetImportButtons();
+                loadApplicantsData(); 
+            });
+
+            DOMElements.refreshDataBtn.addEventListener('click', loadApplicantsData);
+
+            DOMElements.selectAllCheckbox.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                    const docId = checkbox.dataset.id;
+                    if (isChecked) {
+                        selectedForDeletion.add(docId);
+                    } else {
+                        selectedForDeletion.delete(docId);
+                    }
+                });
+                DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
+            });
+
+            DOMElements.saveChangesBtn.addEventListener('click', async () => {
+                if (editedApplicants.size === 0) {
+                    DOMElements.manageDataStatus.textContent = 'Tidak ada perubahan untuk disimpan.';
+                    return;
+                }
+
+                DOMElements.saveChangesBtn.disabled = true;
+                DOMElements.saveChangesBtn.textContent = 'Menyimpan...';
+                DOMElements.manageDataStatus.textContent = 'Menyimpan perubahan...';
+
+                let updateCount = 0;
+                let errorCount = 0;
+
+                for (const docId of editedApplicants) {
+                    const applicant = currentApplicantsData.find(app => app.id === docId);
+                    if (applicant) {
+                        if (!validateNRP(applicant.nrp)) {
+                            console.error(`NRP tidak valid untuk ${applicant.name}: ${applicant.nrp}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: NRP tidak valid untuk ${applicant.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+                        if (!validateKeterangan(applicant.keterangan)) {
+                            console.error(`Keterangan tidak valid untuk ${applicant.name}: ${applicant.keterangan}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Keterangan tidak valid untuk ${applicant.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+                        if (!applicant.password) {
+                            console.error(`Password kosong untuk ${applicant.name}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Password kosong untuk ${applicant.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+
+                        try {
+                            const updateData = {
+                                name: applicant.name,
+                                nrp: applicant.nrp,
+                                keterangan: applicant.keterangan,
+                                password: applicant.password,
+                                code: applicant.code || 'N/A' 
+                            };
+
+                            if (applicant.interviewDetails && (applicant.interviewDetails.time || applicant.interviewDetails.breakoutRoom)) {
+                                updateData.interviewDetails = {
+                                    time: applicant.interviewDetails.time || '',
+                                    breakoutRoom: applicant.interviewDetails.breakoutRoom || ''
+                                };
+                            } else {
+                                updateData.interviewDetails = null; 
+                            }
+
+                            await database.ref('applicants/' + docId).update(updateData);
+                            updateCount++;
+                        } catch (error) {
+                            console.error("Error saving changes for", docId, ":", error);
+                            errorCount++;
+                        }
+                    }
+                }
+
+                if (errorCount === 0) {
+                    DOMElements.manageDataStatus.textContent = `Perubahan berhasil disimpan! ${updateCount} data diupdate.`;
+                    editedApplicants.clear();
+                    DOMElements.saveChangesBtn.disabled = true;
+                } else {
+                    DOMElements.manageDataStatus.textContent = `Selesai menyimpan. ${updateCount} data diupdate, ${errorCount} data gagal.`;
+                }
+                DOMElements.saveChangesBtn.textContent = 'Simpan Perubahan';
+                loadApplicantsData(); 
+            });
+
+            DOMElements.deleteSelectedBtn.addEventListener('click', async () => {
+                if (selectedForDeletion.size === 0) {
+                    DOMElements.manageDataStatus.textContent = 'Tidak ada data yang dipilih untuk dihapus.';
+                    return;
+                }
+
+                if (!confirm(`Anda yakin ingin menghapus ${selectedForDeletion.size} pendaftar yang dipilih?`)) {
+                    return;
+                }
+
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.deleteSelectedBtn.textContent = 'Menghapus...';
+                DOMElements.manageDataStatus.textContent = 'Menghapus data terpilih...';
+
+                let deleteCount = 0;
+                let errorCount = 0;
+
+                for (const docId of selectedForDeletion) {
+                    try {
+                        await database.ref('applicants/' + docId).remove();
+                        deleteCount++;
+                    } catch (error) {
+                        console.error("Error deleting selected applicant:", docId, error);
+                        errorCount++;
+                    }
+                }
+
+                if (errorCount === 0) {
+                    DOMElements.manageDataStatus.textContent = `${deleteCount} pendaftar berhasil dihapus.`;
+                } else {
+                    DOMElements.manageDataStatus.textContent = `Selesai menghapus. ${deleteCount} pendaftar berhasil dihapus, ${errorCount} gagal.`;
+                }
+                selectedForDeletion.clear();
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.selectAllCheckbox.checked = false;
+                DOMElements.deleteSelectedBtn.textContent = 'Hapus Terpilih';
+                loadApplicantsData(); 
+            });
+
+            DOMElements.addCandidateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const newCandidate = {
+                    name: DOMElements.newName.value,
+                    nrp: DOMElements.newNrp.value,
+                    password: DOMElements.newPassword.value,
+                    code: 'N/A', 
+                    keterangan: DOMElements.newStatus.value, 
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    interviewDetails: {}
+                };
+
+                if (DOMElements.newInterviewTime.value) newCandidate.interviewDetails.time = DOMElements.newInterviewTime.value;
+                if (DOMElements.newBreakoutRoom.value) newCandidate.interviewDetails.breakoutRoom = DOMElements.newBreakoutRoom.value;
+
+                if (Object.values(newCandidate.interviewDetails).every(val => val === '')) {
+                    delete newCandidate.interviewDetails;
+                }
+
+                if (!validateNRP(newCandidate.nrp)) {
+                    alert('NRP harus 10 digit angka.');
+                    return;
+                }
+                if (!newCandidate.name || !newCandidate.password || !validateKeterangan(newCandidate.keterangan)) {
+                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan harus "Lolos" atau "Tidak Lolos".');
+                    return;
+                }
+
+                try {
+                    await database.ref('applicants').push(newCandidate);
+                    alert('Kandidat berhasil ditambahkan!');
+                    DOMElements.addCandidateForm.reset();
+                    loadApplicantsData(); 
+                } catch (error) {
+                    console.error("Error adding candidate:", error);
+                    alert('Gagal menambahkan kandidat: ' + error.message);
+                }
+            });
+
+            DOMElements.editCandidateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const candidateId = DOMElements.editCandidateId.value;
+                const updatedCandidate = {
+                    name: DOMElements.editName.value,
+                    nrp: DOMElements.editNrp.value,
+                    keterangan: DOMElements.editStatus.value, 
+                    password: DOMElements.editPassword.value,
+                    code: 'N/A', 
+                    interviewDetails: {}
+                };
+
+                if (DOMElements.editInterviewTime.value) updatedCandidate.interviewDetails.time = DOMElements.editInterviewTime.value;
+                if (DOMElements.editBreakoutRoom.value) updatedCandidate.interviewDetails.breakoutRoom = DOMElements.editBreakoutRoom.value;
+
+                if (Object.values(updatedCandidate.interviewDetails).every(val => val === '')) {
+                    delete updatedCandidate.interviewDetails;
+                }
+
+                if (!validateNRP(updatedCandidate.nrp)) {
+                    alert('NRP harus 10 digit angka.');
+                    return;
+                }
+                if (!updatedCandidate.name || !updatedCandidate.password || !validateKeterangan(updatedCandidate.keterangan)) {
+                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan harus "Lolos" atau "Tidak Lolos".');
+                    return;
+                }
+
+                try {
+                    await database.ref('applicants/' + candidateId).update(updatedCandidate);
+                    alert('Kandidat berhasil diperbarui!');
+                    DOMElements.editCandidateModal.classList.add('hidden');
+                    loadApplicantsData(); 
+                } catch (error) {
+                    console.error("Error updating candidate:", error);
+                    alert('Gagal memperbarui kandidat: ' + error.message);
+                }
+            });
+
+            DOMElements.cancelEdit.addEventListener('click', () => {
+                DOMElements.editCandidateModal.classList.add('hidden');
             });
         });
     </script>
