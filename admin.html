@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Impor & Kelola Kelulusan</title>
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -99,6 +98,25 @@
             border-color: #c41e3a;
             box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
         }
+        /* CSS tambahan untuk CSV upload dari ppp.html */
+        .csv-upload {
+            position: relative;
+            overflow: hidden;
+        }
+        .csv-upload input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            cursor: pointer;
+            display: block;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -149,25 +167,27 @@
                     <h3 class="text-lg font-semibold mb-2">Format File CSV</h3>
                     <p class="text-gray-700 mb-2">File CSV harus memiliki header berikut (case-sensitive) dan urutan kolom tidak masalah:</p>
                     <ul class="list-disc list-inside ml-4 text-gray-600 mb-4">
-                        <li>`Nama`: Nama lengkap pendaftar.</li>
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
-                        <li>`Status`: Status kelulusan (`Lulus`, `Tidak Lulus`, atau `Menunggu`).</li>
+                        <li>`Password`: Kata sandi untuk login.</li>
+                        <li>`Nama`: Nama lengkap pendaftar.</li>
+                        <li>`Kode`: Kode unik pendaftar (misal: A1, B2).</li>
+                        <li>`Status`: Status kelulusan (`lulus` atau `tidak`).</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Status
-Budi Santoso,1234567890,Lulus
-Siti Aminah,0987654321,Tidak Lulus
-Joko Susilo,1122334455,Menunggu</code></pre>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>NRP,Password,Nama,Kode,Status
+5001232001,hidupjokowi,Ahmad Fauzi,A1,lulus
+5001232002,hidupjokowi,Budi Santoso,A2,tidak
+5001232003,hidupjokowi,Siti Nurhaliza,A3,lulus</code></pre>
                 </div>
 
                 <div class="mb-6">
                     <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Pilih File CSV <span class="text-theme-red">*</span></label>
-                    <label for="csvFile" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red">
+                    <label for="csvFile" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red csv-upload">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a3 3 0 013 3v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
                         </svg>
                         <span id="fileName">Seret & Lepas file CSV di sini atau Klik untuk memilih</span>
-                        <input type="file" id="csvFile" accept=".csv" class="hidden">
+                        <input type="file" id="csvFileInput" accept=".csv,.txt" class="hidden">
                     </label>
                     <p id="fileError" class="mt-1 text-sm text-red-600 hidden">Pilih file CSV yang valid.</p>
                 </div>
@@ -178,8 +198,10 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                         <table class="min-w-full bg-white">
                             <thead>
                                 <tr>
-                                    <th>Nama</th>
                                     <th>NRP</th>
+                                    <th>Password</th>
+                                    <th>Nama</th>
+                                    <th>Kode</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -191,8 +213,9 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                     <p id="previewError" class="mt-2 text-sm text-red-600 hidden">Data pratinjau tidak valid atau kosong.</p>
                 </div>
                 
-                <div class="mt-6 flex justify-end">
-                    <button type="button" id="uploadBtn" class="btn-primary px-6 py-2 rounded-md font-medium" disabled>Unggah & Proses</button>
+                <div class="mt-6 flex justify-end space-x-2">
+                    <button type="button" id="importCsvButton" class="btn-primary px-6 py-2 rounded-md font-medium">Pratinjau & Proses</button>
+                    <button type="button" id="confirmImportButton" class="btn-primary px-6 py-2 rounded-md font-medium hidden">Konfirmasi Impor</button>
                 </div>
 
                 <div id="uploadResult" class="mt-8 hidden">
@@ -207,6 +230,46 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 <button id="refreshDataBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Refresh Data</button>
             </div>
             <div class="p-6">
+                <!-- Add Candidate Form (diadaptasi dari ppp.html) -->
+                <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Tambah Kandidat Baru</h3>
+                    <form id="addCandidateForm" class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label for="newNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newNrp" name="newNrp" required 
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newPassword" name="newPassword" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newName" name="newName" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newCode" class="block text-sm font-medium text-gray-700 mb-1">Kode <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newCode" name="newCode" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-theme-red">*</span></label>
+                                <select id="newStatus" name="newStatus" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                    <option value="lulus">Lulus</option>
+                                    <option value="tidak">Tidak Lulus</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
+                            Tambah Kandidat
+                        </button>
+                    </form>
+                </div>
+
                 <div class="mb-4 flex justify-end space-x-2">
                     <button id="saveChangesBtn" class="btn-primary px-4 py-2 rounded-md font-medium" disabled>Simpan Perubahan</button>
                     <button id="deleteSelectedBtn" class="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition" disabled>Hapus Terpilih</button>
@@ -216,11 +279,12 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                         <thead>
                             <tr>
                                 <th class="w-10"><input type="checkbox" id="selectAllCheckbox"></th>
-                                <th>Nama</th>
                                 <th>NRP</th>
+                                <th>Password</th>
+                                <th>Nama</th>
+                                <th>Kode</th>
                                 <th>Status</th>
-                                <th>Link Drive</th>
-                                <th>Detail Interview</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="applicantsTableBody">
@@ -239,23 +303,104 @@ Joko Susilo,1122334455,Menunggu</code></pre>
         </div>
     </footer>
 
+    <!-- Edit Candidate Modal (diadaptasi dari ppp.html) -->
+    <div id="editCandidateModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
+            <div class="bg-theme-red text-white p-4 text-center">
+                <h3 class="text-xl font-bold">Edit Kandidat</h3>
+            </div>
+            <div class="p-6">
+                <form id="editCandidateForm" class="space-y-4">
+                    <input type="hidden" id="editCandidateId">
+                    
+                    <div>
+                        <label for="editNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editNrp" name="editNrp" required 
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    
+                    <div>
+                        <label for="editPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editPassword" name="editPassword" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    
+                    <div>
+                        <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editName" name="editName" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    
+                    <div>
+                        <label for="editCode" class="block text-sm font-medium text-gray-700 mb-1">Kode <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editCode" name="editCode" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    
+                    <div>
+                        <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-theme-red">*</span></label>
+                        <select id="editStatus" name="editStatus" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                            <option value="lulus">Lulus</option>
+                            <option value="tidak">Tidak Lulus</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button type="submit" 
+                            class="flex-1 btn-primary py-2 px-4 rounded-md font-medium">
+                            Simpan
+                        </button>
+                        
+                        <button type="button" id="cancelEdit" 
+                            class="flex-1 bg-gray-300 text-gray-800 hover:bg-gray-400 py-2 px-4 rounded-md font-medium transition-colors duration-300">
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hayoo Modal (untuk pesan error login admin) -->
+    <div id="hayooModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
+            <div class="bg-red-500 text-white p-4 text-center">
+                <div class="mx-auto mb-2 w-16 h-16 flex items-center justify-center rounded-full bg-white bg-opacity-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Akses Ditolak!</h3>
+            </div>
+            <div class="p-6 text-center">
+                <p class="text-gray-700 mb-4">Anda tidak memiliki akses untuk masuk ke halaman admin!</p>
+                <button id="closeHayooModal" class="btn-primary w-full py-2 px-4 rounded-md font-medium">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA",
-            authDomain: "daftaraslab.firebaseapp.com",
-            projectId: "daftaraslab",
-            storageBucket: "daftaraslab.firebasestorage.app", 
-            messagingSenderId: "329213682687",
-            appId: "1:329213682687:web:a326f7f6effc51b4347dca",
-            measurementId: "G-C9NRKRK2JC"
+            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", // GANTI DENGAN API KEY ANDA
+            authDomain: "daftaraslab.firebaseapp.com", // GANTI DENGAN AUTH DOMAIN ANDA
+            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", // GANTI DENGAN DATABASE URL REALTIME DATABASE ANDA
+            projectId: "daftaraslab", // GANTI DENGAN PROJECT ID ANDA
+            storageBucket: "daftaraslab.firebasestorage.app", // GANTI DENGAN STORAGE BUCKET ANDA
+            messagingSenderId: "329213682687", // GANTI DENGAN MESSAGING SENDER ID ANDA
+            appId: "1:329213682687:web:a326f7f6effc51b4347dca", // GANTI DENGAN APP ID ANDA
+            measurementId: "G-C9NRKRK2JC" // GANTI DENGAN MEASUREMENT ID ANDA
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.firestore();
-        const storage = firebase.storage();
+        const database = firebase.database(); // Menggunakan Realtime Database
+        // const db = firebase.firestore(); // Firestore tidak digunakan untuk data pendaftar di sini
+        // const storage = firebase.storage(); // Storage tidak digunakan untuk impor CSV di sini
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
@@ -268,27 +413,50 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 loginError: document.getElementById('loginError'),
                 logoutBtn: document.getElementById('logoutBtn'),
 
-                csvFileInput: document.getElementById('csvFile'),
+                csvFileInput: document.getElementById('csvFileInput'), // Diubah dari csvFile
                 fileNameDisplay: document.getElementById('fileName'),
                 fileError: document.getElementById('fileError'),
                 csvPreview: document.getElementById('csvPreview'),
                 csvPreviewBody: document.getElementById('csvPreviewBody'),
                 previewError: document.getElementById('previewError'),
-                uploadBtn: document.getElementById('uploadBtn'),
-                uploadResultDiv: document.getElementById('uploadResult'),
+                importCsvButton: document.getElementById('importCsvButton'), // Tombol untuk pratinjau/proses
+                confirmImportButton: document.getElementById('confirmImportButton'), // Tombol konfirmasi impor
+                uploadResultDiv: document.getElementById('uploadResult'), // Digunakan untuk hasil impor
 
                 refreshDataBtn: document.getElementById('refreshDataBtn'),
                 saveChangesBtn: document.getElementById('saveChangesBtn'),
                 deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
                 selectAllCheckbox: document.getElementById('selectAllCheckbox'),
                 applicantsTableBody: document.getElementById('applicantsTableBody'),
-                manageDataStatus: document.getElementById('manageDataStatus')
+                manageDataStatus: document.getElementById('manageDataStatus'),
+
+                // Elemen untuk Tambah/Edit Kandidat
+                addCandidateForm: document.getElementById('addCandidateForm'),
+                newNrp: document.getElementById('newNrp'),
+                newPassword: document.getElementById('newPassword'),
+                newName: document.getElementById('newName'),
+                newCode: document.getElementById('newCode'),
+                newStatus: document.getElementById('newStatus'),
+
+                editCandidateModal: document.getElementById('editCandidateModal'),
+                editCandidateForm: document.getElementById('editCandidateForm'),
+                editCandidateId: document.getElementById('editCandidateId'),
+                editNrp: document.getElementById('editNrp'),
+                editPassword: document.getElementById('editPassword'),
+                editName: document.getElementById('editName'),
+                editCode: document.getElementById('editCode'),
+                editStatus: document.getElementById('editStatus'),
+                cancelEdit: document.getElementById('cancelEdit'),
+
+                hayooModal: document.getElementById('hayooModal'),
+                closeHayooModal: document.getElementById('closeHayooModal')
             };
 
             let selectedFile = null;
-            let currentApplicantsData = []; // To store data from Firestore for editing
+            let currentApplicantsData = []; // To store data from Realtime Database for editing
             let editedApplicants = new Set(); // To track which documents have been edited
             let selectedForDeletion = new Set(); // To track selected documents for deletion
+            let parsedCsvData = []; // Untuk menyimpan data CSV yang sudah diparse
 
             // --- Helper Functions ---
 
@@ -306,12 +474,8 @@ Joko Susilo,1122334455,Menunggu</code></pre>
             }
 
             function validateStatus(status) {
-                const validStatuses = ['Lulus', 'Tidak Lulus', 'Menunggu'];
+                const validStatuses = ['lulus', 'tidak']; // Sesuaikan dengan status di Realtime DB
                 return validStatuses.includes(status);
-            }
-
-            function updateUploadButtonState() {
-                DOMElements.uploadBtn.disabled = !selectedFile;
             }
 
             function displayUploadResult(type, message) {
@@ -336,10 +500,81 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 DOMElements.uploadResultDiv.classList.remove('hidden');
             }
 
-            function resetUploadButton() {
-                DOMElements.uploadBtn.disabled = false;
-                DOMElements.uploadBtn.textContent = 'Unggah & Proses';
-                DOMElements.uploadBtn.classList.remove('animate-pulse');
+            function resetImportButtons() {
+                DOMElements.importCsvButton.disabled = false;
+                DOMElements.importCsvButton.textContent = 'Pratinjau & Proses';
+                DOMElements.confirmImportButton.classList.add('hidden');
+            }
+
+            // Fungsi parsing CSV dari ppp.html
+            function parseCSV(text) {
+                function isBinaryContent(content) {
+                    const nonPrintableChars = content.split('').filter(char => {
+                        const code = char.charCodeAt(0);
+                        return (code < 32 && code !== 9 && code !== 10 && code !== 13) || code > 126;
+                    }).length;
+                    return (nonPrintableChars / content.length) > 0.05;
+                }
+
+                if (isBinaryContent(text)) {
+                    alert('File yang Anda unggah sepertinya bukan file CSV yang valid. File terdeteksi sebagai binary (Excel/ZIP/dll). Pastikan file dalam format CSV (text) dan bukan format binary.');
+                    return [];
+                }
+
+                let cleanedText = '';
+                let inTextData = false;
+                for (let i = 0; i < text.length; i++) {
+                    const charCode = text.charCodeAt(i);
+                    if ((charCode >= 32 && charCode <= 126) || charCode === 9 || charCode === 10 || charCode === 13) {
+                        if (!inTextData) {
+                            inTextData = true;
+                        }
+                        cleanedText += text[i];
+                    } else if (inTextData) {
+                        cleanedText += '\n';
+                        inTextData = false;
+                    }
+                }
+                cleanedText = cleanedText.replace(/\n\s*\n/g, '\n').trim();
+
+                let separator = ',';
+                if (cleanedText.indexOf(';') > -1 && cleanedText.indexOf(',') === -1) {
+                    separator = ';';
+                }
+
+                const lines = cleanedText.split('\n');
+                const result = [];
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line === '') continue;
+                    if (line.charCodeAt(0) < 32 || line.charCodeAt(0) > 126) {
+                        continue;
+                    }
+
+                    const values = line.split(separator);
+                    // Format CSV: nrp,password,nama,kode,status
+                    if (values.length >= 5) { 
+                        const cleanValues = values.map(val => {
+                            return val.trim().replace(/^["']|["']$/g, '');
+                        });
+
+                        const candidate = {
+                            nrp: cleanValues[0] || '',
+                            password: cleanValues[1] || '',
+                            name: cleanValues[2] || '',
+                            code: cleanValues[3] || '',
+                            status: (cleanValues[4] || '').toLowerCase() === 'lulus' ? 'lulus' : 'tidak'
+                        };
+
+                        if (candidate.nrp && candidate.password) {
+                            result.push(candidate);
+                        }
+                    } else {
+                        console.warn(`Baris dilewati karena format tidak lengkap: ${line}`);
+                    }
+                }
+                return result;
             }
 
             function renderCsvPreview(data) {
@@ -347,20 +582,38 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 if (data.length === 0) {
                     showError(DOMElements.previewError, 'Tidak ada data valid untuk pratinjau.');
                     DOMElements.csvPreview.classList.add('hidden');
+                    DOMElements.confirmImportButton.classList.add('hidden');
                     return;
                 }
                 hideError(DOMElements.previewError);
                 DOMElements.csvPreview.classList.remove('hidden');
+                DOMElements.confirmImportButton.classList.remove('hidden'); // Tampilkan tombol konfirmasi
 
-                data.forEach(row => {
+                // Tampilkan maksimal 10 baris untuk preview
+                const previewRows = data.slice(0, 10);
+
+                previewRows.forEach(row => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${row.Nama}</td>
-                        <td>${row.NRP}</td>
-                        <td>${row.Status}</td>
+                        <td>${row.nrp || '-'}</td>
+                        <td>${row.password || '-'}</td>
+                        <td>${row.name || '-'}</td>
+                        <td>${row.code || '-'}</td>
+                        <td>${row.status || '-'}</td>
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
                 });
+
+                // Tambahkan informasi jumlah data
+                if (data.length > 10) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td colspan="5" class="py-2 px-3 text-center text-gray-400">
+                            ... dan ${data.length - 10} data lainnya (total ${data.length} data)
+                        </td>
+                    `;
+                    DOMElements.csvPreviewBody.appendChild(tr);
+                }
             }
 
             async function loadApplicantsData() {
@@ -374,10 +627,17 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 DOMElements.selectAllCheckbox.checked = false;
 
                 try {
-                    const snapshot = await db.collection('pendaftaran').orderBy('timestamp', 'desc').get();
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        currentApplicantsData.push({ id: doc.id, ...data });
+                    // Mengambil data dari Realtime Database
+                    const snapshot = await database.ref('candidates').once('value');
+                    
+                    if (!snapshot.exists()) {
+                        DOMElements.manageDataStatus.textContent = 'Tidak ada data pendaftar.';
+                        return;
+                    }
+
+                    snapshot.forEach(childSnapshot => {
+                        const data = childSnapshot.val();
+                        currentApplicantsData.push({ id: childSnapshot.key, ...data });
                     });
                     renderApplicantsTable();
                     DOMElements.manageDataStatus.textContent = `Data berhasil dimuat. Total: ${currentApplicantsData.length} pendaftar.`;
@@ -394,23 +654,19 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                     tr.dataset.id = applicant.id;
                     tr.innerHTML = `
                         <td><input type="checkbox" class="delete-checkbox" data-id="${applicant.id}" ${selectedForDeletion.has(applicant.id) ? 'checked' : ''}></td>
-                        <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
                         <td><input type="text" class="edit-field" data-field="nrp" value="${applicant.nrp || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="code" value="${applicant.code || ''}"></td>
                         <td>
-                            <select class="edit-field" data-field="statusKelulusan">
-                                <option value="Menunggu" ${applicant.statusKelulusan === 'Menunggu' ? 'selected' : ''}>Menunggu</option>
-                                <option value="Lulus" ${applicant.statusKelulusan === 'Lulus' ? 'selected' : ''}>Lulus</option>
-                                <option value="Tidak Lulus" ${applicant.statusKelulusan === 'Tidak Lulus' ? 'selected' : ''}>Tidak Lulus</option>
+                            <select class="edit-field" data-field="status">
+                                <option value="lulus" ${applicant.status === 'lulus' ? 'selected' : ''}>Lulus</option>
+                                <option value="tidak" ${applicant.status === 'tidak' ? 'selected' : ''}>Tidak Lulus</option>
                             </select>
                         </td>
-                        <td><a href="${applicant.driveLink || '#'}" target="_blank" class="text-blue-600 hover:underline text-sm">${applicant.driveLink ? 'Lihat Dokumen' : '-'}</a></td>
                         <td>
-                            <div class="flex flex-col space-y-1 text-sm">
-                                <input type="text" class="edit-field" data-field="interviewDetails.time" placeholder="Waktu" value="${applicant.interviewDetails?.time || ''}">
-                                <input type="text" class="edit-field" data-field="interviewDetails.zoomLink" placeholder="Link Zoom" value="${applicant.interviewDetails?.zoomLink || ''}">
-                                <input type="text" class="edit-field" data-field="interviewDetails.breakoutRoom" placeholder="Breakout Room" value="${applicant.interviewDetails?.breakoutRoom || ''}">
-                                <input type="text" class="edit-field" data-field="interviewDetails.technicalDocLink" placeholder="Link Dokumen Teknis" value="${applicant.interviewDetails?.technicalDocLink || ''}">
-                            </div>
+                            <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
+                            <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
                         </td>
                     `;
                     DOMElements.applicantsTableBody.appendChild(tr);
@@ -425,16 +681,7 @@ Joko Susilo,1122334455,Menunggu</code></pre>
 
                         const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
                         if (applicantIndex > -1) {
-                            // Handle nested fields for interviewDetails
-                            if (field.includes('.')) {
-                                const [parentField, childField] = field.split('.');
-                                if (!currentApplicantsData[applicantIndex][parentField]) {
-                                    currentApplicantsData[applicantIndex][parentField] = {};
-                                }
-                                currentApplicantsData[applicantIndex][parentField][childField] = value;
-                            } else {
-                                currentApplicantsData[applicantIndex][field] = value;
-                            }
+                            currentApplicantsData[applicantIndex][field] = value;
                             editedApplicants.add(docId);
                             DOMElements.saveChangesBtn.disabled = false;
                         }
@@ -452,6 +699,40 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                         }
                         DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
                         DOMElements.selectAllCheckbox.checked = selectedForDeletion.size === currentApplicantsData.length && currentApplicantsData.length > 0;
+                    });
+                });
+
+                // Add event listeners for single delete buttons
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-single-button').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.dataset.id;
+                        if (confirm(`Anda yakin ingin menghapus pendaftar ini (ID: ${docId})?`)) {
+                            try {
+                                await database.ref('candidates/' + docId).remove();
+                                DOMElements.manageDataStatus.textContent = `Pendaftar ${docId} berhasil dihapus.`;
+                                loadApplicantsData(); // Reload data
+                            } catch (error) {
+                                console.error("Error deleting single applicant:", error);
+                                DOMElements.manageDataStatus.textContent = `Gagal menghapus pendaftar: ${error.message}`;
+                            }
+                        }
+                    });
+                });
+
+                // Add event listeners for single edit buttons
+                DOMElements.applicantsTableBody.querySelectorAll('.edit-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const docId = e.target.dataset.id;
+                        const applicant = currentApplicantsData.find(app => app.id === docId);
+                        if (applicant) {
+                            DOMElements.editCandidateId.value = applicant.id;
+                            DOMElements.editNrp.value = applicant.nrp || '';
+                            DOMElements.editPassword.value = applicant.password || '';
+                            DOMElements.editName.value = applicant.name || '';
+                            DOMElements.editCode.value = applicant.code || '';
+                            DOMElements.editStatus.value = applicant.status || 'tidak';
+                            DOMElements.editCandidateModal.classList.remove('hidden');
+                        }
                     });
                 });
             }
@@ -494,7 +775,9 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                     await auth.signInWithEmailAndPassword(email, password);
                 } catch (error) {
                     console.error("Login error:", error);
-                    showError(DOMElements.loginError, 'Email atau password salah.');
+                    // Tampilkan modal "Hayoo"
+                    DOMElements.hayooModal.classList.remove('hidden');
+                    // Anda bisa menambahkan efek shake di sini jika diinginkan
                 } finally {
                     DOMElements.loginBtn.disabled = false;
                     DOMElements.loginBtn.textContent = 'Login';
@@ -511,11 +794,16 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 }
             });
 
+            // Close Hayoo Modal
+            DOMElements.closeHayooModal.addEventListener('click', () => {
+                DOMElements.hayooModal.classList.add('hidden');
+            });
+
             // File input change (for CSV import)
             DOMElements.csvFileInput.addEventListener('change', function(event) {
                 selectedFile = event.target.files[0];
                 if (selectedFile) {
-                    if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv')) {
+                    if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv') || selectedFile.name.endsWith('.txt')) {
                         DOMElements.fileNameDisplay.textContent = selectedFile.name;
                         hideError(DOMElements.fileError);
                         
@@ -523,79 +811,101 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             const text = e.target.result;
-                            const lines = text.split('\n').filter(line => line.trim() !== '');
-                            if (lines.length > 1) { // Check if there's at least a header and one data row
-                                const headers = lines[0].split(',').map(h => h.trim());
-                                const expectedHeaders = ['Nama', 'NRP', 'Status'];
-                                if (expectedHeaders.every(h => headers.includes(h))) {
-                                    const previewData = [];
-                                    for (let i = 1; i < lines.length; i++) {
-                                        const values = lines[i].split(',').map(v => v.trim());
-                                        if (values.length === headers.length) {
-                                            const row = {};
-                                            headers.forEach((header, index) => {
-                                                row[header] = values[index];
-                                            });
-                                            previewData.push(row);
-                                        }
-                                    }
-                                    renderCsvPreview(previewData);
-                                } else {
-                                    showError(DOMElements.previewError, 'Header CSV tidak valid. Harap gunakan: Nama,NRP,Status');
-                                    DOMElements.csvPreview.classList.add('hidden');
-                                }
-                            } else {
-                                showError(DOMElements.previewError, 'File CSV kosong atau hanya berisi header.');
-                                DOMElements.csvPreview.classList.add('hidden');
-                            }
+                            parsedCsvData = parseCSV(text); // Simpan data yang diparse
+                            renderCsvPreview(parsedCsvData);
                         };
                         reader.readAsText(selectedFile);
 
                     } else {
-                        showError(DOMElements.fileError, 'Hanya file CSV yang diizinkan.');
+                        showError(DOMElements.fileError, 'Hanya file CSV atau TXT yang diizinkan.');
                         selectedFile = null;
                         DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
                         DOMElements.csvPreview.classList.add('hidden');
+                        DOMElements.confirmImportButton.classList.add('hidden');
                     }
                 } else {
                     DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
                     hideError(DOMElements.fileError);
                     DOMElements.csvPreview.classList.add('hidden');
+                    DOMElements.confirmImportButton.classList.add('hidden');
                 }
-                updateUploadButtonState();
+                // Tombol "Pratinjau & Proses" selalu aktif jika ada file
+                DOMElements.importCsvButton.disabled = !selectedFile;
             });
 
-            // Upload button click (for CSV import)
-            DOMElements.uploadBtn.addEventListener('click', async function() {
+            // Import CSV button (untuk memicu pratinjau dan menampilkan tombol konfirmasi)
+            DOMElements.importCsvButton.addEventListener('click', function() {
                 if (!selectedFile) {
                     showError(DOMElements.fileError, 'Pilih file CSV terlebih dahulu.');
                     return;
                 }
+                // Trigger the change event to re-process and show preview
+                DOMElements.csvFileInput.dispatchEvent(new Event('change'));
+            });
 
-                DOMElements.uploadBtn.disabled = true;
-                DOMElements.uploadBtn.textContent = 'Mengunggah...';
-                DOMElements.uploadBtn.classList.add('animate-pulse');
+            // Confirm Import button (ini yang benar-benar mengimpor data ke Realtime Database)
+            DOMElements.confirmImportButton.addEventListener('click', async function() {
+                if (!parsedCsvData || parsedCsvData.length === 0) {
+                    alert('Tidak ada data yang diimpor.');
+                    return;
+                }
+
+                DOMElements.confirmImportButton.disabled = true;
+                DOMElements.confirmImportButton.textContent = 'Mengimpor...';
                 DOMElements.uploadResultDiv.classList.add('hidden');
                 DOMElements.uploadResultDiv.innerHTML = '';
 
-                const storageRef = storage.ref();
-                const fileRef = storageRef.child(`admin-imports/${Date.now()}_${selectedFile.name}`);
+                const candidatesRef = database.ref('candidates');
+                let importCount = 0;
+                let errorCount = 0;
 
-                try {
-                    const snapshot = await fileRef.put(selectedFile);
-                    console.log('File berhasil diunggah:', snapshot.metadata.fullPath);
-                    displayUploadResult('success', `File "${selectedFile.name}" berhasil diunggah. Cloud Function akan memprosesnya.`);
-                    selectedFile = null;
-                    DOMElements.csvFileInput.value = '';
-                    DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
-                    DOMElements.csvPreview.classList.add('hidden'); // Hide preview after upload
-                    loadApplicantsData(); // Refresh data after potential import
-                } catch (error) {
-                    console.error("Error uploading file:", error);
-                    displayUploadResult('error', `Gagal mengunggah file: ${error.message}`);
-                } finally {
-                    resetUploadButton();
+                displayUploadResult('warning', `Memulai import ${parsedCsvData.length} data...`);
+
+                const batchSize = 50;
+                const totalBatches = Math.ceil(parsedCsvData.length / batchSize);
+
+                for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+                    const startIdx = batchIndex * batchSize;
+                    const endIdx = Math.min(startIdx + batchSize, parsedCsvData.length);
+                    const currentBatch = parsedCsvData.slice(startIdx, endIdx);
+
+                    const promises = currentBatch.map(candidate => {
+                        if (!candidate.nrp || !candidate.password) {
+                            console.error("Data tidak lengkap (NRP/Password kosong):", candidate);
+                            errorCount++;
+                            return Promise.resolve(); // Lewati data yang tidak lengkap
+                        }
+
+                        // Pastikan status hanya 'lulus' atau 'tidak'
+                        if (candidate.status !== 'lulus' && candidate.status !== 'tidak') {
+                            candidate.status = 'tidak'; // Default ke 'tidak' jika status tidak valid
+                        }
+
+                        // Menggunakan push() untuk menambahkan data baru ke Realtime Database
+                        return candidatesRef.push(candidate)
+                            .then(() => {
+                                importCount++;
+                            })
+                            .catch(error => {
+                                console.error("Error saat mengimpor data:", error);
+                                errorCount++;
+                            });
+                    });
+                    await Promise.all(promises); // Tunggu setiap batch selesai
                 }
+
+                if (errorCount === 0) {
+                    displayUploadResult('success', `Import selesai! ${importCount} data berhasil diimpor.`);
+                } else {
+                    displayUploadResult('warning', `Import selesai dengan ${importCount} data berhasil diimpor dan ${errorCount} data gagal/dilewati.`);
+                }
+                
+                selectedFile = null;
+                DOMElements.csvFileInput.value = '';
+                DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                DOMElements.csvPreview.classList.add('hidden'); // Hide preview after import
+                resetImportButtons();
+                loadApplicantsData(); // Refresh data setelah impor
             });
 
             // Refresh Data button
@@ -627,51 +937,52 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 DOMElements.saveChangesBtn.textContent = 'Menyimpan...';
                 DOMElements.manageDataStatus.textContent = 'Menyimpan perubahan...';
 
-                const batch = db.batch();
                 let updateCount = 0;
                 let errorCount = 0;
 
                 for (const docId of editedApplicants) {
                     const applicant = currentApplicantsData.find(app => app.id === docId);
                     if (applicant) {
-                        const docRef = db.collection('pendaftaran').doc(docId);
-                        const dataToUpdate = { ...applicant };
-                        delete dataToUpdate.id; // Remove ID before updating Firestore
-
-                        // Basic validation before saving
-                        if (!validateNRP(dataToUpdate.nrp)) {
-                            console.error(`Invalid NRP for ${dataToUpdate.name}: ${dataToUpdate.nrp}`);
-                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: NRP tidak valid untuk ${dataToUpdate.name}.`;
+                        // Validasi dasar sebelum menyimpan
+                        if (!validateNRP(applicant.nrp)) {
+                            console.error(`NRP tidak valid untuk ${applicant.name}: ${applicant.nrp}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: NRP tidak valid untuk ${applicant.name}.`;
                             errorCount++;
                             continue;
                         }
-                        if (!validateStatus(dataToUpdate.statusKelulusan)) {
-                            console.error(`Invalid status for ${dataToUpdate.name}: ${dataToUpdate.statusKelulusan}`);
-                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Status tidak valid untuk ${dataToUpdate.name}.`;
+                        if (!validateStatus(applicant.status)) {
+                            console.error(`Status tidak valid untuk ${applicant.name}: ${applicant.status}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Status tidak valid untuk ${applicant.name}.`;
                             errorCount++;
                             continue;
                         }
 
-                        batch.update(docRef, dataToUpdate);
-                        updateCount++;
+                        try {
+                            // Update data di Realtime Database
+                            await database.ref('candidates/' + docId).update({
+                                nrp: applicant.nrp,
+                                password: applicant.password,
+                                name: applicant.name,
+                                code: applicant.code,
+                                status: applicant.status
+                            });
+                            updateCount++;
+                        } catch (error) {
+                            console.error("Error saving changes for", docId, ":", error);
+                            errorCount++;
+                        }
                     }
                 }
 
-                try {
-                    await batch.commit();
+                if (errorCount === 0) {
                     DOMElements.manageDataStatus.textContent = `Perubahan berhasil disimpan! ${updateCount} data diupdate.`;
                     editedApplicants.clear();
                     DOMElements.saveChangesBtn.disabled = true;
-                } catch (error) {
-                    console.error("Error saving changes:", error);
-                    DOMElements.manageDataStatus.textContent = `Gagal menyimpan perubahan: ${error.message}`;
-                } finally {
-                    DOMElements.saveChangesBtn.textContent = 'Simpan Perubahan';
-                    // Re-enable if there are still uncommitted edits or if an error occurred
-                    if (editedApplicants.size > 0 || errorCount > 0) {
-                        DOMElements.saveChangesBtn.disabled = false;
-                    }
+                } else {
+                    DOMElements.manageDataStatus.textContent = `Selesai menyimpan. ${updateCount} data diupdate, ${errorCount} data gagal.`;
                 }
+                DOMElements.saveChangesBtn.textContent = 'Simpan Perubahan';
+                loadApplicantsData(); // Reload data untuk memastikan tampilan terbaru
             });
 
             // Delete Selected button
@@ -689,29 +1000,99 @@ Joko Susilo,1122334455,Menunggu</code></pre>
                 DOMElements.deleteSelectedBtn.textContent = 'Menghapus...';
                 DOMElements.manageDataStatus.textContent = 'Menghapus data terpilih...';
 
-                const batch = db.batch();
                 let deleteCount = 0;
                 let errorCount = 0;
 
                 for (const docId of selectedForDeletion) {
-                    const docRef = db.collection('pendaftaran').doc(docId);
-                    batch.delete(docRef);
-                    deleteCount++;
+                    try {
+                        await database.ref('candidates/' + docId).remove();
+                        deleteCount++;
+                    } catch (error) {
+                        console.error("Error deleting selected applicant:", docId, error);
+                        errorCount++;
+                    }
+                }
+
+                if (errorCount === 0) {
+                    DOMElements.manageDataStatus.textContent = `${deleteCount} pendaftar berhasil dihapus.`;
+                } else {
+                    DOMElements.manageDataStatus.textContent = `Selesai menghapus. ${deleteCount} pendaftar berhasil dihapus, ${errorCount} gagal.`;
+                }
+                selectedForDeletion.clear();
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.selectAllCheckbox.checked = false;
+                DOMElements.deleteSelectedBtn.textContent = 'Hapus Terpilih';
+                loadApplicantsData(); // Reload data setelah penghapusan
+            });
+
+            // Add Candidate Form Submission
+            DOMElements.addCandidateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const newCandidate = {
+                    nrp: DOMElements.newNrp.value,
+                    password: DOMElements.newPassword.value,
+                    name: DOMElements.newName.value,
+                    code: DOMElements.newCode.value,
+                    status: DOMElements.newStatus.value
+                };
+
+                if (!validateNRP(newCandidate.nrp)) {
+                    alert('NRP harus 10 digit angka.');
+                    return;
+                }
+                if (!newCandidate.password || !newCandidate.name || !newCandidate.code) {
+                    alert('Semua kolom bertanda (*) harus diisi.');
+                    return;
                 }
 
                 try {
-                    await batch.commit();
-                    DOMElements.manageDataStatus.textContent = `${deleteCount} pendaftar berhasil dihapus.`;
-                    selectedForDeletion.clear();
-                    DOMElements.deleteSelectedBtn.disabled = true;
-                    DOMElements.selectAllCheckbox.checked = false;
-                    loadApplicantsData(); // Reload data after deletion
+                    await database.ref('candidates').push(newCandidate);
+                    alert('Kandidat berhasil ditambahkan!');
+                    DOMElements.addCandidateForm.reset();
+                    loadApplicantsData(); // Refresh data
                 } catch (error) {
-                    console.error("Error deleting selected applicants:", error);
-                    DOMElements.manageDataStatus.textContent = `Gagal menghapus data: ${error.message}`;
-                } finally {
-                    DOMElements.deleteSelectedBtn.textContent = 'Hapus Terpilih';
+                    console.error("Error adding candidate:", error);
+                    alert('Gagal menambahkan kandidat: ' + error.message);
                 }
+            });
+
+            // Edit Candidate Form Submission
+            DOMElements.editCandidateForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const candidateId = DOMElements.editCandidateId.value;
+                const updatedCandidate = {
+                    nrp: DOMElements.editNrp.value,
+                    password: DOMElements.editPassword.value,
+                    name: DOMElements.editName.value,
+                    code: DOMElements.editCode.value,
+                    status: DOMElements.editStatus.value
+                };
+
+                if (!validateNRP(updatedCandidate.nrp)) {
+                    alert('NRP harus 10 digit angka.');
+                    return;
+                }
+                if (!updatedCandidate.password || !updatedCandidate.name || !updatedCandidate.code) {
+                    alert('Semua kolom bertanda (*) harus diisi.');
+                    return;
+                }
+
+                try {
+                    await database.ref('candidates/' + candidateId).update(updatedCandidate);
+                    alert('Kandidat berhasil diperbarui!');
+                    DOMElements.editCandidateModal.classList.add('hidden');
+                    loadApplicantsData(); // Refresh data
+                } catch (error) {
+                    console.error("Error updating candidate:", error);
+                    alert('Gagal memperbarui kandidat: ' + error.message);
+                }
+            });
+
+            // Cancel Edit button
+            DOMElements.cancelEdit.addEventListener('click', () => {
+                DOMElements.editCandidateModal.classList.add('hidden');
             });
         });
     </script>
