@@ -86,14 +86,14 @@
             background-color: #f3f4f6;
         }
 
-        td input[type="text"], td select {
+        td input[type="text"], td select, td input[type="datetime-local"] {
             width: 100%;
             padding: 0.25rem 0.5rem;
             border: 1px solid #d1d5db;
             border-radius: 0.25rem;
             font-size: 0.875rem;
         }
-        td input[type="text"]:focus, td select:focus {
+        td input[type="text"]:focus, td select:focus, td input[type="datetime-local"]:focus {
             outline: none;
             border-color: #c41e3a;
             box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
@@ -163,6 +163,28 @@
             </div>
             
             <div class="p-6">
+                <!-- Global Interview Settings Section -->
+                <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Pengaturan Global Interview</h3>
+                    <p class="text-gray-700 mb-3">Link Zoom dan Dokumen Teknis ini akan berlaku untuk semua pendaftar yang Lolos.</p>
+                    <form id="globalSettingsForm" class="space-y-3">
+                        <div>
+                            <label for="globalZoomLink" class="block text-sm font-medium text-gray-700 mb-1">Link Zoom Global</label>
+                            <input type="url" id="globalZoomLink" name="globalZoomLink" placeholder="Contoh: https://zoom.us/j/1234567890"
+                                class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="globalTechnicalDocLink" class="block text-sm font-medium text-gray-700 mb-1">Link Dokumen Teknis Global</label>
+                            <input type="url" id="globalTechnicalDocLink" name="globalTechnicalDocLink" placeholder="Contoh: https://example.com/doc.pdf"
+                                class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <button type="submit" id="saveGlobalSettingsBtn" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
+                            Simpan Pengaturan Global
+                        </button>
+                        <p id="globalSettingsStatus" class="mt-2 text-sm text-gray-600"></p>
+                    </form>
+                </div>
+
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold mb-2">Format File CSV</h3>
                     <p class="text-gray-700 mb-2">File CSV harus memiliki header berikut (case-sensitive) dan urutan kolom tidak masalah:</p>
@@ -171,16 +193,14 @@
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
                         <li>`Keterangan`: Status kelulusan (`Lolos` atau `Tidak Lolos`).</li>
                         <li>`Password`: Kata sandi untuk login pendaftar.</li>
-                        <li>`Waktu Interview` (Opsional): Contoh: `Senin, 10 Jan 2025, 10:00 WIB`</li>
-                        <li>`Link Zoom` (Opsional): URL link Zoom.</li>
-                        <li>`Breakout Room` (Opsional): Nomor atau nama breakout room.</li>
-                        <li>`Link Dokumen Teknis` (Opsional): URL dokumen panduan teknis interview.</li>
+                        <li>`Waktu Interview` (Opsional): Tanggal dan waktu interview spesifik per pendaftar. Contoh: `2025-01-10T10:00`</li>
+                        <li>`Breakout Room` (Opsional): Nomor atau nama breakout room spesifik per pendaftar.</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan,Password,Waktu Interview,Link Zoom,Breakout Room,Link Dokumen Teknis
-Budi Santoso,1234567890,Lolos,passbudi,Senin, 10 Jan 2025, 10:00 WIB,https://zoom.us/j/1234567890,Room A,https://example.com/doc_budi.pdf
-Siti Aminah,0987654321,Tidak Lolos,passsiti,,,,
-Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoom.us/j/0987654321,Room B,https://example.com/doc_joko.pdf</code></pre>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan,Password,Waktu Interview,Breakout Room
+Budi Santoso,1234567890,Lolos,passbudi,2025-01-10T10:00,Room A
+Siti Aminah,0987654321,Tidak Lolos,passsiti,
+Joko Susilo,1122334455,Lolos,passjoko,2025-01-11T13:00,Room B</code></pre>
                 </div>
 
                 <div class="mb-6">
@@ -206,9 +226,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                                     <th>Keterangan</th>
                                     <th>Password</th>
                                     <th>Waktu Interview</th>
-                                    <th>Link Zoom</th>
                                     <th>Breakout Room</th>
-                                    <th>Link Dokumen Teknis</th>
                                 </tr>
                             </thead>
                             <tbody id="csvPreviewBody">
@@ -267,22 +285,12 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                             <!-- New fields for interview details -->
                             <div>
                                 <label for="newInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
-                                <input type="text" id="newInterviewTime" name="newInterviewTime" placeholder="Contoh: Senin, 10 Jan 2025, 10:00 WIB"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newZoomLink" class="block text-sm font-medium text-gray-700 mb-1">Link Zoom</label>
-                                <input type="url" id="newZoomLink" name="newZoomLink" placeholder="Contoh: https://zoom.us/j/1234567890"
+                                <input type="datetime-local" id="newInterviewTime" name="newInterviewTime"
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
                             <div>
                                 <label for="newBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
                                 <input type="text" id="newBreakoutRoom" name="newBreakoutRoom" placeholder="Contoh: Room A"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newTechnicalDocLink" class="block text-sm font-medium text-gray-700 mb-1">Link Dokumen Teknis</label>
-                                <input type="url" id="newTechnicalDocLink" name="newTechnicalDocLink" placeholder="Contoh: https://example.com/doc.pdf"
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
                         </div>
@@ -305,7 +313,8 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                                 <th>NRP</th>
                                 <th>Keterangan</th>
                                 <th>Password</th>
-                                <th>Waktu Interview</th> <!-- New column -->
+                                <th>Waktu Interview</th> 
+                                <th>Breakout Room</th> <!-- New column -->
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -361,22 +370,12 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                     <!-- New fields for interview details in edit modal -->
                     <div>
                         <label for="editInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
-                        <input type="text" id="editInterviewTime" name="editInterviewTime" placeholder="Contoh: Senin, 10 Jan 2025, 10:00 WIB"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editZoomLink" class="block text-sm font-medium text-gray-700 mb-1">Link Zoom</label>
-                        <input type="url" id="editZoomLink" name="editZoomLink" placeholder="Contoh: https://zoom.us/j/1234567890"
+                        <input type="datetime-local" id="editInterviewTime" name="editInterviewTime"
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
                     <div>
                         <label for="editBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
                         <input type="text" id="editBreakoutRoom" name="editBreakoutRoom" placeholder="Contoh: Room A"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editTechnicalDocLink" class="block text-sm font-medium text-gray-700 mb-1">Link Dokumen Teknis</label>
-                        <input type="url" id="editTechnicalDocLink" name="editTechnicalDocLink" placeholder="Contoh: https://example.com/doc.pdf"
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
                     
@@ -445,6 +444,13 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 loginError: document.getElementById('loginError'),
                 logoutBtn: document.getElementById('logoutBtn'),
 
+                // Global Settings
+                globalSettingsForm: document.getElementById('globalSettingsForm'),
+                globalZoomLink: document.getElementById('globalZoomLink'),
+                globalTechnicalDocLink: document.getElementById('globalTechnicalDocLink'),
+                saveGlobalSettingsBtn: document.getElementById('saveGlobalSettingsBtn'),
+                globalSettingsStatus: document.getElementById('globalSettingsStatus'),
+
                 csvFileInput: document.getElementById('csvFileInput'),
                 fileNameDisplay: document.getElementById('fileName'),
                 fileError: document.getElementById('fileError'),
@@ -469,9 +475,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 newPassword: document.getElementById('newPassword'),
                 newStatus: document.getElementById('newStatus'),
                 newInterviewTime: document.getElementById('newInterviewTime'),
-                newZoomLink: document.getElementById('newZoomLink'),
                 newBreakoutRoom: document.getElementById('newBreakoutRoom'),
-                newTechnicalDocLink: document.getElementById('newTechnicalDocLink'),
 
                 // Elemen untuk Edit Kandidat Modal
                 editCandidateModal: document.getElementById('editCandidateModal'),
@@ -482,9 +486,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 editStatus: document.getElementById('editStatus'),
                 editPassword: document.getElementById('editPassword'),
                 editInterviewTime: document.getElementById('editInterviewTime'),
-                editZoomLink: document.getElementById('editZoomLink'),
                 editBreakoutRoom: document.getElementById('editBreakoutRoom'),
-                editTechnicalDocLink: document.getElementById('editTechnicalDocLink'),
                 cancelEdit: document.getElementById('cancelEdit'),
 
                 hayooModal: document.getElementById('hayooModal'),
@@ -544,7 +546,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 DOMElements.confirmImportButton.classList.add('hidden');
             }
 
-            // Fungsi parsing CSV yang disesuaikan untuk Nama,NRP,Keterangan,Password + Interview Details
+            // Fungsi parsing CSV yang disesuaikan
             function parseCSV(text) {
                 function isBinaryContent(content) {
                     const nonPrintableChars = content.split('').filter(char => {
@@ -586,8 +588,8 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 if (lines.length > 0) {
                     const headers = lines[0].split(separator).map(h => h.trim());
                     const expectedHeaders = ['Nama', 'NRP', 'Keterangan', 'Password'];
-                    const optionalHeaders = ['Waktu Interview', 'Link Zoom', 'Breakout Room', 'Link Dokumen Teknis'];
-                    
+                    const optionalHeaders = ['Waktu Interview', 'Breakout Room']; // Hanya ini yang dari CSV
+
                     const hasCoreHeaders = expectedHeaders.every(expectedH => 
                         headers.some(h => h.toLowerCase() === expectedH.toLowerCase())
                     );
@@ -628,10 +630,8 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                             };
 
                             if (headerMap['waktu interview'] !== undefined) candidate.interviewDetails.time = values[headerMap['waktu interview']] || '';
-                            if (headerMap['link zoom'] !== undefined) candidate.interviewDetails.zoomLink = values[headerMap['link zoom']] || '';
                             if (headerMap['breakout room'] !== undefined) candidate.interviewDetails.breakoutRoom = values[headerMap['breakout room']] || '';
-                            if (headerMap['link dokumen teknis'] !== undefined) candidate.interviewDetails.technicalDocLink = values[headerMap['link dokumen teknis']] || '';
-
+                            
                             // Hapus interviewDetails jika semua propertinya kosong
                             if (Object.values(candidate.interviewDetails).every(val => val === '')) {
                                 delete candidate.interviewDetails;
@@ -672,9 +672,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                         <td>${row.keterangan || '-'}</td>
                         <td>${row.password || '-'}</td>
                         <td>${row.interviewDetails?.time || '-'}</td>
-                        <td>${row.interviewDetails?.zoomLink || '-'}</td>
                         <td>${row.interviewDetails?.breakoutRoom || '-'}</td>
-                        <td>${row.interviewDetails?.technicalDocLink || '-'}</td>
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
                 });
@@ -682,7 +680,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 if (data.length > 10) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td colspan="8" class="py-2 px-3 text-center text-gray-400">
+                        <td colspan="6" class="py-2 px-3 text-center text-gray-400">
                             ... dan ${data.length - 10} data lainnya (total ${data.length} data)
                         </td>
                     `;
@@ -736,9 +734,10 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                             </select>
                         </td>
                         <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
-                        <td><input type="text" class="edit-field" data-field="interviewDetails.time" value="${applicant.interviewDetails?.time || ''}" placeholder="Waktu Interview"></td>
+                        <td><input type="datetime-local" class="edit-field" data-field="interviewDetails.time" value="${applicant.interviewDetails?.time || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="interviewDetails.breakoutRoom" value="${applicant.interviewDetails?.breakoutRoom || ''}" placeholder="Room A"></td>
                         <td>
-                            <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit Detail</button>
+                            <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
                             <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
                         </td>
                     `;
@@ -748,7 +747,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 DOMElements.applicantsTableBody.querySelectorAll('.edit-field').forEach(input => {
                     input.addEventListener('change', (e) => {
                         const docId = e.target.closest('tr').dataset.id;
-                        const fieldPath = e.target.dataset.field; // e.g., "interviewDetails.time"
+                        const fieldPath = e.target.dataset.field; 
                         const value = e.target.value;
 
                         const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
@@ -808,14 +807,55 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                             DOMElements.editStatus.value = applicant.keterangan || 'Tidak Lolos';
                             DOMElements.editPassword.value = applicant.password || '';
                             DOMElements.editInterviewTime.value = applicant.interviewDetails?.time || '';
-                            DOMElements.editZoomLink.value = applicant.interviewDetails?.zoomLink || '';
                             DOMElements.editBreakoutRoom.value = applicant.interviewDetails?.breakoutRoom || '';
-                            DOMElements.editTechnicalDocLink.value = applicant.interviewDetails?.technicalDocLink || '';
                             DOMElements.editCandidateModal.classList.remove('hidden');
                         }
                     });
                 });
             }
+
+            // --- Global Settings Functions ---
+            async function loadGlobalSettings() {
+                try {
+                    const snapshot = await database.ref('settings/globalInterviewDetails').once('value');
+                    if (snapshot.exists()) {
+                        const settings = snapshot.val();
+                        DOMElements.globalZoomLink.value = settings.zoomLink || '';
+                        DOMElements.globalTechnicalDocLink.value = settings.technicalDocLink || '';
+                    } else {
+                        DOMElements.globalZoomLink.value = '';
+                        DOMElements.globalTechnicalDocLink.value = '';
+                    }
+                    DOMElements.globalSettingsStatus.textContent = 'Pengaturan global dimuat.';
+                } catch (error) {
+                    console.error("Error loading global settings:", error);
+                    DOMElements.globalSettingsStatus.textContent = `Gagal memuat pengaturan global: ${error.message}`;
+                }
+            }
+
+            DOMElements.globalSettingsForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                DOMElements.saveGlobalSettingsBtn.disabled = true;
+                DOMElements.saveGlobalSettingsBtn.textContent = 'Menyimpan...';
+                DOMElements.globalSettingsStatus.textContent = 'Menyimpan pengaturan...';
+
+                const settings = {
+                    zoomLink: DOMElements.globalZoomLink.value,
+                    technicalDocLink: DOMElements.globalTechnicalDocLink.value
+                };
+
+                try {
+                    await database.ref('settings/globalInterviewDetails').set(settings);
+                    DOMElements.globalSettingsStatus.textContent = 'Pengaturan global berhasil disimpan!';
+                } catch (error) {
+                    console.error("Error saving global settings:", error);
+                    DOMElements.globalSettingsStatus.textContent = `Gagal menyimpan pengaturan global: ${error.message}`;
+                } finally {
+                    DOMElements.saveGlobalSettingsBtn.disabled = false;
+                    DOMElements.saveGlobalSettingsBtn.textContent = 'Simpan Pengaturan Global';
+                }
+            });
+
 
             // --- Authentication State Listener ---
             auth.onAuthStateChanged(user => {
@@ -824,6 +864,7 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                     DOMElements.importSection.classList.remove('hidden');
                     DOMElements.manageSection.classList.remove('hidden');
                     loadApplicantsData(); 
+                    loadGlobalSettings(); // Load global settings when admin logs in
                     console.log("Admin logged in:", user.email);
                 } else {
                     DOMElements.authSection.classList.remove('hidden');
@@ -946,7 +987,6 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                             timestamp: firebase.database.ServerValue.TIMESTAMP 
                         };
 
-                        // Tambahkan interviewDetails jika ada
                         if (applicant.interviewDetails && Object.keys(applicant.interviewDetails).length > 0) {
                             dataToSave.interviewDetails = applicant.interviewDetails;
                         }
@@ -1035,20 +1075,20 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                         }
 
                         try {
-                            // Buat objek update, termasuk interviewDetails
                             const updateData = {
                                 name: applicant.name,
                                 nrp: applicant.nrp,
                                 keterangan: applicant.keterangan,
                                 password: applicant.password,
-                                code: applicant.code || 'N/A' // Pastikan code tetap ada jika tidak dihapus dari DB
+                                code: applicant.code || 'N/A' 
                             };
 
-                            // Tambahkan interviewDetails jika ada dan tidak kosong
-                            if (applicant.interviewDetails && Object.values(applicant.interviewDetails).some(val => val !== '')) {
-                                updateData.interviewDetails = applicant.interviewDetails;
+                            if (applicant.interviewDetails && (applicant.interviewDetails.time || applicant.interviewDetails.breakoutRoom)) {
+                                updateData.interviewDetails = {
+                                    time: applicant.interviewDetails.time || '',
+                                    breakoutRoom: applicant.interviewDetails.breakoutRoom || ''
+                                };
                             } else {
-                                // Jika semua detail interview kosong, hapus field interviewDetails dari DB
                                 updateData.interviewDetails = null; 
                             }
 
@@ -1125,11 +1165,8 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                 };
 
                 if (DOMElements.newInterviewTime.value) newCandidate.interviewDetails.time = DOMElements.newInterviewTime.value;
-                if (DOMElements.newZoomLink.value) newCandidate.interviewDetails.zoomLink = DOMElements.newZoomLink.value;
                 if (DOMElements.newBreakoutRoom.value) newCandidate.interviewDetails.breakoutRoom = DOMElements.newBreakoutRoom.value;
-                if (DOMElements.newTechnicalDocLink.value) newCandidate.interviewDetails.technicalDocLink = DOMElements.newTechnicalDocLink.value;
 
-                // Hapus interviewDetails jika semua propertinya kosong
                 if (Object.values(newCandidate.interviewDetails).every(val => val === '')) {
                     delete newCandidate.interviewDetails;
                 }
@@ -1163,16 +1200,13 @@ Joko Susilo,1122334455,Lolos,passjoko,Selasa, 11 Jan 2025, 13:00 WIB,https://zoo
                     nrp: DOMElements.editNrp.value,
                     keterangan: DOMElements.editStatus.value, 
                     password: DOMElements.editPassword.value,
-                    code: 'N/A', // Tetap 'N/A'
+                    code: 'N/A', 
                     interviewDetails: {}
                 };
 
                 if (DOMElements.editInterviewTime.value) updatedCandidate.interviewDetails.time = DOMElements.editInterviewTime.value;
-                if (DOMElements.editZoomLink.value) updatedCandidate.interviewDetails.zoomLink = DOMElements.editZoomLink.value;
                 if (DOMElements.editBreakoutRoom.value) updatedCandidate.interviewDetails.breakoutRoom = DOMElements.editBreakoutRoom.value;
-                if (DOMElements.editTechnicalDocLink.value) updatedCandidate.interviewDetails.technicalDocLink = DOMElements.editTechnicalDocLink.value;
 
-                // Hapus interviewDetails jika semua propertinya kosong
                 if (Object.values(updatedCandidate.interviewDetails).every(val => val === '')) {
                     delete updatedCandidate.interviewDetails;
                 }
