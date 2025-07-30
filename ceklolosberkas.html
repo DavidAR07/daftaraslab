@@ -43,6 +43,16 @@
             cursor: not-allowed;
         }
 
+        /* Animasi untuk tombol saat diklik */
+        .btn-primary.animate-bounce-click {
+            animation: bounceClick 0.3s ease-in-out;
+        }
+        @keyframes bounceClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
         /* Gaya untuk Modal Pop-up */
         .modal-overlay {
             position: fixed;
@@ -55,7 +65,6 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            /* Awalnya tersembunyi dengan opacity dan visibility */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -68,18 +77,19 @@
 
         .modal-content {
             background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
+            border-radius: 0.75rem; /* Sedikit lebih bulat */
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3); /* Shadow lebih kuat */
+            max-width: 550px; /* Sedikit lebih lebar */
             width: 90%;
-            /* Efek slide-up */
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-            overflow: hidden; /* Pastikan konten tidak keluar dari border-radius */
+            transform: scale(0.8); /* Mulai dari skala kecil */
+            opacity: 0; /* Mulai dari transparan */
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease; /* Animasi bounce */
+            overflow: hidden;
         }
 
         .modal-overlay.show .modal-content {
-            transform: translateY(0);
+            transform: scale(1);
+            opacity: 1;
         }
 
         /* Gaya untuk status card di dalam modal */
@@ -87,13 +97,51 @@
             border-left-width: 6px;
             border-radius: 0.5rem;
             padding: 1.5rem;
-            margin-top: 0; /* Hapus margin-top karena sudah di dalam modal */
-            box-shadow: none; /* Hapus shadow karena sudah ada di modal-content */
+            margin-top: 0;
+            box-shadow: none;
+            text-align: center; /* Pusatkan teks */
         }
         .status-lulus { border-color: #22c55e; background-color: #ecfdf5; color: #16a34a; }
         .status-tidak-lulus { border-color: #ef4444; background-color: #fef2f2; color: #dc2626; }
         .status-menunggu { border-color: #f59e0b; background-color: #fffbeb; color: #d97706; }
         .status-not-found { border-color: #6b7280; background-color: #f3f4f6; color: #4b5563; }
+
+        /* Gaya untuk ikon status */
+        .status-icon {
+            width: 64px; /* Ukuran ikon lebih besar */
+            height: 64px;
+            margin: 0 auto 1.5rem auto; /* Pusatkan dan beri margin bawah */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem; /* Ukuran font ikon */
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Animasi pop-in untuk ikon */
+        }
+        .status-lulus .status-icon { background-color: #22c55e; }
+        .status-tidak-lulus .status-icon { background-color: #ef4444; }
+        .status-menunggu .status-icon { background-color: #f59e0b; }
+        .status-not-found .status-icon { background-color: #6b7280; }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        .status-card-modal h4 {
+            font-size: 1.875rem; /* Ukuran judul lebih besar */
+            font-weight: 700; /* Lebih tebal */
+            margin-bottom: 1rem;
+        }
+        .status-card-modal p {
+            font-size: 1.125rem; /* Ukuran paragraf sedikit lebih besar */
+            line-height: 1.6;
+        }
+        .status-card-modal strong {
+            font-weight: 700; /* Pastikan bold benar-benar tebal */
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -152,7 +200,6 @@
                     </div>
                 </form>
 
-                <!-- Div ini tidak lagi digunakan untuk menampilkan hasil, tapi tetap ada untuk referensi -->
                 <div id="statusResult" class="mt-8 hidden"></div>
             </div>
         </div>
@@ -165,7 +212,6 @@
     </footer>
 
     <!-- Modal Pop-up untuk Hasil Status -->
-    <!-- Hapus class 'hidden' dari sini, biarkan CSS opacity/visibility yang mengontrol -->
     <div id="statusModalOverlay" class="modal-overlay"> 
         <div id="statusModalContent" class="modal-content">
             <!-- Konten status akan dimuat di sini oleh JavaScript -->
@@ -173,8 +219,8 @@
                 <div id="modalStatusCard" class="status-card-modal">
                     <!-- Isi status akan masuk di sini -->
                 </div>
-                <div class="mt-6 text-right">
-                    <button id="closeStatusModalBtn" class="btn-primary px-6 py-2 rounded-md font-medium">Tutup</button>
+                <div class="mt-6 text-center"> <!-- Pusatkan tombol -->
+                    <button id="closeStatusModalBtn" class="btn-primary px-8 py-3 rounded-lg font-semibold text-lg">Tutup</button>
                 </div>
             </div>
         </div>
@@ -204,11 +250,10 @@
                 passwordInput: document.getElementById('passwordCheck'),
                 togglePasswordBtn: document.getElementById('togglePasswordCheck'),
                 checkStatusBtn: document.getElementById('checkStatusBtn'),
-                statusResultDiv: document.getElementById('statusResult'), // Ini div lama, akan disembunyikan
+                statusResultDiv: document.getElementById('statusResult'), 
                 nrpError: document.getElementById('nrpCheckError'),
                 passwordError: document.getElementById('passwordCheckError'),
 
-                // Elemen Modal Baru
                 statusModalOverlay: document.getElementById('statusModalOverlay'),
                 statusModalContent: document.getElementById('statusModalContent'),
                 modalStatusCard: document.getElementById('modalStatusCard'),
@@ -234,16 +279,20 @@
                 let content = '';
                 let className = '';
                 let title = '';
-                // Menggunakan <strong> untuk bold yang benar
+                let iconSvg = '';
                 const applicantName = `<strong>${data.name || 'pendaftar'}</strong>`; 
 
-                // Reset class pada modalStatusCard
                 DOMElements.modalStatusCard.className = 'status-card-modal'; 
 
                 switch (status) {
                     case 'Lolos':
                         title = 'Selamat, Anda Lolos Tahap Administrasi!';
                         className = 'status-lulus';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
                         content = `
                             <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base font-semibold mb-2">Selanjutnya, Anda diundang untuk mengikuti tahap interview:</p>
@@ -264,6 +313,11 @@
                     case 'Tidak Lolos':
                         title = 'Mohon Maaf';
                         className = 'status-tidak-lulus';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
                         content = `
                             <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan minat Anda untuk mendaftar. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
@@ -272,6 +326,11 @@
                     case 'Menunggu':
                         title = 'Status Pendaftaran';
                         className = 'status-menunggu';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
                         content = `
                             <p class="text-base mb-4">Halo ${applicantName}, status pendaftaran Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
                             <p class="text-base mb-4">Mohon bersabar, informasi lebih lanjut akan segera diumumkan.</p>
@@ -281,6 +340,11 @@
                     default:
                         title = 'Data Tidak Ditemukan';
                         className = 'status-not-found';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
                         content = `
                             <p class="text-base mb-4">NRP atau Password yang Anda masukkan salah, atau data pendaftaran tidak ditemukan.</p>
                             <p class="text-base mb-4">Mohon periksa kembali NRP dan Password Anda, atau pastikan Anda sudah mendaftar.</p>
@@ -290,12 +354,15 @@
 
                 DOMElements.modalStatusCard.classList.add(className);
                 DOMElements.modalStatusCard.innerHTML = `
+                    <div class="status-icon">${iconSvg}</div>
                     <h4 class="text-xl font-bold mb-2">${title}</h4>
                     ${content}
                 `;
                 
-                // Tampilkan modal
-                DOMElements.statusModalOverlay.classList.add('show');
+                // Tampilkan modal setelah sedikit delay untuk efek transisi
+                setTimeout(() => {
+                    DOMElements.statusModalOverlay.classList.add('show');
+                }, 100); // Delay 100ms
             }
 
             DOMElements.togglePasswordBtn.addEventListener('click', function() {
@@ -342,21 +409,20 @@
                     return;
                 }
 
+                // Tambahkan animasi bounce pada tombol
+                DOMElements.checkStatusBtn.classList.add('animate-bounce-click');
                 DOMElements.checkStatusBtn.disabled = true;
                 DOMElements.checkStatusBtn.textContent = 'Mengecek...';
-                DOMElements.checkStatusBtn.classList.add('animate-pulse');
                 
                 try {
                     const applicantsRef = database.ref('applicants');
                     
-                    // Mencari data berdasarkan NRP
                     const snapshot = await applicantsRef.orderByChild('nrp').equalTo(nrp).once('value');
 
                     if (snapshot.exists()) {
                         let found = false;
                         snapshot.forEach(childSnapshot => {
                             const applicantData = childSnapshot.val();
-                            // Membandingkan password
                             if (applicantData.password === password) {
                                 found = true;
                                 const status = applicantData.keterangan || 'Menunggu'; 
@@ -377,16 +443,14 @@
                 } finally {
                     DOMElements.checkStatusBtn.disabled = false;
                     DOMElements.checkStatusBtn.textContent = 'Cek Status';
-                    DOMElements.checkStatusBtn.classList.remove('animate-pulse');
+                    DOMElements.checkStatusBtn.classList.remove('animate-bounce-click'); // Hapus animasi setelah selesai
                 }
             });
 
-            // Event listener untuk tombol tutup modal
             DOMElements.closeStatusModalBtn.addEventListener('click', () => {
                 DOMElements.statusModalOverlay.classList.remove('show');
             });
 
-            // Opsional: Tutup modal jika klik di luar konten modal
             DOMElements.statusModalOverlay.addEventListener('click', (e) => {
                 if (e.target === DOMElements.statusModalOverlay) {
                     DOMElements.statusModalOverlay.classList.remove('show');
