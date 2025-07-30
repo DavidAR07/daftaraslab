@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cek Kelulusan Asisten Fisika Laboratorium 1</title>
     <!-- Firebase SDKs -->
-    <!-- Menggunakan Firebase SDK v8.10.1 untuk konsistensi dengan admin.html dan Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script> <!-- Tambahkan Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -44,12 +43,50 @@
             cursor: not-allowed;
         }
 
-        .status-card {
+        /* Gaya untuk Modal Pop-up */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            overflow: hidden; /* Pastikan konten tidak keluar dari border-radius */
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Gaya untuk status card di dalam modal */
+        .status-card-modal {
             border-left-width: 6px;
             border-radius: 0.5rem;
             padding: 1.5rem;
-            margin-top: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 0; /* Hapus margin-top karena sudah di dalam modal */
+            box-shadow: none; /* Hapus shadow karena sudah ada di modal-content */
         }
         .status-lulus { border-color: #22c55e; background-color: #ecfdf5; color: #16a34a; }
         .status-tidak-lulus { border-color: #ef4444; background-color: #fef2f2; color: #dc2626; }
@@ -113,9 +150,8 @@
                     </div>
                 </form>
 
-                <div id="statusResult" class="mt-8 hidden">
-                    <!-- Status and details will be displayed here -->
-                </div>
+                <!-- Div ini tidak lagi digunakan untuk menampilkan hasil, tapi tetap ada untuk referensi -->
+                <div id="statusResult" class="mt-8 hidden"></div>
             </div>
         </div>
     </main>
@@ -125,6 +161,21 @@
             <p>&copy; 2025 Fisika Laboratorium 1 - Departemen Fisika ITS</p>
         </div>
     </footer>
+
+    <!-- Modal Pop-up untuk Hasil Status -->
+    <div id="statusModalOverlay" class="modal-overlay hidden">
+        <div id="statusModalContent" class="modal-content">
+            <!-- Konten status akan dimuat di sini oleh JavaScript -->
+            <div class="p-6">
+                <div id="modalStatusCard" class="status-card-modal">
+                    <!-- Isi status akan masuk di sini -->
+                </div>
+                <div class="mt-6 text-right">
+                    <button id="closeStatusModalBtn" class="btn-primary px-6 py-2 rounded-md font-medium">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Firebase Configuration
@@ -150,9 +201,15 @@
                 passwordInput: document.getElementById('passwordCheck'),
                 togglePasswordBtn: document.getElementById('togglePasswordCheck'),
                 checkStatusBtn: document.getElementById('checkStatusBtn'),
-                statusResultDiv: document.getElementById('statusResult'),
+                statusResultDiv: document.getElementById('statusResult'), // Ini div lama, akan disembunyikan
                 nrpError: document.getElementById('nrpCheckError'),
-                passwordError: document.getElementById('passwordCheckError')
+                passwordError: document.getElementById('passwordCheckError'),
+
+                // Elemen Modal Baru
+                statusModalOverlay: document.getElementById('statusModalOverlay'),
+                statusModalContent: document.getElementById('statusModalContent'),
+                modalStatusCard: document.getElementById('modalStatusCard'),
+                closeStatusModalBtn: document.getElementById('closeStatusModalBtn')
             };
 
             function showError(inputElement, errorElement) {
@@ -161,7 +218,7 @@
             }
 
             function hideError(inputElement, errorElement) {
-                inputElement.classList.remove('border-red-500'); // Hapus border merah saat error disembunyikan
+                inputElement.classList.remove('border-red-500'); 
                 errorElement.classList.add('hidden');
             }
 
@@ -174,22 +231,23 @@
                 let content = '';
                 let className = '';
                 let title = '';
-                const applicantName = data.name || 'pendaftar'; // Menggunakan field 'name'
+                // Menggunakan <strong> untuk bold yang benar
+                const applicantName = `<strong>${data.name || 'pendaftar'}</strong>`; 
 
-                DOMElements.statusResultDiv.classList.remove('hidden');
-                DOMElements.statusResultDiv.className = 'mt-8 status-card'; // Reset class
+                // Reset class pada modalStatusCard
+                DOMElements.modalStatusCard.className = 'status-card-modal'; 
 
                 switch (status) {
-                    case 'Lolos': // Menggunakan 'Lolos' sesuai data di Realtime DB
+                    case 'Lolos':
                         title = 'Selamat, Anda Lolos Tahap Administrasi!';
                         className = 'status-lulus';
                         content = `
-                            <p class="text-base mb-4">Halo **${applicantName}**, Anda dinyatakan **Lolos** tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
+                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base font-semibold mb-2">Selanjutnya, Anda diundang untuk mengikuti tahap interview:</p>
                             <ul class="list-disc list-inside ml-4 mb-4 text-gray-700">
-                                <li>**Waktu:** Akan diinformasikan</li>
-                                <li>**Link Zoom:** Link belum tersedia</li>
-                                <li>**Breakout Room:** Akan diinformasikan</li>
+                                <li><strong>Waktu:</strong> Akan diinformasikan</li>
+                                <li><strong>Link Zoom:</strong> <a href="#" target="_blank" class="text-blue-600 hover:underline">Link belum tersedia</a></li>
+                                <li><strong>Breakout Room:</strong> Akan diinformasikan</li>
                             </ul>
                             <p class="text-base mb-4">Mohon persiapkan diri Anda dengan baik. Untuk panduan teknis interview, silakan unduh dokumen berikut:</p>
                             <a href="#" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center">
@@ -199,27 +257,23 @@
                                 Unduh Dokumen Teknis Interview
                             </a>
                         `;
-                        // Anda bisa menambahkan data interviewDetails jika ada di Realtime DB
-                        // data.interviewDetails?.time || 'Akan diinformasikan'
-                        // data.interviewDetails?.zoomLink || '#'
-                        // data.interviewDetails?.technicalDocLink || '#'
                         break;
-                    case 'Tidak Lolos': // Menggunakan 'Tidak Lolos' sesuai data di Realtime DB
+                    case 'Tidak Lolos':
                         title = 'Mohon Maaf';
                         className = 'status-tidak-lulus';
                         content = `
-                            <p class="text-base mb-4">Halo **${applicantName}**, Anda dinyatakan **TIDAK LOLOS** sebagai Asisten Fisika Laboratorium 1.</p>
+                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan minat Anda untuk mendaftar. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
-                            <button onclick="window.location.href='/'" class="btn-primary px-4 py-2 rounded-md font-medium">Kembali ke Menu Utama</button>
+                            <!-- Tombol ini akan diganti dengan tombol tutup modal -->
                         `;
                         break;
-                    case 'Menunggu': // Status default jika 'keterangan' tidak ada atau tidak dikenali
+                    case 'Menunggu':
                         title = 'Status Pendaftaran';
                         className = 'status-menunggu';
                         content = `
-                            <p class="text-base mb-4">Halo **${applicantName}**, status pendaftaran Anda saat ini adalah **MENUNGGU** pengumuman.</p>
+                            <p class="text-base mb-4">Halo ${applicantName}, status pendaftaran Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
                             <p class="text-base mb-4">Mohon bersabar, informasi lebih lanjut akan segera diumumkan.</p>
-                            <button onclick="window.location.href='/'" class="btn-primary px-4 py-2 rounded-md font-medium">Kembali ke Menu Utama</button>
+                            <!-- Tombol ini akan diganti dengan tombol tutup modal -->
                         `;
                         break;
                     case 'Tidak Ditemukan':
@@ -229,16 +283,19 @@
                         content = `
                             <p class="text-base mb-4">NRP atau Password yang Anda masukkan salah, atau data pendaftaran tidak ditemukan.</p>
                             <p class="text-base mb-4">Mohon periksa kembali NRP dan Password Anda, atau pastikan Anda sudah mendaftar.</p>
-                            <button onclick="window.location.href='/'" class="btn-primary px-4 py-2 rounded-md font-medium">Kembali ke Menu Utama</button>
+                            <!-- Tombol ini akan diganti dengan tombol tutup modal -->
                         `;
                         break;
                 }
 
-                DOMElements.statusResultDiv.classList.add(className);
-                DOMElements.statusResultDiv.innerHTML = `
+                DOMElements.modalStatusCard.classList.add(className);
+                DOMElements.modalStatusCard.innerHTML = `
                     <h4 class="text-xl font-bold mb-2">${title}</h4>
                     ${content}
                 `;
+                
+                // Tampilkan modal
+                DOMElements.statusModalOverlay.classList.add('show');
             }
 
             DOMElements.togglePasswordBtn.addEventListener('click', function() {
@@ -288,10 +345,9 @@
                 DOMElements.checkStatusBtn.disabled = true;
                 DOMElements.checkStatusBtn.textContent = 'Mengecek...';
                 DOMElements.checkStatusBtn.classList.add('animate-pulse');
-                DOMElements.statusResultDiv.classList.add('hidden');
+                // DOMElements.statusResultDiv.classList.add('hidden'); // Tidak perlu lagi menyembunyikan ini
 
                 try {
-                    // Menggunakan Realtime Database
                     const applicantsRef = database.ref('applicants');
                     
                     // Mencari data berdasarkan NRP
@@ -304,27 +360,38 @@
                             // Membandingkan password
                             if (applicantData.password === password) {
                                 found = true;
-                                // Menggunakan field 'keterangan' untuk status kelulusan
                                 const status = applicantData.keterangan || 'Menunggu'; 
                                 displayStatus(status, applicantData);
                             }
                         });
 
                         if (!found) {
-                            displayStatus('Tidak Ditemukan'); // NRP ditemukan tapi password salah
+                            displayStatus('Tidak Ditemukan'); 
                         }
                     } else {
-                        displayStatus('Tidak Ditemukan'); // NRP tidak ditemukan
+                        displayStatus('Tidak Ditemukan'); 
                     }
 
                 } catch (error) {
                     console.error("Error checking status:", error);
                     displayStatus('Terjadi Kesalahan');
-                    alert("Terjadi kesalahan saat memeriksa status. Silakan coba lagi nanti.");
+                    // alert("Terjadi kesalahan saat memeriksa status. Silakan coba lagi nanti."); // Ganti dengan modal error jika perlu
                 } finally {
                     DOMElements.checkStatusBtn.disabled = false;
                     DOMElements.checkStatusBtn.textContent = 'Cek Status';
                     DOMElements.checkStatusBtn.classList.remove('animate-pulse');
+                }
+            });
+
+            // Event listener untuk tombol tutup modal
+            DOMElements.closeStatusModalBtn.addEventListener('click', () => {
+                DOMElements.statusModalOverlay.classList.remove('show');
+            });
+
+            // Opsional: Tutup modal jika klik di luar konten modal
+            DOMElements.statusModalOverlay.addEventListener('click', (e) => {
+                if (e.target === DOMElements.statusModalOverlay) {
+                    DOMElements.statusModalOverlay.classList.remove('show');
                 }
             });
         });
