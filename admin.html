@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Impor Kelulusan</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .bg-theme-red { background-color: #c41e3a; }
+        .bg-theme-black { background-color: #1a1a1a; }
+        .text-theme-red { color: #c41e3a; }
+        .border-theme-red { border-color: #c41e3a; }
+        
+        .form-input:focus {
+            border-color: #c41e3a;
+            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.2);
+        }
+        
+        .btn-primary {
+            background-color: #c41e3a;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #a01a30;
+        }
+        
+        .btn-primary:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .file-input-label {
+            background-color: #f0f0f0;
+            border: 1px dashed #ccc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-input-label:hover {
+            border-color: #c41e3a;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="bg-theme-black text-white py-6 shadow-md">
+        <div class="container mx-auto px-4 md:px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="w-12 h-12 rounded-full bg-theme-red flex items-center justify-center mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold">Fisika Laboratorium 1</h1>
+                        <p class="text-sm text-gray-300">Departemen Fisika ITS</p>
+                    </div>
+                </div>
+                <div class="bg-theme-red px-4 py-2 rounded-md shadow-lg">
+                    <h2 class="text-lg font-semibold">Admin Panel</h2>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 md:px-6 py-8">
+        <div id="authSection" class="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden p-6">
+            <h3 class="text-xl font-semibold mb-4 text-theme-red">Login Admin</h3>
+            <div class="mb-4">
+                <label for="adminEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Admin</label>
+                <input type="email" id="adminEmail" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
+            </div>
+            <div class="mb-6">
+                <label for="adminPasswordLogin" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="adminPasswordLogin" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
+                <p id="loginError" class="mt-1 text-sm text-red-600 hidden">Email atau password salah.</p>
+            </div>
+            <button type="button" id="loginBtn" class="btn-primary w-full px-6 py-2 rounded-md font-medium">Login</button>
+        </div>
+
+        <div id="importSection" class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden hidden">
+            <div class="bg-theme-red text-white p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold">Impor Data Kelulusan Asisten</h2>
+                <button id="logoutBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Logout</button>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-6">
+                    <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Pilih File CSV <span class="text-theme-red">*</span></label>
+                    <label for="csvFile" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a3 3 0 013 3v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                        </svg>
+                        <span id="fileName">Seret & Lepas file CSV di sini atau Klik untuk memilih</span>
+                        <input type="file" id="csvFile" accept=".csv" class="hidden">
+                    </label>
+                    <p id="fileError" class="mt-1 text-sm text-red-600 hidden">Pilih file CSV yang valid.</p>
+                </div>
+                
+                <div class="mt-6 flex justify-end">
+                    <button type="button" id="uploadBtn" class="btn-primary px-6 py-2 rounded-md font-medium" disabled>Unggah & Proses</button>
+                </div>
+
+                <div id="uploadResult" class="mt-8 hidden">
+                    <!-- Upload results will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="bg-theme-black text-white py-4 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>&copy; 2025 Fisika Laboratorium 1 - Departemen Fisika ITS</p>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase Configuration - REPLACE WITH YOUR OWN FIREBASE PROJECT CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "YOUR_AUTH_DOMAIN", 
+            projectId: "YOUR_PROJECT_ID", 
+            storageBucket: "YOUR_STORAGE_BUCKET", 
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID", 
+            appId: "YOUR_APP_ID", 
+            measurementId: "YOUR_MEASUREMENT_ID" 
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const storage = firebase.storage();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const DOMElements = {
+                authSection: document.getElementById('authSection'),
+                importSection: document.getElementById('importSection'),
+                adminEmailInput: document.getElementById('adminEmail'),
+                adminPasswordLoginInput: document.getElementById('adminPasswordLogin'),
+                loginBtn: document.getElementById('loginBtn'),
+                loginError: document.getElementById('loginError'),
+                logoutBtn: document.getElementById('logoutBtn'),
+
+                csvFileInput: document.getElementById('csvFile'),
+                fileNameDisplay: document.getElementById('fileName'),
+                fileError: document.getElementById('fileError'),
+                uploadBtn: document.getElementById('uploadBtn'),
+                uploadResultDiv: document.getElementById('uploadResult')
+            };
+
+            let selectedFile = null;
+
+            function showError(element, message) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            }
+
+            function hideError(element) {
+                element.classList.add('hidden');
+            }
+
+            function updateUploadButtonState() {
+                DOMElements.uploadBtn.disabled = !selectedFile;
+            }
+
+            function displayUploadResult(type, message) {
+                let className = '';
+                let title = '';
+                switch (type) {
+                    case 'success':
+                        className = 'border-green-500 bg-green-50 text-green-800';
+                        title = 'Unggah Berhasil!';
+                        break;
+                    case 'error':
+                        className = 'border-red-500 bg-red-50 text-red-800';
+                        title = 'Unggah Gagal!';
+                        break;
+                    case 'warning':
+                        className = 'border-yellow-500 bg-yellow-50 text-yellow-800';
+                        title = 'Peringatan Unggah';
+                        break;
+                }
+                DOMElements.uploadResultDiv.className = `mt-8 p-4 rounded-md border-l-4 ${className}`;
+                DOMElements.uploadResultDiv.innerHTML = `<h4 class="font-bold">${title}</h4><p>${message}</p>`;
+                DOMElements.uploadResultDiv.classList.remove('hidden');
+            }
+
+            function resetUploadButton() {
+                DOMElements.uploadBtn.disabled = false;
+                DOMElements.uploadBtn.textContent = 'Unggah & Proses';
+                DOMElements.uploadBtn.classList.remove('animate-pulse');
+            }
+
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    DOMElements.authSection.classList.add('hidden');
+                    DOMElements.importSection.classList.remove('hidden');
+                    DOMElements.importSection.classList.add('active');
+                    console.log("Admin logged in:", user.email);
+                } else {
+                    DOMElements.authSection.classList.remove('hidden');
+                    DOMElements.importSection.classList.add('hidden');
+                    DOMElements.importSection.classList.remove('active');
+                    console.log("Admin logged out.");
+                }
+            });
+
+            DOMElements.loginBtn.addEventListener('click', async () => {
+                const email = DOMElements.adminEmailInput.value;
+                const password = DOMElements.adminPasswordLoginInput.value;
+
+                if (!email || !password) {
+                    showError(DOMElements.loginError, 'Email dan password harus diisi.');
+                    return;
+                }
+
+                DOMElements.loginBtn.disabled = true;
+                DOMElements.loginBtn.textContent = 'Logging in...';
+                hideError(DOMElements.loginError);
+
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                } catch (error) {
+                    console.error("Login error:", error);
+                    showError(DOMElements.loginError, 'Email atau password salah.');
+                } finally {
+                    DOMElements.loginBtn.disabled = false;
+                    DOMElements.loginBtn.textContent = 'Login';
+                }
+            });
+
+            DOMElements.logoutBtn.addEventListener('click', async () => {
+                try {
+                    await auth.signOut();
+                } catch (error) {
+                    console.error("Logout error:", error);
+                    alert("Gagal logout. Silakan coba lagi.");
+                }
+            });
+
+            DOMElements.csvFileInput.addEventListener('change', function(event) {
+                selectedFile = event.target.files[0];
+                if (selectedFile) {
+                    if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv')) {
+                        DOMElements.fileNameDisplay.textContent = selectedFile.name;
+                        hideError(DOMElements.fileError);
+                    } else {
+                        showError(DOMElements.fileError, 'Hanya file CSV yang diizinkan.');
+                        selectedFile = null;
+                        DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                    }
+                } else {
+                    DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                    hideError(DOMElements.fileError);
+                }
+                updateUploadButtonState();
+            });
+
+            DOMElements.uploadBtn.addEventListener('click', async function() {
+                if (!selectedFile) {
+                    showError(DOMElements.fileError, 'Pilih file CSV terlebih dahulu.');
+                    return;
+                }
+
+                DOMElements.uploadBtn.disabled = true;
+                DOMElements.uploadBtn.textContent = 'Mengunggah...';
+                DOMElements.uploadBtn.classList.add('animate-pulse');
+                DOMElements.uploadResultDiv.classList.add('hidden');
+                DOMElements.uploadResultDiv.innerHTML = '';
+
+                const storageRef = storage.ref();
+                const fileRef = storageRef.child(`admin-imports/${Date.now()}_${selectedFile.name}`);
+
+                try {
+                    const snapshot = await fileRef.put(selectedFile);
+                    console.log('File berhasil diunggah:', snapshot.metadata.fullPath);
+                    displayUploadResult('success', `File "${selectedFile.name}" berhasil diunggah. Cloud Function akan memprosesnya.`);
+                    selectedFile = null;
+                    DOMElements.csvFileInput.value = '';
+                    DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
+                } catch (error) {
+                    console.error("Error uploading file:", error);
+                    displayUploadResult('error', `Gagal mengunggah file: ${error.message}`);
+                } finally {
+                    resetUploadButton();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
