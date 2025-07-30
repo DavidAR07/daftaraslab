@@ -170,12 +170,13 @@
                         <li>`Nama`: Nama lengkap pendaftar.</li>
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
                         <li>`Keterangan`: Status kelulusan (`Lolos` atau `Tidak Lolos`).</li>
+                        <li>`Password`: Kata sandi untuk login pendaftar.</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan
-Budi Santoso,1234567890,Lolos
-Siti Aminah,0987654321,Tidak Lolos
-Joko Susilo,1122334455,Lolos</code></pre>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan,Password
+Budi Santoso,1234567890,Lolos,passbudi
+Siti Aminah,0987654321,Tidak Lolos,passsiti
+Joko Susilo,1122334455,Lolos,passjoko</code></pre>
                 </div>
 
                 <div class="mb-6">
@@ -199,6 +200,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                                     <th>Nama</th>
                                     <th>NRP</th>
                                     <th>Keterangan</th>
+                                    <th>Password</th>
                                 </tr>
                             </thead>
                             <tbody id="csvPreviewBody">
@@ -247,11 +249,6 @@ Joko Susilo,1122334455,Lolos</code></pre>
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
                             <div>
-                                <label for="newCode" class="block text-sm font-medium text-gray-700 mb-1">Kode <span class="text-theme-red">*</span></label>
-                                <input type="text" id="newCode" name="newCode" required
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
                                 <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-theme-red">*</span></label>
                                 <select id="newStatus" name="newStatus" required
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
@@ -259,6 +256,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                                     <option value="Tidak Lolos">Tidak Lolos</option>
                                 </select>
                             </div>
+                            <!-- Kolom Kode dihapus dari form tambah -->
                         </div>
                         <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
                             Tambah Kandidat
@@ -279,7 +277,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                                 <th>NRP</th>
                                 <th>Keterangan</th>
                                 <th>Password</th>
-                                <th>Kode</th>
+                                <!-- Kolom Kode dihapus dari tabel -->
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -332,11 +330,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                         <input type="text" id="editPassword" name="editPassword" required
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
-                    <div>
-                        <label for="editCode" class="block text-sm font-medium text-gray-700 mb-1">Kode <span class="text-theme-red">*</span></label>
-                        <input type="text" id="editCode" name="editCode" required
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
+                    <!-- Kolom Kode dihapus dari form edit -->
                     
                     <div class="flex space-x-3">
                         <button type="submit" 
@@ -425,8 +419,8 @@ Joko Susilo,1122334455,Lolos</code></pre>
                 newNrp: document.getElementById('newNrp'),
                 newPassword: document.getElementById('newPassword'),
                 newName: document.getElementById('newName'),
-                newCode: document.getElementById('newCode'),
-                newStatus: document.getElementById('newStatus'),
+                // newCode: document.getElementById('newCode'), // Dihapus
+                newStatus: document.getElementById('newStatus'), // Ini akan menjadi 'keterangan'
 
                 editCandidateModal: document.getElementById('editCandidateModal'),
                 editCandidateForm: document.getElementById('editCandidateForm'),
@@ -434,8 +428,8 @@ Joko Susilo,1122334455,Lolos</code></pre>
                 editNrp: document.getElementById('editNrp'),
                 editPassword: document.getElementById('editPassword'),
                 editName: document.getElementById('editName'),
-                editCode: document.getElementById('editCode'),
-                editStatus: document.getElementById('editStatus'),
+                // editCode: document.getElementById('editCode'), // Dihapus
+                editStatus: document.getElementById('editStatus'), // Ini akan menjadi 'keterangan'
                 cancelEdit: document.getElementById('cancelEdit'),
 
                 hayooModal: document.getElementById('hayooModal'),
@@ -460,12 +454,13 @@ Joko Susilo,1122334455,Lolos</code></pre>
             }
 
             function validateNRP(nrp) {
+                // Memastikan NRP adalah 10 digit angka
                 return /^[0-9]{10}$/.test(nrp);
             }
 
             function validateKeterangan(keterangan) {
-                const validKeterangan = ['Lolos', 'Tidak Lolos'];
-                return validKeterangan.includes(keterangan);
+                // Memastikan keterangan adalah 'Lolos' atau 'Tidak Lolos' (case-sensitive)
+                return keterangan === 'Lolos' || keterangan === 'Tidak Lolos';
             }
 
             function displayUploadResult(type, message) {
@@ -496,7 +491,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                 DOMElements.confirmImportButton.classList.add('hidden');
             }
 
-            // Fungsi parsing CSV yang disesuaikan untuk Nama,NRP,Keterangan
+            // Fungsi parsing CSV yang disesuaikan untuk Nama,NRP,Keterangan,Password
             function parseCSV(text) {
                 function isBinaryContent(content) {
                     const nonPrintableChars = content.split('').filter(char => {
@@ -538,7 +533,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                 // Asumsi baris pertama adalah header, kita akan mengabaikannya
                 if (lines.length > 0) {
                     const headers = lines[0].split(separator).map(h => h.trim());
-                    const expectedHeaders = ['Nama', 'NRP', 'Keterangan'];
+                    const expectedHeaders = ['Nama', 'NRP', 'Keterangan', 'Password'];
                     
                     // Cek apakah semua header yang diharapkan ada (case-insensitive)
                     const hasAllExpectedHeaders = expectedHeaders.every(expectedH => 
@@ -546,7 +541,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                     );
 
                     if (!hasAllExpectedHeaders) {
-                        alert('Header CSV tidak valid. Harap gunakan: Nama,NRP,Keterangan (urutan tidak masalah).');
+                        alert('Header CSV tidak valid. Harap gunakan: Nama,NRP,Keterangan,Password (urutan tidak masalah).');
                         return [];
                     }
 
@@ -554,6 +549,8 @@ Joko Susilo,1122334455,Lolos</code></pre>
                     const namaIndex = headers.findIndex(h => h.toLowerCase() === 'nama');
                     const nrpIndex = headers.findIndex(h => h.toLowerCase() === 'nrp');
                     const keteranganIndex = headers.findIndex(h => h.toLowerCase() === 'keterangan');
+                    const passwordIndex = headers.findIndex(h => h.toLowerCase() === 'password');
+
 
                     for (let i = 1; i < lines.length; i++) { // Mulai dari baris kedua (setelah header)
                         const line = lines[i].trim();
@@ -566,14 +563,26 @@ Joko Susilo,1122334455,Lolos</code></pre>
                         
                         // Pastikan jumlah kolom sesuai dengan header
                         if (values.length === headers.length) {
+                            let keteranganValue = values[keteranganIndex] || '';
+                            // Normalisasi keterangan ke 'Lolos' atau 'Tidak Lolos'
+                            if (keteranganValue.toLowerCase() === 'lolos') {
+                                keteranganValue = 'Lolos';
+                            } else if (keteranganValue.toLowerCase() === 'tidak lolos') {
+                                keteranganValue = 'Tidak Lolos';
+                            } else {
+                                // Jika tidak sesuai, bisa default atau tandai sebagai tidak valid
+                                keteranganValue = 'Tidak Lolos'; // Default jika tidak dikenali
+                            }
+
                             const candidate = {
                                 name: values[namaIndex] || '',
                                 nrp: values[nrpIndex] || '',
-                                keterangan: values[keteranganIndex] || ''
+                                keterangan: keteranganValue,
+                                password: values[passwordIndex] || ''
                             };
 
-                            // Validasi dasar
-                            if (candidate.name && validateNRP(candidate.nrp) && validateKeterangan(candidate.keterangan)) {
+                            // Validasi dasar: nama, nrp, keterangan, dan password harus ada
+                            if (candidate.name && validateNRP(candidate.nrp) && validateKeterangan(candidate.keterangan) && candidate.password) {
                                 result.push(candidate);
                             } else {
                                 console.warn(`Baris dilewati karena data tidak valid: ${line}`);
@@ -607,6 +616,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                         <td>${row.name || '-'}</td>
                         <td>${row.nrp || '-'}</td>
                         <td>${row.keterangan || '-'}</td>
+                        <td>${row.password || '-'}</td>
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
                 });
@@ -615,7 +625,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                 if (data.length > 10) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td colspan="3" class="py-2 px-3 text-center text-gray-400">
+                        <td colspan="4" class="py-2 px-3 text-center text-gray-400">
                             ... dan ${data.length - 10} data lainnya (total ${data.length} data)
                         </td>
                     `;
@@ -670,7 +680,6 @@ Joko Susilo,1122334455,Lolos</code></pre>
                             </select>
                         </td>
                         <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
-                        <td><input type="text" class="edit-field" data-field="code" value="${applicant.code || ''}"></td>
                         <td>
                             <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
                             <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
@@ -735,9 +744,9 @@ Joko Susilo,1122334455,Lolos</code></pre>
                             DOMElements.editCandidateId.value = applicant.id;
                             DOMElements.editName.value = applicant.name || '';
                             DOMElements.editNrp.value = applicant.nrp || '';
-                            DOMElements.editKeterangan.value = applicant.keterangan || 'Tidak Lolos'; // Sesuaikan dengan nama field
+                            DOMElements.editStatus.value = applicant.keterangan || 'Tidak Lolos'; // Menggunakan editStatus untuk keterangan
                             DOMElements.editPassword.value = applicant.password || '';
-                            DOMElements.editCode.value = applicant.code || '';
+                            // DOMElements.editCode.value = applicant.code || ''; // Dihapus
                             DOMElements.editCandidateModal.classList.remove('hidden');
                         }
                     });
@@ -880,15 +889,14 @@ Joko Susilo,1122334455,Lolos</code></pre>
                             name: applicant.name,
                             nrp: applicant.nrp,
                             keterangan: applicant.keterangan,
-                            // Tambahkan field lain jika diperlukan, misal password dan code default
-                            password: 'default_password', // Anda bisa membuat password default atau mengosongkannya
-                            code: 'N/A', // Anda bisa membuat kode default atau mengosongkannya
+                            password: applicant.password, // Ambil password dari CSV
+                            code: 'N/A', // Default 'N/A' karena kolom kode dihapus
                             timestamp: firebase.database.ServerValue.TIMESTAMP // Tambahkan timestamp
                         };
 
                         // Validasi dasar sebelum menyimpan
-                        if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeterangan(dataToSave.keterangan)) {
-                            console.error("Data tidak valid (Nama/NRP/Keterangan kosong/salah format):", applicant);
+                        if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeterangan(dataToSave.keterangan) || !dataToSave.password) {
+                            console.error("Data tidak valid (Nama/NRP/Keterangan/Password kosong/salah format):", applicant);
                             errorCount++;
                             return Promise.resolve(); // Lewati data yang tidak valid
                         }
@@ -967,6 +975,12 @@ Joko Susilo,1122334455,Lolos</code></pre>
                             errorCount++;
                             continue;
                         }
+                        if (!applicant.password) {
+                            console.error(`Password kosong untuk ${applicant.name}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Password kosong untuk ${applicant.name}.`;
+                            errorCount++;
+                            continue;
+                        }
 
                         try {
                             // Update data di Realtime Database
@@ -974,8 +988,8 @@ Joko Susilo,1122334455,Lolos</code></pre>
                                 name: applicant.name,
                                 nrp: applicant.nrp,
                                 keterangan: applicant.keterangan,
-                                password: applicant.password, // Pastikan password juga diupdate
-                                code: applicant.code // Pastikan code juga diupdate
+                                password: applicant.password,
+                                code: applicant.code // Tetap simpan code yang ada jika tidak dihapus dari DB
                             });
                             updateCount++;
                         } catch (error) {
@@ -1044,7 +1058,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                     name: DOMElements.newName.value,
                     nrp: DOMElements.newNrp.value,
                     password: DOMElements.newPassword.value,
-                    code: DOMElements.newCode.value,
+                    code: 'N/A', // Default 'N/A' karena kolom kode dihapus
                     keterangan: DOMElements.newStatus.value, // Menggunakan 'keterangan'
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 };
@@ -1053,7 +1067,7 @@ Joko Susilo,1122334455,Lolos</code></pre>
                     alert('NRP harus 10 digit angka.');
                     return;
                 }
-                if (!newCandidate.name || !newCandidate.password || !newCandidate.code || !validateKeterangan(newCandidate.keterangan)) {
+                if (!newCandidate.name || !newCandidate.password || !validateKeterangan(newCandidate.keterangan)) {
                     alert('Semua kolom bertanda (*) harus diisi dan Keterangan harus "Lolos" atau "Tidak Lolos".');
                     return;
                 }
@@ -1079,14 +1093,14 @@ Joko Susilo,1122334455,Lolos</code></pre>
                     nrp: DOMElements.editNrp.value,
                     keterangan: DOMElements.editStatus.value, // Menggunakan 'keterangan'
                     password: DOMElements.editPassword.value,
-                    code: DOMElements.editCode.value
+                    code: 'N/A' // Default 'N/A' karena kolom kode dihapus
                 };
 
                 if (!validateNRP(updatedCandidate.nrp)) {
                     alert('NRP harus 10 digit angka.');
                     return;
                 }
-                if (!updatedCandidate.name || !updatedCandidate.password || !updatedCandidate.code || !validateKeterangan(updatedCandidate.keterangan)) {
+                if (!updatedCandidate.name || !updatedCandidate.password || !validateKeterangan(updatedCandidate.keterangan)) {
                     alert('Semua kolom bertanda (*) harus diisi dan Keterangan harus "Lolos" atau "Tidak Lolos".');
                     return;
                 }
