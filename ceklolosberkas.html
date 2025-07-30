@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cek Kelulusan Asisten Fisika Laboratorium 1</title>
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Menggunakan Firebase SDK v8.10.1 untuk konsistensi dengan admin.html dan Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script> <!-- Tambahkan Realtime Database SDK -->
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app/');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
         body {
             font-family: 'Poppins', sans-serif;
@@ -128,18 +129,19 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA",
-            authDomain: "daftaraslab.firebaseapp.com",
-            projectId: "daftaraslab",
-            storageBucket: "daftaraslab.firebasestorage.app", 
-            messagingSenderId: "329213682687",
-            appId: "1:329213682687:web:a326f7f6effc51b4347dca",
-            measurementId: "G-C9NRKRK2JC"
+            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", // GANTI DENGAN API KEY ANDA
+            authDomain: "daftaraslab.firebaseapp.com", // GANTI DENGAN AUTH DOMAIN ANDA
+            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", // GANTI DENGAN DATABASE URL REALTIME DATABASE ANDA
+            projectId: "daftaraslab", // GANTI DENGAN PROJECT ID ANDA
+            storageBucket: "daftaraslab.firebasestorage.app", // GANTI DENGAN STORAGE BUCKET ANDA
+            messagingSenderId: "329213682687", // GANTI DENGAN MESSAGING SENDER ID ANDA
+            appId: "1:329213682687:web:a326f7f6effc51b4347dca", // GANTI DENGAN APP ID ANDA
+            measurementId: "G-C9NRKRK2JC" // GANTI DENGAN MEASUREMENT ID ANDA
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        const database = firebase.database(); // Menggunakan Realtime Database
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
@@ -159,7 +161,8 @@
             }
 
             function hideError(inputElement, errorElement) {
-                inputElement.classList.add('hidden');
+                inputElement.classList.remove('border-red-500'); // Hapus border merah saat error disembunyikan
+                errorElement.classList.add('hidden');
             }
 
             function validateNRP(nrp) {
@@ -171,42 +174,46 @@
                 let content = '';
                 let className = '';
                 let title = '';
-                const applicantName = data.name || 'pendaftar';
+                const applicantName = data.name || 'pendaftar'; // Menggunakan field 'name'
 
                 DOMElements.statusResultDiv.classList.remove('hidden');
-                DOMElements.statusResultDiv.className = 'mt-8 status-card';
+                DOMElements.statusResultDiv.className = 'mt-8 status-card'; // Reset class
 
                 switch (status) {
-                    case 'Lulus':
-                        title = 'Selamat, Anda Lulus Tahap Administrasi!';
+                    case 'Lolos': // Menggunakan 'Lolos' sesuai data di Realtime DB
+                        title = 'Selamat, Anda Lolos Tahap Administrasi!';
                         className = 'status-lulus';
                         content = `
-                            <p class="text-base mb-4">Halo **${applicantName}**, Anda dinyatakan **LULUS** tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
+                            <p class="text-base mb-4">Halo **${applicantName}**, Anda dinyatakan **Lolos** tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base font-semibold mb-2">Selanjutnya, Anda diundang untuk mengikuti tahap interview:</p>
                             <ul class="list-disc list-inside ml-4 mb-4 text-gray-700">
-                                <li>**Waktu:** ${data.interviewDetails?.time || 'Akan diinformasikan'}</li>
-                                <li>**Link Zoom:** <a href="${data.interviewDetails?.zoomLink || '#'}" target="_blank" class="text-blue-600 hover:underline">${data.interviewDetails?.zoomLink || 'Link belum tersedia'}</a></li>
-                                <li>**Breakout Room:** ${data.interviewDetails?.breakoutRoom || 'Akan diinformasikan'}</li>
+                                <li>**Waktu:** Akan diinformasikan</li>
+                                <li>**Link Zoom:** Link belum tersedia</li>
+                                <li>**Breakout Room:** Akan diinformasikan</li>
                             </ul>
                             <p class="text-base mb-4">Mohon persiapkan diri Anda dengan baik. Untuk panduan teknis interview, silakan unduh dokumen berikut:</p>
-                            <a href="${data.interviewDetails?.technicalDocLink || '#'}" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center">
+                            <a href="#" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd" />
                                 </svg>
                                 Unduh Dokumen Teknis Interview
                             </a>
                         `;
+                        // Anda bisa menambahkan data interviewDetails jika ada di Realtime DB
+                        // data.interviewDetails?.time || 'Akan diinformasikan'
+                        // data.interviewDetails?.zoomLink || '#'
+                        // data.interviewDetails?.technicalDocLink || '#'
                         break;
-                    case 'Tidak Lulus':
+                    case 'Tidak Lolos': // Menggunakan 'Tidak Lolos' sesuai data di Realtime DB
                         title = 'Mohon Maaf';
                         className = 'status-tidak-lulus';
                         content = `
-                            <p class="text-base mb-4">Halo **${applicantName}**, Anda dinyatakan **TIDAK LULUS** sebagai Asisten Fisika Laboratorium 1.</p>
+                            <p class="text-base mb-4">Halo **${applicantName}**, Anda dinyatakan **TIDAK LOLOS** sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan minat Anda untuk mendaftar. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
                             <button onclick="window.location.href='/'" class="btn-primary px-4 py-2 rounded-md font-medium">Kembali ke Menu Utama</button>
                         `;
                         break;
-                    case 'Menunggu':
+                    case 'Menunggu': // Status default jika 'keterangan' tidak ada atau tidak dikenali
                         title = 'Status Pendaftaran';
                         className = 'status-menunggu';
                         content = `
@@ -284,21 +291,30 @@
                 DOMElements.statusResultDiv.classList.add('hidden');
 
                 try {
-                    const querySnapshot = await db.collection("pendaftaran")
-                                                .where("nrp", "==", nrp)
-                                                .limit(1)
-                                                .get();
+                    // Menggunakan Realtime Database
+                    const applicantsRef = database.ref('applicants');
+                    
+                    // Mencari data berdasarkan NRP
+                    const snapshot = await applicantsRef.orderByChild('nrp').equalTo(nrp).once('value');
 
-                    if (querySnapshot.empty) {
-                        displayStatus('Tidak Ditemukan');
-                    } else {
-                        const applicantData = querySnapshot.docs[0].data();
-                        if (applicantData.password === password) {
-                            const status = applicantData.statusKelulusan || 'Menunggu';
-                            displayStatus(status, applicantData);
-                        } else {
-                            displayStatus('Tidak Ditemukan');
+                    if (snapshot.exists()) {
+                        let found = false;
+                        snapshot.forEach(childSnapshot => {
+                            const applicantData = childSnapshot.val();
+                            // Membandingkan password
+                            if (applicantData.password === password) {
+                                found = true;
+                                // Menggunakan field 'keterangan' untuk status kelulusan
+                                const status = applicantData.keterangan || 'Menunggu'; 
+                                displayStatus(status, applicantData);
+                            }
+                        });
+
+                        if (!found) {
+                            displayStatus('Tidak Ditemukan'); // NRP ditemukan tapi password salah
                         }
+                    } else {
+                        displayStatus('Tidak Ditemukan'); // NRP tidak ditemukan
                     }
 
                 } catch (error) {
