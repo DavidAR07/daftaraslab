@@ -10,7 +10,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app/');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
         body {
             font-family: 'Poppins', sans-serif;
@@ -214,12 +214,11 @@
     <!-- Modal Pop-up untuk Hasil Status -->
     <div id="statusModalOverlay" class="modal-overlay"> 
         <div id="statusModalContent" class="modal-content">
-            <!-- Konten status akan dimuat di sini oleh JavaScript -->
             <div class="p-6">
                 <div id="modalStatusCard" class="status-card-modal">
                     <!-- Isi status akan masuk di sini -->
                 </div>
-                <div class="mt-6 text-center"> <!-- Pusatkan tombol -->
+                <div class="mt-6 text-center">
                     <button id="closeStatusModalBtn" class="btn-primary px-8 py-3 rounded-lg font-semibold text-lg">Tutup</button>
                 </div>
             </div>
@@ -229,19 +228,19 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", // GANTI DENGAN API KEY ANDA
-            authDomain: "daftaraslab.firebaseapp.com", // GANTI DENGAN AUTH DOMAIN ANDA
-            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", // GANTI DENGAN DATABASE URL REALTIME DATABASE ANDA
-            projectId: "daftaraslab", // GANTI DENGAN PROJECT ID ANDA
-            storageBucket: "daftaraslab.firebasestorage.app", // GANTI DENGAN STORAGE BUCKET ANDA
-            messagingSenderId: "329213682687", // GANTI DENGAN MESSAGING SENDER ID ANDA
-            appId: "1:329213682687:web:a326f7f6effc51b4347dca", // GANTI DENGAN APP ID ANDA
-            measurementId: "G-C9NRKRK2JC" // GANTI DENGAN MEASUREMENT ID ANDA
+            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", 
+            authDomain: "daftaraslab.firebaseapp.com", 
+            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "daftaraslab", 
+            storageBucket: "daftaraslab.firebasestorage.app", 
+            messagingSenderId: "329213682687", 
+            appId: "1:329213682687:web:a326f7f6effc51b4347dca", 
+            measurementId: "G-C9NRKRK2JC" 
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database(); // Menggunakan Realtime Database
+        const database = firebase.database(); 
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
@@ -293,21 +292,30 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         `;
+                        
+                        // Ambil detail interview dari data
+                        const interviewTime = data.interviewDetails?.time || 'Akan diinformasikan';
+                        const zoomLink = data.interviewDetails?.zoomLink || '#';
+                        const breakoutRoom = data.interviewDetails?.breakoutRoom || 'Akan diinformasikan';
+                        const technicalDocLink = data.interviewDetails?.technicalDocLink || '#';
+
                         content = `
                             <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base font-semibold mb-2">Selanjutnya, Anda diundang untuk mengikuti tahap interview:</p>
-                            <ul class="list-disc list-inside ml-4 mb-4 text-gray-700">
-                                <li><strong>Waktu:</strong> Akan diinformasikan</li>
-                                <li><strong>Link Zoom:</strong> <a href="#" target="_blank" class="text-blue-600 hover:underline">Link belum tersedia</a></li>
-                                <li><strong>Breakout Room:</strong> Akan diinformasikan</li>
+                            <ul class="list-disc list-inside ml-4 mb-4 text-gray-700 text-left">
+                                <li><strong>Waktu:</strong> ${interviewTime}</li>
+                                <li><strong>Link Zoom:</strong> ${zoomLink !== '#' ? `<a href="${zoomLink}" target="_blank" class="text-blue-600 hover:underline">${zoomLink}</a>` : 'Link belum tersedia'}</li>
+                                <li><strong>Breakout Room:</strong> ${breakoutRoom}</li>
                             </ul>
                             <p class="text-base mb-4">Mohon persiapkan diri Anda dengan baik. Untuk panduan teknis interview, silakan unduh dokumen berikut:</p>
-                            <a href="#" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd" />
-                                </svg>
-                                Unduh Dokumen Teknis Interview
-                            </a>
+                            ${technicalDocLink !== '#' ? `
+                                <a href="${technicalDocLink}" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd" />
+                                    </svg>
+                                    Unduh Dokumen Teknis Interview
+                                </a>
+                            ` : `<p class="text-sm text-gray-500">Dokumen teknis belum tersedia.</p>`}
                         `;
                         break;
                     case 'Tidak Lolos':
@@ -359,10 +367,9 @@
                     ${content}
                 `;
                 
-                // Tampilkan modal setelah sedikit delay untuk efek transisi
                 setTimeout(() => {
                     DOMElements.statusModalOverlay.classList.add('show');
-                }, 100); // Delay 100ms
+                }, 100); 
             }
 
             DOMElements.togglePasswordBtn.addEventListener('click', function() {
@@ -409,7 +416,6 @@
                     return;
                 }
 
-                // Tambahkan animasi bounce pada tombol
                 DOMElements.checkStatusBtn.classList.add('animate-bounce-click');
                 DOMElements.checkStatusBtn.disabled = true;
                 DOMElements.checkStatusBtn.textContent = 'Mengecek...';
@@ -443,7 +449,7 @@
                 } finally {
                     DOMElements.checkStatusBtn.disabled = false;
                     DOMElements.checkStatusBtn.textContent = 'Cek Status';
-                    DOMElements.checkStatusBtn.classList.remove('animate-bounce-click'); // Hapus animasi setelah selesai
+                    DOMElements.checkStatusBtn.classList.remove('animate-bounce-click'); 
                 }
             });
 
