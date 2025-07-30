@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Izinkan siapa saja yang terautentikasi untuk mengunggah file CSV ke folder 'admin-imports/'
+    match /admin-imports/{fileName} {
+      allow write: if request.auth != null && request.resource.contentType == 'text/csv';
+      allow read: if false; // Admin tidak perlu membaca langsung dari sini
+    }
+
+    // Aturan default untuk folder lain (misalnya, untuk gambar profil, dll.)
+    match /{allPaths=**} {
+      allow read, write: if false; // Default to deny for all other paths
+    }
+  }
+}
