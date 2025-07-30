@@ -55,7 +55,7 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            /* Awalnya tersembunyi */
+            /* Awalnya tersembunyi dengan opacity dan visibility */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -165,7 +165,8 @@
     </footer>
 
     <!-- Modal Pop-up untuk Hasil Status -->
-    <div id="statusModalOverlay" class="modal-overlay">
+    <!-- Hapus class 'hidden' dari sini, biarkan CSS opacity/visibility yang mengontrol -->
+    <div id="statusModalOverlay" class="modal-overlay"> 
         <div id="statusModalContent" class="modal-content">
             <!-- Konten status akan dimuat di sini oleh JavaScript -->
             <div class="p-6">
