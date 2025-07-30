@@ -55,6 +55,7 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            /* Awalnya tersembunyi */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -71,6 +72,7 @@
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
             max-width: 500px;
             width: 90%;
+            /* Efek slide-up */
             transform: translateY(-20px);
             transition: transform 0.3s ease;
             overflow: hidden; /* Pastikan konten tidak keluar dari border-radius */
@@ -163,7 +165,7 @@
     </footer>
 
     <!-- Modal Pop-up untuk Hasil Status -->
-    <div id="statusModalOverlay" class="modal-overlay hidden">
+    <div id="statusModalOverlay" class="modal-overlay">
         <div id="statusModalContent" class="modal-content">
             <!-- Konten status akan dimuat di sini oleh JavaScript -->
             <div class="p-6">
@@ -264,7 +266,6 @@
                         content = `
                             <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan minat Anda untuk mendaftar. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
-                            <!-- Tombol ini akan diganti dengan tombol tutup modal -->
                         `;
                         break;
                     case 'Menunggu':
@@ -273,7 +274,6 @@
                         content = `
                             <p class="text-base mb-4">Halo ${applicantName}, status pendaftaran Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
                             <p class="text-base mb-4">Mohon bersabar, informasi lebih lanjut akan segera diumumkan.</p>
-                            <!-- Tombol ini akan diganti dengan tombol tutup modal -->
                         `;
                         break;
                     case 'Tidak Ditemukan':
@@ -283,7 +283,6 @@
                         content = `
                             <p class="text-base mb-4">NRP atau Password yang Anda masukkan salah, atau data pendaftaran tidak ditemukan.</p>
                             <p class="text-base mb-4">Mohon periksa kembali NRP dan Password Anda, atau pastikan Anda sudah mendaftar.</p>
-                            <!-- Tombol ini akan diganti dengan tombol tutup modal -->
                         `;
                         break;
                 }
@@ -345,8 +344,7 @@
                 DOMElements.checkStatusBtn.disabled = true;
                 DOMElements.checkStatusBtn.textContent = 'Mengecek...';
                 DOMElements.checkStatusBtn.classList.add('animate-pulse');
-                // DOMElements.statusResultDiv.classList.add('hidden'); // Tidak perlu lagi menyembunyikan ini
-
+                
                 try {
                     const applicantsRef = database.ref('applicants');
                     
@@ -375,7 +373,6 @@
                 } catch (error) {
                     console.error("Error checking status:", error);
                     displayStatus('Terjadi Kesalahan');
-                    // alert("Terjadi kesalahan saat memeriksa status. Silakan coba lagi nanti."); // Ganti dengan modal error jika perlu
                 } finally {
                     DOMElements.checkStatusBtn.disabled = false;
                     DOMElements.checkStatusBtn.textContent = 'Cek Status';
