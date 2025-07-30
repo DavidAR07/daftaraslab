@@ -4,19 +4,15 @@ service cloud.firestore {
     // Aturan untuk koleksi pendaftaran
     match /pendaftaran/{docId} {
       // Izinkan pembacaan untuk semua pengguna (untuk halaman cek status)
-      // PERINGATAN: Untuk aplikasi produksi, pertimbangkan untuk membatasi ini
-      // misalnya, hanya izinkan membaca jika request.auth.uid == resource.data.userId
-      // atau melalui Cloud Function yang terautentikasi.
       allow read: if true; 
 
-      // Izinkan penulisan (create, update, delete) HANYA jika permintaan datang dari Cloud Function
-      // Karena Cloud Function menggunakan Admin SDK, ia akan melewati aturan ini.
-      // Namun, ini adalah praktik yang baik untuk secara eksplisit menolak penulisan langsung dari klien.
-      // Jika Anda tidak memiliki aturan ini, klien bisa menulis langsung jika tidak ada aturan lain.
-      allow write: if false; // Klien tidak boleh menulis langsung ke sini
+      // Izinkan penulisan (create, update, delete) HANYA jika pengguna terautentikasi
+      // dan email mereka adalah email admin yang diizinkan.
+      // GANTI 'admin@yourdomain.com' dengan email admin yang Anda buat di Firebase Auth.
+      allow write: if request.auth != null && request.auth.token.email == 'atmint@gmail.com';
     }
 
-    // Aturan default untuk koleksi lain (jika ada)
+    // Aturan default untuk koleksi lain
     match /{document=**} {
       allow read, write: if false; // Default to deny for all other collections
     }
