@@ -167,22 +167,20 @@
                     <h3 class="text-lg font-semibold mb-2">Format File CSV</h3>
                     <p class="text-gray-700 mb-2">File CSV harus memiliki header berikut (case-sensitive) dan urutan kolom tidak masalah:</p>
                     <ul class="list-disc list-inside ml-4 text-gray-600 mb-4">
-                        <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
-                        <li>`Password`: Kata sandi untuk login.</li>
                         <li>`Nama`: Nama lengkap pendaftar.</li>
-                        <li>`Kode`: Kode unik pendaftar (misal: A1, B2).</li>
-                        <li>`Status`: Status kelulusan (`lulus` atau `tidak`).</li>
+                        <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
+                        <li>`Keterangan`: Status kelulusan (`Lolos` atau `Tidak Lolos`).</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>NRP,Password,Nama,Kode,Status
-5001232001,hidupjokowi,Ahmad Fauzi,A1,lulus
-5001232002,hidupjokowi,Budi Santoso,A2,tidak
-5001232003,hidupjokowi,Siti Nurhaliza,A3,lulus</code></pre>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan
+Budi Santoso,1234567890,Lolos
+Siti Aminah,0987654321,Tidak Lolos
+Joko Susilo,1122334455,Lolos</code></pre>
                 </div>
 
                 <div class="mb-6">
                     <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Pilih File CSV <span class="text-theme-red">*</span></label>
-                    <label for="csvFile" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red csv-upload">
+                    <label for="csvFileInput" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red csv-upload">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a3 3 0 013 3v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
                         </svg>
@@ -198,11 +196,9 @@
                         <table class="min-w-full bg-white">
                             <thead>
                                 <tr>
-                                    <th>NRP</th>
-                                    <th>Password</th>
                                     <th>Nama</th>
-                                    <th>Kode</th>
-                                    <th>Status</th>
+                                    <th>NRP</th>
+                                    <th>Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody id="csvPreviewBody">
@@ -214,7 +210,7 @@
                 </div>
                 
                 <div class="mt-6 flex justify-end space-x-2">
-                    <button type="button" id="importCsvButton" class="btn-primary px-6 py-2 rounded-md font-medium">Pratinjau & Proses</button>
+                    <button type="button" id="importCsvButton" class="btn-primary px-6 py-2 rounded-md font-medium" disabled>Pratinjau & Proses</button>
                     <button type="button" id="confirmImportButton" class="btn-primary px-6 py-2 rounded-md font-medium hidden">Konfirmasi Impor</button>
                 </div>
 
@@ -230,14 +226,19 @@
                 <button id="refreshDataBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Refresh Data</button>
             </div>
             <div class="p-6">
-                <!-- Add Candidate Form (diadaptasi dari ppp.html) -->
+                <!-- Add Candidate Form -->
                 <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
                     <h3 class="text-lg font-semibold mb-3 text-gray-800">Tambah Kandidat Baru</h3>
                     <form id="addCandidateForm" class="space-y-3">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
+                                <label for="newName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newName" name="newName" required 
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
                                 <label for="newNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
-                                <input type="text" id="newNrp" name="newNrp" required 
+                                <input type="text" id="newNrp" name="newNrp" required
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
                             <div>
@@ -246,21 +247,16 @@
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
                             <div>
-                                <label for="newName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
-                                <input type="text" id="newName" name="newName" required
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
                                 <label for="newCode" class="block text-sm font-medium text-gray-700 mb-1">Kode <span class="text-theme-red">*</span></label>
                                 <input type="text" id="newCode" name="newCode" required
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
                             <div>
-                                <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-theme-red">*</span></label>
+                                <label for="newStatus" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-theme-red">*</span></label>
                                 <select id="newStatus" name="newStatus" required
                                     class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                    <option value="lulus">Lulus</option>
-                                    <option value="tidak">Tidak Lulus</option>
+                                    <option value="Lolos">Lolos</option>
+                                    <option value="Tidak Lolos">Tidak Lolos</option>
                                 </select>
                             </div>
                         </div>
@@ -279,11 +275,11 @@
                         <thead>
                             <tr>
                                 <th class="w-10"><input type="checkbox" id="selectAllCheckbox"></th>
-                                <th>NRP</th>
-                                <th>Password</th>
                                 <th>Nama</th>
+                                <th>NRP</th>
+                                <th>Keterangan</th>
+                                <th>Password</th>
                                 <th>Kode</th>
-                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -303,7 +299,7 @@
         </div>
     </footer>
 
-    <!-- Edit Candidate Modal (diadaptasi dari ppp.html) -->
+    <!-- Edit Candidate Modal -->
     <div id="editCandidateModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
             <div class="bg-theme-red text-white p-4 text-center">
@@ -314,36 +310,32 @@
                     <input type="hidden" id="editCandidateId">
                     
                     <div>
+                        <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editName" name="editName" required 
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
                         <label for="editNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
                         <input type="text" id="editNrp" name="editNrp" required 
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
-                    
+                    <div>
+                        <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-1">Keterangan <span class="text-theme-red">*</span></label>
+                        <select id="editStatus" name="editStatus" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                            <option value="Lolos">Lolos</option>
+                            <option value="Tidak Lolos">Tidak Lolos</option>
+                        </select>
+                    </div>
                     <div>
                         <label for="editPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
                         <input type="text" id="editPassword" name="editPassword" required
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
-                    
-                    <div>
-                        <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
-                        <input type="text" id="editName" name="editName" required
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    
                     <div>
                         <label for="editCode" class="block text-sm font-medium text-gray-700 mb-1">Kode <span class="text-theme-red">*</span></label>
                         <input type="text" id="editCode" name="editCode" required
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    
-                    <div>
-                        <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-theme-red">*</span></label>
-                        <select id="editStatus" name="editStatus" required
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                            <option value="lulus">Lulus</option>
-                            <option value="tidak">Tidak Lulus</option>
-                        </select>
                     </div>
                     
                     <div class="flex space-x-3">
@@ -385,21 +377,20 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA",
-            authDomain: "daftaraslab.firebaseapp.com",
-            projectId: "daftaraslab",
-            storageBucket: "daftaraslab.firebasestorage.app", 
-            messagingSenderId: "329213682687",
-            appId: "1:329213682687:web:a326f7f6effc51b4347dca",
-            measurementId: "G-C9NRKRK2JC"
+            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", // GANTI DENGAN API KEY ANDA
+            authDomain: "daftaraslab.firebaseapp.com", // GANTI DENGAN AUTH DOMAIN ANDA
+            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", // GANTI DENGAN DATABASE URL REALTIME DATABASE ANDA
+            projectId: "daftaraslab", // GANTI DENGAN PROJECT ID ANDA
+            storageBucket: "daftaraslab.firebasestorage.app", // GANTI DENGAN STORAGE BUCKET ANDA
+            messagingSenderId: "329213682687", // GANTI DENGAN MESSAGING SENDER ID ANDA
+            appId: "1:329213682687:web:a326f7f6effc51b4347dca", // GANTI DENGAN APP ID ANDA
+            measurementId: "G-C9NRKRK2JC" // GANTI DENGAN MEASUREMENT ID ANDA
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database(); // Menggunakan Realtime Database
-        // const db = firebase.firestore(); // Firestore tidak digunakan untuk data pendaftar di sini
-        // const storage = firebase.storage(); // Storage tidak digunakan untuk impor CSV di sini
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
@@ -412,15 +403,15 @@
                 loginError: document.getElementById('loginError'),
                 logoutBtn: document.getElementById('logoutBtn'),
 
-                csvFileInput: document.getElementById('csvFileInput'), // Diubah dari csvFile
+                csvFileInput: document.getElementById('csvFileInput'),
                 fileNameDisplay: document.getElementById('fileName'),
                 fileError: document.getElementById('fileError'),
                 csvPreview: document.getElementById('csvPreview'),
                 csvPreviewBody: document.getElementById('csvPreviewBody'),
                 previewError: document.getElementById('previewError'),
-                importCsvButton: document.getElementById('importCsvButton'), // Tombol untuk pratinjau/proses
-                confirmImportButton: document.getElementById('confirmImportButton'), // Tombol konfirmasi impor
-                uploadResultDiv: document.getElementById('uploadResult'), // Digunakan untuk hasil impor
+                importCsvButton: document.getElementById('importCsvButton'),
+                confirmImportButton: document.getElementById('confirmImportButton'),
+                uploadResultDiv: document.getElementById('uploadResult'),
 
                 refreshDataBtn: document.getElementById('refreshDataBtn'),
                 saveChangesBtn: document.getElementById('saveChangesBtn'),
@@ -472,9 +463,9 @@
                 return /^[0-9]{10}$/.test(nrp);
             }
 
-            function validateStatus(status) {
-                const validStatuses = ['lulus', 'tidak']; // Sesuaikan dengan status di Realtime DB
-                return validStatuses.includes(status);
+            function validateKeterangan(keterangan) {
+                const validKeterangan = ['Lolos', 'Tidak Lolos'];
+                return validKeterangan.includes(keterangan);
             }
 
             function displayUploadResult(type, message) {
@@ -505,7 +496,7 @@
                 DOMElements.confirmImportButton.classList.add('hidden');
             }
 
-            // Fungsi parsing CSV dari ppp.html
+            // Fungsi parsing CSV yang disesuaikan untuk Nama,NRP,Keterangan
             function parseCSV(text) {
                 function isBinaryContent(content) {
                     const nonPrintableChars = content.split('').filter(char => {
@@ -544,33 +535,52 @@
                 const lines = cleanedText.split('\n');
                 const result = [];
 
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line === '') continue;
-                    if (line.charCodeAt(0) < 32 || line.charCodeAt(0) > 126) {
-                        continue;
+                // Asumsi baris pertama adalah header, kita akan mengabaikannya
+                if (lines.length > 0) {
+                    const headers = lines[0].split(separator).map(h => h.trim());
+                    const expectedHeaders = ['Nama', 'NRP', 'Keterangan'];
+                    
+                    // Cek apakah semua header yang diharapkan ada (case-insensitive)
+                    const hasAllExpectedHeaders = expectedHeaders.every(expectedH => 
+                        headers.some(h => h.toLowerCase() === expectedH.toLowerCase())
+                    );
+
+                    if (!hasAllExpectedHeaders) {
+                        alert('Header CSV tidak valid. Harap gunakan: Nama,NRP,Keterangan (urutan tidak masalah).');
+                        return [];
                     }
 
-                    const values = line.split(separator);
-                    // Format CSV: nrp,password,nama,kode,status
-                    if (values.length >= 5) { 
-                        const cleanValues = values.map(val => {
-                            return val.trim().replace(/^["']|["']$/g, '');
-                        });
+                    // Temukan indeks kolom berdasarkan header
+                    const namaIndex = headers.findIndex(h => h.toLowerCase() === 'nama');
+                    const nrpIndex = headers.findIndex(h => h.toLowerCase() === 'nrp');
+                    const keteranganIndex = headers.findIndex(h => h.toLowerCase() === 'keterangan');
 
-                        const candidate = {
-                            nrp: cleanValues[0] || '',
-                            password: cleanValues[1] || '',
-                            name: cleanValues[2] || '',
-                            code: cleanValues[3] || '',
-                            status: (cleanValues[4] || '').toLowerCase() === 'lulus' ? 'lulus' : 'tidak'
-                        };
-
-                        if (candidate.nrp && candidate.password) {
-                            result.push(candidate);
+                    for (let i = 1; i < lines.length; i++) { // Mulai dari baris kedua (setelah header)
+                        const line = lines[i].trim();
+                        if (line === '') continue;
+                        if (line.charCodeAt(0) < 32 || line.charCodeAt(0) > 126) {
+                            continue;
                         }
-                    } else {
-                        console.warn(`Baris dilewati karena format tidak lengkap: ${line}`);
+
+                        const values = line.split(separator).map(val => val.trim().replace(/^["']|["']$/g, ''));
+                        
+                        // Pastikan jumlah kolom sesuai dengan header
+                        if (values.length === headers.length) {
+                            const candidate = {
+                                name: values[namaIndex] || '',
+                                nrp: values[nrpIndex] || '',
+                                keterangan: values[keteranganIndex] || ''
+                            };
+
+                            // Validasi dasar
+                            if (candidate.name && validateNRP(candidate.nrp) && validateKeterangan(candidate.keterangan)) {
+                                result.push(candidate);
+                            } else {
+                                console.warn(`Baris dilewati karena data tidak valid: ${line}`);
+                            }
+                        } else {
+                            console.warn(`Baris dilewati karena jumlah kolom tidak sesuai: ${line}`);
+                        }
                     }
                 }
                 return result;
@@ -594,11 +604,9 @@
                 previewRows.forEach(row => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${row.nrp || '-'}</td>
-                        <td>${row.password || '-'}</td>
                         <td>${row.name || '-'}</td>
-                        <td>${row.code || '-'}</td>
-                        <td>${row.status || '-'}</td>
+                        <td>${row.nrp || '-'}</td>
+                        <td>${row.keterangan || '-'}</td>
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
                 });
@@ -607,7 +615,7 @@
                 if (data.length > 10) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td colspan="5" class="py-2 px-3 text-center text-gray-400">
+                        <td colspan="3" class="py-2 px-3 text-center text-gray-400">
                             ... dan ${data.length - 10} data lainnya (total ${data.length} data)
                         </td>
                     `;
@@ -627,7 +635,7 @@
 
                 try {
                     // Mengambil data dari Realtime Database
-                    const snapshot = await database.ref('candidates').once('value');
+                    const snapshot = await database.ref('applicants').once('value'); // Menggunakan 'applicants' sebagai koleksi utama
                     
                     if (!snapshot.exists()) {
                         DOMElements.manageDataStatus.textContent = 'Tidak ada data pendaftar.';
@@ -653,16 +661,16 @@
                     tr.dataset.id = applicant.id;
                     tr.innerHTML = `
                         <td><input type="checkbox" class="delete-checkbox" data-id="${applicant.id}" ${selectedForDeletion.has(applicant.id) ? 'checked' : ''}></td>
-                        <td><input type="text" class="edit-field" data-field="nrp" value="${applicant.nrp || ''}"></td>
-                        <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
                         <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
-                        <td><input type="text" class="edit-field" data-field="code" value="${applicant.code || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="nrp" value="${applicant.nrp || ''}"></td>
                         <td>
-                            <select class="edit-field" data-field="status">
-                                <option value="lulus" ${applicant.status === 'lulus' ? 'selected' : ''}>Lulus</option>
-                                <option value="tidak" ${applicant.status === 'tidak' ? 'selected' : ''}>Tidak Lulus</option>
+                            <select class="edit-field" data-field="keterangan">
+                                <option value="Lolos" ${applicant.keterangan === 'Lolos' ? 'selected' : ''}>Lolos</option>
+                                <option value="Tidak Lolos" ${applicant.keterangan === 'Tidak Lolos' ? 'selected' : ''}>Tidak Lolos</option>
                             </select>
                         </td>
+                        <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="code" value="${applicant.code || ''}"></td>
                         <td>
                             <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
                             <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
@@ -707,7 +715,7 @@
                         const docId = e.target.dataset.id;
                         if (confirm(`Anda yakin ingin menghapus pendaftar ini (ID: ${docId})?`)) {
                             try {
-                                await database.ref('candidates/' + docId).remove();
+                                await database.ref('applicants/' + docId).remove();
                                 DOMElements.manageDataStatus.textContent = `Pendaftar ${docId} berhasil dihapus.`;
                                 loadApplicantsData(); // Reload data
                             } catch (error) {
@@ -725,11 +733,11 @@
                         const applicant = currentApplicantsData.find(app => app.id === docId);
                         if (applicant) {
                             DOMElements.editCandidateId.value = applicant.id;
-                            DOMElements.editNrp.value = applicant.nrp || '';
-                            DOMElements.editPassword.value = applicant.password || '';
                             DOMElements.editName.value = applicant.name || '';
+                            DOMElements.editNrp.value = applicant.nrp || '';
+                            DOMElements.editKeterangan.value = applicant.keterangan || 'Tidak Lolos'; // Sesuaikan dengan nama field
+                            DOMElements.editPassword.value = applicant.password || '';
                             DOMElements.editCode.value = applicant.code || '';
-                            DOMElements.editStatus.value = applicant.status || 'tidak';
                             DOMElements.editCandidateModal.classList.remove('hidden');
                         }
                     });
@@ -776,7 +784,6 @@
                     console.error("Login error:", error);
                     // Tampilkan modal "Hayoo"
                     DOMElements.hayooModal.classList.remove('hidden');
-                    // Anda bisa menambahkan efek shake di sini jika diinginkan
                 } finally {
                     DOMElements.loginBtn.disabled = false;
                     DOMElements.loginBtn.textContent = 'Login';
@@ -806,7 +813,6 @@
                         DOMElements.fileNameDisplay.textContent = selectedFile.name;
                         hideError(DOMElements.fileError);
                         
-                        // Read file for preview
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             const text = e.target.result;
@@ -854,7 +860,7 @@
                 DOMElements.uploadResultDiv.classList.add('hidden');
                 DOMElements.uploadResultDiv.innerHTML = '';
 
-                const candidatesRef = database.ref('candidates');
+                const applicantsRef = database.ref('applicants'); // Koleksi 'applicants'
                 let importCount = 0;
                 let errorCount = 0;
 
@@ -868,20 +874,26 @@
                     const endIdx = Math.min(startIdx + batchSize, parsedCsvData.length);
                     const currentBatch = parsedCsvData.slice(startIdx, endIdx);
 
-                    const promises = currentBatch.map(candidate => {
-                        if (!candidate.nrp || !candidate.password) {
-                            console.error("Data tidak lengkap (NRP/Password kosong):", candidate);
+                    const promises = currentBatch.map(applicant => {
+                        // Data yang akan disimpan ke Realtime Database
+                        const dataToSave = {
+                            name: applicant.name,
+                            nrp: applicant.nrp,
+                            keterangan: applicant.keterangan,
+                            // Tambahkan field lain jika diperlukan, misal password dan code default
+                            password: 'default_password', // Anda bisa membuat password default atau mengosongkannya
+                            code: 'N/A', // Anda bisa membuat kode default atau mengosongkannya
+                            timestamp: firebase.database.ServerValue.TIMESTAMP // Tambahkan timestamp
+                        };
+
+                        // Validasi dasar sebelum menyimpan
+                        if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeterangan(dataToSave.keterangan)) {
+                            console.error("Data tidak valid (Nama/NRP/Keterangan kosong/salah format):", applicant);
                             errorCount++;
-                            return Promise.resolve(); // Lewati data yang tidak lengkap
+                            return Promise.resolve(); // Lewati data yang tidak valid
                         }
 
-                        // Pastikan status hanya 'lulus' atau 'tidak'
-                        if (candidate.status !== 'lulus' && candidate.status !== 'tidak') {
-                            candidate.status = 'tidak'; // Default ke 'tidak' jika status tidak valid
-                        }
-
-                        // Menggunakan push() untuk menambahkan data baru ke Realtime Database
-                        return candidatesRef.push(candidate)
+                        return applicantsRef.push(dataToSave)
                             .then(() => {
                                 importCount++;
                             })
@@ -949,21 +961,21 @@
                             errorCount++;
                             continue;
                         }
-                        if (!validateStatus(applicant.status)) {
-                            console.error(`Status tidak valid untuk ${applicant.name}: ${applicant.status}`);
-                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Status tidak valid untuk ${applicant.name}.`;
+                        if (!validateKeterangan(applicant.keterangan)) {
+                            console.error(`Keterangan tidak valid untuk ${applicant.name}: ${applicant.keterangan}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Keterangan tidak valid untuk ${applicant.name}.`;
                             errorCount++;
                             continue;
                         }
 
                         try {
                             // Update data di Realtime Database
-                            await database.ref('candidates/' + docId).update({
-                                nrp: applicant.nrp,
-                                password: applicant.password,
+                            await database.ref('applicants/' + docId).update({
                                 name: applicant.name,
-                                code: applicant.code,
-                                status: applicant.status
+                                nrp: applicant.nrp,
+                                keterangan: applicant.keterangan,
+                                password: applicant.password, // Pastikan password juga diupdate
+                                code: applicant.code // Pastikan code juga diupdate
                             });
                             updateCount++;
                         } catch (error) {
@@ -1004,7 +1016,7 @@
 
                 for (const docId of selectedForDeletion) {
                     try {
-                        await database.ref('candidates/' + docId).remove();
+                        await database.ref('applicants/' + docId).remove();
                         deleteCount++;
                     } catch (error) {
                         console.error("Error deleting selected applicant:", docId, error);
@@ -1029,24 +1041,25 @@
                 e.preventDefault();
 
                 const newCandidate = {
+                    name: DOMElements.newName.value,
                     nrp: DOMElements.newNrp.value,
                     password: DOMElements.newPassword.value,
-                    name: DOMElements.newName.value,
                     code: DOMElements.newCode.value,
-                    status: DOMElements.newStatus.value
+                    keterangan: DOMElements.newStatus.value, // Menggunakan 'keterangan'
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 };
 
                 if (!validateNRP(newCandidate.nrp)) {
                     alert('NRP harus 10 digit angka.');
                     return;
                 }
-                if (!newCandidate.password || !newCandidate.name || !newCandidate.code) {
-                    alert('Semua kolom bertanda (*) harus diisi.');
+                if (!newCandidate.name || !newCandidate.password || !newCandidate.code || !validateKeterangan(newCandidate.keterangan)) {
+                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan harus "Lolos" atau "Tidak Lolos".');
                     return;
                 }
 
                 try {
-                    await database.ref('candidates').push(newCandidate);
+                    await database.ref('applicants').push(newCandidate);
                     alert('Kandidat berhasil ditambahkan!');
                     DOMElements.addCandidateForm.reset();
                     loadApplicantsData(); // Refresh data
@@ -1062,24 +1075,24 @@
 
                 const candidateId = DOMElements.editCandidateId.value;
                 const updatedCandidate = {
-                    nrp: DOMElements.editNrp.value,
-                    password: DOMElements.editPassword.value,
                     name: DOMElements.editName.value,
-                    code: DOMElements.editCode.value,
-                    status: DOMElements.editStatus.value
+                    nrp: DOMElements.editNrp.value,
+                    keterangan: DOMElements.editStatus.value, // Menggunakan 'keterangan'
+                    password: DOMElements.editPassword.value,
+                    code: DOMElements.editCode.value
                 };
 
                 if (!validateNRP(updatedCandidate.nrp)) {
                     alert('NRP harus 10 digit angka.');
                     return;
                 }
-                if (!updatedCandidate.password || !updatedCandidate.name || !updatedCandidate.code) {
-                    alert('Semua kolom bertanda (*) harus diisi.');
+                if (!updatedCandidate.name || !updatedCandidate.password || !updatedCandidate.code || !validateKeterangan(updatedCandidate.keterangan)) {
+                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan harus "Lolos" atau "Tidak Lolos".');
                     return;
                 }
 
                 try {
-                    await database.ref('candidates/' + candidateId).update(updatedCandidate);
+                    await database.ref('applicants/' + candidateId).update(updatedCandidate);
                     alert('Kandidat berhasil diperbarui!');
                     DOMElements.editCandidateModal.classList.add('hidden');
                     loadApplicantsData(); // Refresh data
