@@ -295,6 +295,27 @@
                 return re.test(nrp);
             }
 
+            // Helper function to format datetime-local string
+            function formatDateTimeForDisplay(dateTimeString) {
+                if (!dateTimeString) {
+                    return { date: 'Akan diinformasikan kemudian (Cek secara berkala)', time: '' };
+                }
+                try {
+                    const date = new Date(dateTimeString);
+                    if (isNaN(date.getTime())) { // Check for invalid date
+                        return { date: 'Format tanggal/waktu tidak valid', time: '' };
+                    }
+                    const optionsDate = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                    const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false };
+                    const formattedDate = date.toLocaleDateString('id-ID', optionsDate);
+                    const formattedTime = date.toLocaleTimeString('id-ID', optionsTime);
+                    return { date: formattedDate, time: formattedTime };
+                } catch (e) {
+                    console.error("Error formatting date time:", e);
+                    return { date: 'Akan diinformasikan kemudian (Cek secara berkala)', time: '' };
+                }
+            }
+
             function displayStatus(status, data = {}) {
                 let content = '';
                 let className = '';
@@ -315,8 +336,10 @@
                         `;
                         
                         // Ambil detail interview dari data pendaftar
-                        const interviewTime = data.interviewDetails?.time || 'Akan diinformasikan';
-                        const breakoutRoom = data.interviewDetails?.breakoutRoom || 'Akan diinformasikan';
+                        const formattedInterview = formatDateTimeForDisplay(data.interviewDetails?.time);
+                        const interviewDate = formattedInterview.date;
+                        const interviewTime = formattedInterview.time || 'Akan diinformasikan kemudian (Cek secara berkala)';
+                        const breakoutRoom = data.interviewDetails?.breakoutRoom || 'Akan diinformasikan kemudian (Cek secara berkala)';
                         
                         // Gunakan link global
                         const currentZoomLink = globalZoomLink;
@@ -326,6 +349,7 @@
                             <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> tahap administrasi sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-base font-semibold mb-2">Selanjutnya, Anda diundang untuk mengikuti tahap interview:</p>
                             <ul class="list-disc list-inside ml-4 mb-4 text-gray-700 text-left">
+                                <li><strong>Tanggal:</strong> ${interviewDate}</li>
                                 <li><strong>Waktu:</strong> ${interviewTime}</li>
                                 <li><strong>Breakout Room:</strong> ${breakoutRoom}</li>
                                 <li><strong>Link Zoom:</strong> ${currentZoomLink !== '#' ? `<a href="${currentZoomLink}" target="_blank" class="text-blue-600 hover:underline">${currentZoomLink}</a>` : 'Link belum tersedia'}</li>
