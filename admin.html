@@ -193,14 +193,14 @@
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
                         <li>`Keterangan`: Status kelulusan (`Lolos` atau `Tidak Lolos`).</li>
                         <li>`Password`: Kata sandi untuk login pendaftar.</li>
-                        <li>`Waktu Interview` (Opsional): Tanggal dan waktu interview spesifik per pendaftar. Format: `DD/MM/YYYY HH:MM`. Contoh: `31/12/2025 10:45`</li>
+                        <li>`Waktu Interview` (Opsional): Tanggal dan waktu interview spesifik per pendaftar. Contoh: `2025-01-10T10:00`</li>
                         <li>`Breakout Room` (Opsional): Nomor atau nama breakout room spesifik per pendaftar.</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
                     <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan,Password,Waktu Interview,Breakout Room
-Budi Santoso,1234567890,Lolos,passbudi,31/12/2025 10:45,Room A
+Budi Santoso,1234567890,Lolos,passbudi,2025-01-10T10:00,Room A
 Siti Aminah,0987654321,Tidak Lolos,passsiti,
-Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
+Joko Susilo,1122334455,Lolos,passjoko,2025-01-11T13:00,Room B</code></pre>
                 </div>
 
                 <div class="mb-6">
@@ -314,7 +314,7 @@ Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
                                 <th>Keterangan</th>
                                 <th>Password</th>
                                 <th>Waktu Interview</th> 
-                                <th>Breakout Room</th>
+                                <th>Breakout Room</th> <!-- New column -->
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -546,41 +546,6 @@ Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
                 DOMElements.confirmImportButton.classList.add('hidden');
             }
 
-            // Helper function to format datetime-local string for display (DD/MM/YYYY HH:MM)
-            function formatDateTimeForDisplay(dateTimeString) {
-                if (!dateTimeString) {
-                    return 'Akan diinformasikan kemudian (Cek secara berkala)';
-                }
-                try {
-                    const date = new Date(dateTimeString);
-                    if (isNaN(date.getTime())) { // Check for invalid date
-                        return 'Format tanggal/waktu tidak valid';
-                    }
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-                    const year = date.getFullYear();
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    return `${day}/${month}/${year} ${hours}:${minutes}`;
-                } catch (e) {
-                    console.error("Error formatting date time:", e);
-                    return 'Akan diinformasikan kemudian (Cek secara berkala)';
-                }
-            }
-
-            // Helper function to parse DD/MM/YYYY HH:MM to YYYY-MM-DDTHH:MM for datetime-local input
-            function parseDateTimeForInput(displayString) {
-                if (!displayString || displayString === 'Akan diinformasikan kemudian (Cek secara berkala)' || displayString === 'Format tanggal/waktu tidak valid') {
-                    return '';
-                }
-                const parts = displayString.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/);
-                if (parts) {
-                    const [, day, month, year, hour, minute] = parts;
-                    return `${year}-${month}-${day}T${hour}:${minute}`;
-                }
-                return '';
-            }
-
             // Fungsi parsing CSV yang disesuaikan
             function parseCSV(text) {
                 function isBinaryContent(content) {
@@ -664,21 +629,7 @@ Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
                                 interviewDetails: {}
                             };
 
-                            // Parse Waktu Interview dari DD/MM/YYYY HH:MM ke format ISO untuk datetime-local input
-                            if (headerMap['waktu interview'] !== undefined && values[headerMap['waktu interview']]) {
-                                const dateTimeParts = values[headerMap['waktu interview']].match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/);
-                                if (dateTimeParts) {
-                                    const [, day, month, year, hour, minute] = dateTimeParts;
-                                    // Construct ISO string for Date object, then format for datetime-local input
-                                    const isoString = `${year}-${month}-${day}T${hour}:${minute}:00`;
-                                    candidate.interviewDetails.time = isoString;
-                                } else {
-                                    candidate.interviewDetails.time = ''; // Invalid format
-                                }
-                            } else {
-                                candidate.interviewDetails.time = '';
-                            }
-
+                            if (headerMap['waktu interview'] !== undefined) candidate.interviewDetails.time = values[headerMap['waktu interview']] || '';
                             if (headerMap['breakout room'] !== undefined) candidate.interviewDetails.breakoutRoom = values[headerMap['breakout room']] || '';
                             
                             // Hapus interviewDetails jika semua propertinya kosong
@@ -715,16 +666,13 @@ Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
 
                 previewRows.forEach(row => {
                     const tr = document.createElement('tr');
-                    const displayTime = formatDateTimeForDisplay(row.interviewDetails?.time);
-                    const displayBreakout = row.interviewDetails?.breakoutRoom || 'Akan diinformasikan kemudian (Cek secara berkala)';
-
                     tr.innerHTML = `
                         <td>${row.name || '-'}</td>
                         <td>${row.nrp || '-'}</td>
                         <td>${row.keterangan || '-'}</td>
                         <td>${row.password || '-'}</td>
-                        <td>${displayTime}</td>
-                        <td>${displayBreakout}</td>
+                        <td>${row.interviewDetails?.time || '-'}</td>
+                        <td>${row.interviewDetails?.breakoutRoom || '-'}</td>
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
                 });
@@ -775,11 +723,6 @@ Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
                 currentApplicantsData.forEach(applicant => {
                     const tr = document.createElement('tr');
                     tr.dataset.id = applicant.id;
-                    
-                    const displayTime = formatDateTimeForDisplay(applicant.interviewDetails?.time);
-                    const inputTime = parseDateTimeForInput(displayTime); // For datetime-local input
-                    const displayBreakout = applicant.interviewDetails?.breakoutRoom || 'Akan diinformasikan kemudian (Cek secara berkala)';
-
                     tr.innerHTML = `
                         <td><input type="checkbox" class="delete-checkbox" data-id="${applicant.id}" ${selectedForDeletion.has(applicant.id) ? 'checked' : ''}></td>
                         <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
@@ -791,7 +734,7 @@ Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
                             </select>
                         </td>
                         <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
-                        <td><input type="datetime-local" class="edit-field" data-field="interviewDetails.time" value="${inputTime}"></td>
+                        <td><input type="datetime-local" class="edit-field" data-field="interviewDetails.time" value="${applicant.interviewDetails?.time || ''}"></td>
                         <td><input type="text" class="edit-field" data-field="interviewDetails.breakoutRoom" value="${applicant.interviewDetails?.breakoutRoom || ''}" placeholder="Room A"></td>
                         <td>
                             <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
@@ -863,7 +806,7 @@ Joko Susilo,1122334455,Lolos,passjoko,01/01/2026 13:00,Room B</code></pre>
                             DOMElements.editNrp.value = applicant.nrp || '';
                             DOMElements.editStatus.value = applicant.keterangan || 'Tidak Lolos';
                             DOMElements.editPassword.value = applicant.password || '';
-                            DOMElements.editInterviewTime.value = parseDateTimeForInput(formatDateTimeForDisplay(applicant.interviewDetails?.time));
+                            DOMElements.editInterviewTime.value = applicant.interviewDetails?.time || '';
                             DOMElements.editBreakoutRoom.value = applicant.interviewDetails?.breakoutRoom || '';
                             DOMElements.editCandidateModal.classList.remove('hidden');
                         }
