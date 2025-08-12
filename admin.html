@@ -86,14 +86,14 @@
             background-color: #f3f4f6;
         }
 
-        td input[type="text"], td select, td input[type="datetime-local"] {
+        td input[type="text"], td select, td input[type="datetime-local"], td input[type="number"], td textarea {
             width: 100%;
             padding: 0.25rem 0.5rem;
             border: 1px solid #d1d5db;
             border-radius: 0.25rem;
             font-size: 0.875rem;
         }
-        td input[type="text"]:focus, td select:focus, td input[type="datetime-local"]:focus {
+        td input[type="text"]:focus, td select:focus, td input[type="datetime-local"]:focus, td input[type="number"]:focus, td textarea:focus {
             outline: none;
             border-color: #c41e3a;
             box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
@@ -173,7 +173,6 @@
                             <input type="url" id="globalNextStepLink" name="globalNextStepLink" placeholder="Contoh: https://chat.whatsapp.com/your-group-invite"
                                 class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                         </div>
-                        <!-- Removed Link Dokumen Panduan Global -->
                         <button type="submit" id="saveGlobalSettingsBtn" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
                             Simpan Pengaturan Global
                         </button>
@@ -189,13 +188,23 @@
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
                         <li>`Keterangan Interview`: Status kelulusan tahap interview (`Lolos Interview`, `Tidak Lolos Interview`, atau `Menunggu`).</li>
                         <li>`Password`: Kata sandi untuk login pendaftar.</li>
-                        <!-- Removed Waktu Interview and Breakout Room -->
+                        <li>`Perkenalan`: Nilai (0-100) untuk Perkenalan, kelebihan dan kekurangan.</li>
+                        <li>`Kesibukan`: Nilai (0-100) untuk Kesibukan akademik, dan non-akademik.</li>
+                        <li>`Komitmen`: Nilai (0-100) untuk Skala prioritas/komitmen.</li>
+                        <li>`Praktikum1`: Nilai (0-100) untuk Penjelasan judul praktikum pilihan 1.</li>
+                        <li>`Praktikum2`: Nilai (0-100) untuk Penjelasan judul praktikum pilihan 2.</li>
+                        <li>`LaporanDummy`: Nilai (0-100) untuk Yang diketahui mengenai format laporan Dummy POMITS.</li>
+                        <li>`Ralat`: Nilai (0-100) untuk Yang diketahui mengenai ralat yang digunakan pada laporan POMITS.</li>
+                        <li>`SkemaWaktu`: Nilai (0-100) untuk Skema pembagian waktu saat praktikum.</li>
+                        <li>`KomitmenInputNilai`: Nilai (0-100) untuk Komitmen dalam ketepatan untuk menginput nilai.</li>
+                        <li>`KeyakinanDiterima`: Nilai (0-100) untuk Seberapa yakin diterima jadi aslab.</li>
+                        <li>`Keterangan`: Opsional, keterangan tambahan dari admin.</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan Interview,Password
-Budi Santoso,1234567890,Lolos Interview,passbudi
-Siti Aminah,0987654321,Tidak Lolos Interview,passsiti
-Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan Interview,Password,Perkenalan,Kesibukan,Komitmen,Praktikum1,Praktikum2,LaporanDummy,Ralat,SkemaWaktu,KomitmenInputNilai,KeyakinanDiterima,Keterangan
+Budi Santoso,1234567890,Lolos Interview,passbudi,80,75,90,85,88,70,72,92,95,90,Baik sekali
+Siti Aminah,0987654321,Tidak Lolos Interview,passsiti,60,65,50,55,60,40,45,50,55,60,Perlu peningkatan
+Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></pre>
                 </div>
 
                 <div class="mb-6">
@@ -220,7 +229,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                                     <th>NRP</th>
                                     <th>Keterangan Interview</th>
                                     <th>Password</th>
-                                    <!-- Removed Waktu Interview and Breakout Room -->
+                                    <th>Perkenalan</th>
+                                    <th>Kesibukan</th>
+                                    <th>Komitmen</th>
+                                    <th>Praktikum 1</th>
+                                    <th>Praktikum 2</th>
+                                    <th>Laporan Dummy</th>
+                                    <th>Ralat</th>
+                                    <th>Skema Waktu</th>
+                                    <th>Komitmen Input Nilai</th>
+                                    <th>Keyakinan Diterima</th>
+                                    <th>Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody id="csvPreviewBody">
@@ -277,7 +296,52 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                                     <option value="Menunggu">Menunggu</option>
                                 </select>
                             </div>
-                            <!-- Removed Waktu Interview and Breakout Room -->
+                            <div class="col-span-full grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label for="newPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (0-100)</label>
+                                    <input type="number" id="newPerkenalan" name="newPerkenalan" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (0-100)</label>
+                                    <input type="number" id="newKesibukan" name="newKesibukan" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (0-100)</label>
+                                    <input type="number" id="newKomitmen" name="newKomitmen" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 1 (0-100)</label>
+                                    <input type="number" id="newPraktikum1" name="newPraktikum1" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 2 (0-100)</label>
+                                    <input type="number" id="newPraktikum2" name="newPraktikum2" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (0-100)</label>
+                                    <input type="number" id="newLaporanDummy" name="newLaporanDummy" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (0-100)</label>
+                                    <input type="number" id="newRalat" name="newRalat" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (0-100)</label>
+                                    <input type="number" id="newSkemaWaktu" name="newSkemaWaktu" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (0-100)</label>
+                                    <input type="number" id="newKomitmenInputNilai" name="newKomitmenInputNilai" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="newKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (0-100)</label>
+                                    <input type="number" id="newKeyakinanDiterima" name="newKeyakinanDiterima" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                </div>
+                            </div>
+                            <div class="col-span-full">
+                                <label for="newKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan (Opsional)</label>
+                                <textarea id="newKeterangan" name="newKeterangan" rows="2" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none"></textarea>
+                            </div>
                         </div>
                         <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
                             Tambah Kandidat
@@ -298,7 +362,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                                 <th>NRP</th>
                                 <th>Keterangan Interview</th>
                                 <th>Password</th>
-                                <!-- Removed Waktu Interview and Breakout Room -->
+                                <th>Perkenalan</th>
+                                <th>Kesibukan</th>
+                                <th>Komitmen</th>
+                                <th>Praktikum 1</th>
+                                <th>Praktikum 2</th>
+                                <th>Laporan Dummy</th>
+                                <th>Ralat</th>
+                                <th>Skema Waktu</th>
+                                <th>Komitmen Input Nilai</th>
+                                <th>Keyakinan Diterima</th>
+                                <th>Keterangan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -352,7 +426,52 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                         <input type="text" id="editPassword" name="editPassword" required
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
-                    <!-- Removed Waktu Interview and Breakout Room -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label for="editPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (0-100)</label>
+                            <input type="number" id="editPerkenalan" name="editPerkenalan" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (0-100)</label>
+                            <input type="number" id="editKesibukan" name="editKesibukan" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (0-100)</label>
+                            <input type="number" id="editKomitmen" name="editKomitmen" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 1 (0-100)</label>
+                            <input type="number" id="editPraktikum1" name="editPraktikum1" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 2 (0-100)</label>
+                            <input type="number" id="editPraktikum2" name="editPraktikum2" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (0-100)</label>
+                            <input type="number" id="editLaporanDummy" name="editLaporanDummy" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (0-100)</label>
+                            <input type="number" id="editRalat" name="editRalat" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (0-100)</label>
+                            <input type="number" id="editSkemaWaktu" name="editSkemaWaktu" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (0-100)</label>
+                            <input type="number" id="editKomitmenInputNilai" name="editKomitmenInputNilai" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="editKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (0-100)</label>
+                            <input type="number" id="editKeyakinanDiterima" name="editKeyakinanDiterima" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="editKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan (Opsional)</label>
+                        <textarea id="editKeterangan" name="editKeterangan" rows="2" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none"></textarea>
+                    </div>
                     
                     <div class="flex space-x-3">
                         <button type="submit" 
@@ -422,7 +541,6 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                 // Global Settings
                 globalSettingsForm: document.getElementById('globalSettingsForm'),
                 globalNextStepLink: document.getElementById('globalNextStepLink'),
-                // globalNextStepDocLink: document.getElementById('globalNextStepDocLink'), // Removed
                 saveGlobalSettingsBtn: document.getElementById('saveGlobalSettingsBtn'),
                 globalSettingsStatus: document.getElementById('globalSettingsStatus'),
 
@@ -448,8 +566,18 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                 newNrp: document.getElementById('newNrp'),
                 newPassword: document.getElementById('newPassword'),
                 newStatusInterview: document.getElementById('newStatusInterview'),
-                // newInterviewTime: document.getElementById('newInterviewTime'), // Removed
-                // newBreakoutRoom: document.getElementById('newBreakoutRoom'), // Removed
+                newPerkenalan: document.getElementById('newPerkenalan'),
+                newKesibukan: document.getElementById('newKesibukan'),
+                newKomitmen: document.getElementById('newKomitmen'),
+                newPraktikum1: document.getElementById('newPraktikum1'),
+                newPraktikum2: document.getElementById('newPraktikum2'),
+                newLaporanDummy: document.getElementById('newLaporanDummy'),
+                newRalat: document.getElementById('newRalat'),
+                newSkemaWaktu: document.getElementById('newSkemaWaktu'),
+                newKomitmenInputNilai: document.getElementById('newKomitmenInputNilai'),
+                newKeyakinanDiterima: document.getElementById('newKeyakinanDiterima'),
+                newKeterangan: document.getElementById('newKeterangan'),
+
                 editCandidateModal: document.getElementById('editCandidateModal'),
                 editCandidateForm: document.getElementById('editCandidateForm'),
                 editCandidateId: document.getElementById('editCandidateId'),
@@ -457,8 +585,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                 editNrp: document.getElementById('editNrp'),
                 editStatusInterview: document.getElementById('editStatusInterview'),
                 editPassword: document.getElementById('editPassword'),
-                // editInterviewTime: document.getElementById('editInterviewTime'), // Removed
-                // editBreakoutRoom: document.getElementById('editBreakoutRoom'), // Removed
+                editPerkenalan: document.getElementById('editPerkenalan'),
+                editKesibukan: document.getElementById('editKesibukan'),
+                editKomitmen: document.getElementById('editKomitmen'),
+                editPraktikum1: document.getElementById('editPraktikum1'),
+                editPraktikum2: document.getElementById('editPraktikum2'),
+                editLaporanDummy: document.getElementById('editLaporanDummy'),
+                editRalat: document.getElementById('editRalat'),
+                editSkemaWaktu: document.getElementById('editSkemaWaktu'),
+                editKomitmenInputNilai: document.getElementById('editKomitmenInputNilai'),
+                editKeyakinanDiterima: document.getElementById('editKeyakinanDiterima'),
+                editKeterangan: document.getElementById('editKeterangan'),
                 cancelEdit: document.getElementById('cancelEdit'),
 
                 hayooModal: document.getElementById('hayooModal'),
@@ -560,7 +697,11 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                 if (lines.length > 0) {
                     const headers = lines[0].split(separator).map(h => h.trim());
                     const expectedCoreHeaders = ['Nama', 'NRP', 'Keterangan Interview', 'Password'];
-                    // Removed optionalHeaders as they are no longer needed
+                    const optionalHeaders = [
+                        'Perkenalan', 'Kesibukan', 'Komitmen', 'Praktikum1', 'Praktikum2',
+                        'LaporanDummy', 'Ralat', 'SkemaWaktu', 'KomitmenInputNilai',
+                        'KeyakinanDiterima', 'Keterangan'
+                    ];
 
                     const hasCoreHeaders = expectedCoreHeaders.every(expectedH => 
                         headers.some(h => h.toLowerCase() === expectedH.toLowerCase())
@@ -601,8 +742,21 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                                 nrp: values[headerMap['nrp']] || '',
                                 keteranganInterview: keteranganInterviewValue,
                                 password: values[headerMap['password']] || '',
-                                // Removed interviewDetails
                             };
+
+                            optionalHeaders.forEach(optHeader => {
+                                const headerKey = optHeader.toLowerCase();
+                                if (headerMap.hasOwnProperty(headerKey)) {
+                                    let value = values[headerMap[headerKey]];
+                                    if (['perkenalan', 'kesibukan', 'komitmen', 'praktikum1', 'praktikum2',
+                                         'laporandummy', 'ralat', 'skemawaktu', 'komitmeninputnilai',
+                                         'keyakinanditerima'].includes(headerKey)) {
+                                        candidate[optHeader] = value ? parseInt(value) : null;
+                                    } else {
+                                        candidate[optHeader] = value || '';
+                                    }
+                                }
+                            });
 
                             if (candidate.name && validateNRP(candidate.nrp) && validateKeteranganInterview(candidate.keteranganInterview) && candidate.password) {
                                 result.push(candidate);
@@ -638,7 +792,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                         <td>${row.nrp || '-'}</td>
                         <td>${row.keteranganInterview || '-'}</td>
                         <td>${row.password || '-'}</td>
-                        <!-- Removed interviewDetails columns -->
+                        <td>${row.Perkenalan !== undefined ? row.Perkenalan : '-'}</td>
+                        <td>${row.Kesibukan !== undefined ? row.Kesibukan : '-'}</td>
+                        <td>${row.Komitmen !== undefined ? row.Komitmen : '-'}</td>
+                        <td>${row.Praktikum1 !== undefined ? row.Praktikum1 : '-'}</td>
+                        <td>${row.Praktikum2 !== undefined ? row.Praktikum2 : '-'}</td>
+                        <td>${row.LaporanDummy !== undefined ? row.LaporanDummy : '-'}</td>
+                        <td>${row.Ralat !== undefined ? row.Ralat : '-'}</td>
+                        <td>${row.SkemaWaktu !== undefined ? row.SkemaWaktu : '-'}</td>
+                        <td>${row.KomitmenInputNilai !== undefined ? row.KomitmenInputNilai : '-'}</td>
+                        <td>${row.KeyakinanDiterima !== undefined ? row.KeyakinanDiterima : '-'}</td>
+                        <td>${row.Keterangan || '-'}</td>
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
                 });
@@ -646,7 +810,7 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                 if (data.length > 10) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td colspan="4" class="py-2 px-3 text-center text-gray-400">
+                        <td colspan="15" class="py-2 px-3 text-center text-gray-400">
                             ... dan ${data.length - 10} data lainnya (total ${data.length} data)
                         </td>
                     `;
@@ -701,7 +865,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                             </select>
                         </td>
                         <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
-                        <!-- Removed interviewDetails fields -->
+                        <td><input type="number" class="edit-field" data-field="Perkenalan" value="${applicant.Perkenalan !== undefined ? applicant.Perkenalan : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="Kesibukan" value="${applicant.Kesibukan !== undefined ? applicant.Kesibukan : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="Komitmen" value="${applicant.Komitmen !== undefined ? applicant.Komitmen : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="Praktikum1" value="${applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="Praktikum2" value="${applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="LaporanDummy" value="${applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="Ralat" value="${applicant.Ralat !== undefined ? applicant.Ralat : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="SkemaWaktu" value="${applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="KomitmenInputNilai" value="${applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : ''}" min="0" max="100"></td>
+                        <td><input type="number" class="edit-field" data-field="KeyakinanDiterima" value="${applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : ''}" min="0" max="100"></td>
+                        <td><textarea class="edit-field" data-field="Keterangan" rows="1">${applicant.Keterangan || ''}</textarea></td>
                         <td>
                             <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
                             <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
@@ -714,11 +888,14 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                     input.addEventListener('change', (e) => {
                         const docId = e.target.closest('tr').dataset.id;
                         const fieldPath = e.target.dataset.field; 
-                        const value = e.target.value;
+                        let value = e.target.value;
+
+                        if (e.target.type === 'number') {
+                            value = value === '' ? null : parseInt(value);
+                        }
 
                         const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
                         if (applicantIndex > -1) {
-                            // Simplified field update as interviewDetails is removed
                             currentApplicantsData[applicantIndex][fieldPath] = value;
                             editedApplicants.add(docId);
                             DOMElements.saveChangesBtn.disabled = false;
@@ -765,7 +942,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                             DOMElements.editNrp.value = applicant.nrp || '';
                             DOMElements.editStatusInterview.value = applicant.keteranganInterview || 'Menunggu';
                             DOMElements.editPassword.value = applicant.password || '';
-                            // Removed interviewDetails fields
+                            DOMElements.editPerkenalan.value = applicant.Perkenalan !== undefined ? applicant.Perkenalan : '';
+                            DOMElements.editKesibukan.value = applicant.Kesibukan !== undefined ? applicant.Kesibukan : '';
+                            DOMElements.editKomitmen.value = applicant.Komitmen !== undefined ? applicant.Komitmen : '';
+                            DOMElements.editPraktikum1.value = applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : '';
+                            DOMElements.editPraktikum2.value = applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : '';
+                            DOMElements.editLaporanDummy.value = applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : '';
+                            DOMElements.editRalat.value = applicant.Ralat !== undefined ? applicant.Ralat : '';
+                            DOMElements.editSkemaWaktu.value = applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : '';
+                            DOMElements.editKomitmenInputNilai.value = applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : '';
+                            DOMElements.editKeyakinanDiterima.value = applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : '';
+                            DOMElements.editKeterangan.value = applicant.Keterangan || '';
                             DOMElements.editCandidateModal.classList.remove('hidden');
                         }
                     });
@@ -779,7 +966,6 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                     if (snapshot.exists()) {
                         const settings = snapshot.val();
                         DOMElements.globalNextStepLink.value = settings.nextStepLink || '';
-                        // Removed globalNextStepDocLink
                     } else {
                         DOMElements.globalNextStepLink.value = '';
                     }
@@ -798,7 +984,6 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
 
                 const settings = {
                     nextStepLink: DOMElements.globalNextStepLink.value,
-                    // Removed nextStepDocLink
                 };
 
                 try {
@@ -941,10 +1126,19 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                             keteranganInterview: applicant.keteranganInterview,
                             password: applicant.password,
                             code: 'N/A', 
-                            timestamp: firebase.database.ServerValue.TIMESTAMP 
+                            timestamp: firebase.database.ServerValue.TIMESTAMP,
+                            Perkenalan: applicant.Perkenalan !== undefined ? applicant.Perkenalan : null,
+                            Kesibukan: applicant.Kesibukan !== undefined ? applicant.Kesibukan : null,
+                            Komitmen: applicant.Komitmen !== undefined ? applicant.Komitmen : null,
+                            Praktikum1: applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : null,
+                            Praktikum2: applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : null,
+                            LaporanDummy: applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : null,
+                            Ralat: applicant.Ralat !== undefined ? applicant.Ralat : null,
+                            SkemaWaktu: applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : null,
+                            KomitmenInputNilai: applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : null,
+                            KeyakinanDiterima: applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : null,
+                            Keterangan: applicant.Keterangan || ''
                         };
-
-                        // Removed interviewDetails handling
 
                         if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeteranganInterview(dataToSave.keteranganInterview) || !dataToSave.password) {
                             console.error("Data tidak valid (Nama/NRP/Keterangan Interview/Password kosong/salah format):", applicant);
@@ -1047,10 +1241,19 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                                 nrp: applicant.nrp,
                                 keteranganInterview: applicant.keteranganInterview,
                                 password: applicant.password,
-                                code: applicant.code || 'N/A' 
+                                code: applicant.code || 'N/A',
+                                Perkenalan: applicant.Perkenalan !== undefined ? applicant.Perkenalan : null,
+                                Kesibukan: applicant.Kesibukan !== undefined ? applicant.Kesibukan : null,
+                                Komitmen: applicant.Komitmen !== undefined ? applicant.Komitmen : null,
+                                Praktikum1: applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : null,
+                                Praktikum2: applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : null,
+                                LaporanDummy: applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : null,
+                                Ralat: applicant.Ralat !== undefined ? applicant.Ralat : null,
+                                SkemaWaktu: applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : null,
+                                KomitmenInputNilai: applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : null,
+                                KeyakinanDiterima: applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : null,
+                                Keterangan: applicant.Keterangan || ''
                             };
-
-                            // Removed interviewDetails handling
 
                             await database.ref('applicants/' + docId).update(updateData);
                             updateCount++;
@@ -1121,7 +1324,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                     code: 'N/A', 
                     keteranganInterview: DOMElements.newStatusInterview.value, 
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    // Removed interviewDetails
+                    Perkenalan: DOMElements.newPerkenalan.value ? parseInt(DOMElements.newPerkenalan.value) : null,
+                    Kesibukan: DOMElements.newKesibukan.value ? parseInt(DOMElements.newKesibukan.value) : null,
+                    Komitmen: DOMElements.newKomitmen.value ? parseInt(DOMElements.newKomitmen.value) : null,
+                    Praktikum1: DOMElements.newPraktikum1.value ? parseInt(DOMElements.newPraktikum1.value) : null,
+                    Praktikum2: DOMElements.newPraktikum2.value ? parseInt(DOMElements.newPraktikum2.value) : null,
+                    LaporanDummy: DOMElements.newLaporanDummy.value ? parseInt(DOMElements.newLaporanDummy.value) : null,
+                    Ralat: DOMElements.newRalat.value ? parseInt(DOMElements.newRalat.value) : null,
+                    SkemaWaktu: DOMElements.newSkemaWaktu.value ? parseInt(DOMElements.newSkemaWaktu.value) : null,
+                    KomitmenInputNilai: DOMElements.newKomitmenInputNilai.value ? parseInt(DOMElements.newKomitmenInputNilai.value) : null,
+                    KeyakinanDiterima: DOMElements.newKeyakinanDiterima.value ? parseInt(DOMElements.newKeyakinanDiterima.value) : null,
+                    Keterangan: DOMElements.newKeterangan.value || ''
                 };
 
                 if (!validateNRP(newCandidate.nrp)) {
@@ -1154,7 +1367,17 @@ Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                     keteranganInterview: DOMElements.editStatusInterview.value, 
                     password: DOMElements.editPassword.value,
                     code: 'N/A', 
-                    // Removed interviewDetails
+                    Perkenalan: DOMElements.editPerkenalan.value ? parseInt(DOMElements.editPerkenalan.value) : null,
+                    Kesibukan: DOMElements.editKesibukan.value ? parseInt(DOMElements.editKesibukan.value) : null,
+                    Komitmen: DOMElements.editKomitmen.value ? parseInt(DOMElements.editKomitmen.value) : null,
+                    Praktikum1: DOMElements.editPraktikum1.value ? parseInt(DOMElements.editPraktikum1.value) : null,
+                    Praktikum2: DOMElements.editPraktikum2.value ? parseInt(DOMElements.editPraktikum2.value) : null,
+                    LaporanDummy: DOMElements.editLaporanDummy.value ? parseInt(DOMElements.editLaporanDummy.value) : null,
+                    Ralat: DOMElements.editRalat.value ? parseInt(DOMElements.editRalat.value) : null,
+                    SkemaWaktu: DOMElements.editSkemaWaktu.value ? parseInt(DOMElements.editSkemaWaktu.value) : null,
+                    KomitmenInputNilai: DOMElements.editKomitmenInputNilai.value ? parseInt(DOMElements.editKomitmenInputNilai.value) : null,
+                    KeyakinanDiterima: DOMElements.editKeyakinanDiterima.value ? parseInt(DOMElements.editKeyakinanDiterima.value) : null,
+                    Keterangan: DOMElements.editKeterangan.value || ''
                 };
 
                 if (!validateNRP(updatedCandidate.nrp)) {
