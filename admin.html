@@ -166,18 +166,14 @@
                 <!-- Global Next Step Settings Section -->
                 <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
                     <h3 class="text-lg font-semibold mb-3 text-gray-800">Pengaturan Global Langkah Selanjutnya</h3>
-                    <p class="text-gray-700 mb-3">Link grup komunikasi dan dokumen panduan ini akan berlaku untuk semua pendaftar yang Lolos Tahap Interview.</p>
+                    <p class="text-gray-700 mb-3">Link grup komunikasi ini akan berlaku untuk semua pendaftar yang Lolos Tahap Interview.</p>
                     <form id="globalSettingsForm" class="space-y-3">
                         <div>
                             <label for="globalNextStepLink" class="block text-sm font-medium text-gray-700 mb-1">Link Grup Komunikasi Global</label>
                             <input type="url" id="globalNextStepLink" name="globalNextStepLink" placeholder="Contoh: https://chat.whatsapp.com/your-group-invite"
                                 class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                         </div>
-                        <div>
-                            <label for="globalNextStepDocLink" class="block text-sm font-medium text-gray-700 mb-1">Link Dokumen Panduan Global</label>
-                            <input type="url" id="globalNextStepDocLink" name="globalNextStepDocLink" placeholder="Contoh: https://docs.google.com/document/d/your-doc-id/edit"
-                                class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                        </div>
+                        <!-- Removed Link Dokumen Panduan Global -->
                         <button type="submit" id="saveGlobalSettingsBtn" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
                             Simpan Pengaturan Global
                         </button>
@@ -193,14 +189,13 @@
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
                         <li>`Keterangan Interview`: Status kelulusan tahap interview (`Lolos Interview`, `Tidak Lolos Interview`, atau `Menunggu`).</li>
                         <li>`Password`: Kata sandi untuk login pendaftar.</li>
-                        <li>`Waktu Interview` (Opsional): Tanggal dan waktu interview spesifik per pendaftar. Contoh: `2025-01-10T10:00`</li>
-                        <li>`Breakout Room` (Opsional): Nomor atau nama breakout room spesifik per pendaftar.</li>
+                        <!-- Removed Waktu Interview and Breakout Room -->
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan Interview,Password,Waktu Interview,Breakout Room
-Budi Santoso,1234567890,Lolos Interview,passbudi,2025-01-10T10:00,Room A
-Siti Aminah,0987654321,Tidak Lolos Interview,passsiti,
-Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan Interview,Password
+Budi Santoso,1234567890,Lolos Interview,passbudi
+Siti Aminah,0987654321,Tidak Lolos Interview,passsiti
+Joko Susilo,1122334455,Menunggu,passjoko</code></pre>
                 </div>
 
                 <div class="mb-6">
@@ -225,8 +220,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                                     <th>NRP</th>
                                     <th>Keterangan Interview</th>
                                     <th>Password</th>
-                                    <th>Waktu Interview</th>
-                                    <th>Breakout Room</th>
+                                    <!-- Removed Waktu Interview and Breakout Room -->
                                 </tr>
                             </thead>
                             <tbody id="csvPreviewBody">
@@ -283,17 +277,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                                     <option value="Menunggu">Menunggu</option>
                                 </select>
                             </div>
-                            <!-- New fields for interview details -->
-                            <div>
-                                <label for="newInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
-                                <input type="datetime-local" id="newInterviewTime" name="newInterviewTime"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
-                                <input type="text" id="newBreakoutRoom" name="newBreakoutRoom" placeholder="Contoh: Room A"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
+                            <!-- Removed Waktu Interview and Breakout Room -->
                         </div>
                         <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
                             Tambah Kandidat
@@ -314,8 +298,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                                 <th>NRP</th>
                                 <th>Keterangan Interview</th>
                                 <th>Password</th>
-                                <th>Waktu Interview</th> 
-                                <th>Breakout Room</th> 
+                                <!-- Removed Waktu Interview and Breakout Room -->
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -369,17 +352,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                         <input type="text" id="editPassword" name="editPassword" required
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
-                    <!-- New fields for interview details in edit modal -->
-                    <div>
-                        <label for="editInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
-                        <input type="datetime-local" id="editInterviewTime" name="editInterviewTime"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
-                        <input type="text" id="editBreakoutRoom" name="editBreakoutRoom" placeholder="Contoh: Room A"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
+                    <!-- Removed Waktu Interview and Breakout Room -->
                     
                     <div class="flex space-x-3">
                         <button type="submit" 
@@ -439,7 +412,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
             const DOMElements = {
                 authSection: document.getElementById('authSection'),
                 importSection: document.getElementById('importSection'),
-                manageSection: document.getElementById('manageSection'), // Re-added
+                manageSection: document.getElementById('manageSection'),
                 adminEmailInput: document.getElementById('adminEmail'),
                 adminPasswordLoginInput: document.getElementById('adminPasswordLogin'),
                 loginBtn: document.getElementById('loginBtn'),
@@ -449,7 +422,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 // Global Settings
                 globalSettingsForm: document.getElementById('globalSettingsForm'),
                 globalNextStepLink: document.getElementById('globalNextStepLink'),
-                globalNextStepDocLink: document.getElementById('globalNextStepDocLink'),
+                // globalNextStepDocLink: document.getElementById('globalNextStepDocLink'), // Removed
                 saveGlobalSettingsBtn: document.getElementById('saveGlobalSettingsBtn'),
                 globalSettingsStatus: document.getElementById('globalSettingsStatus'),
 
@@ -463,7 +436,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 confirmImportButton: document.getElementById('confirmImportButton'),
                 uploadResultDiv: document.getElementById('uploadResult'),
 
-                // Elements related to applicant management (re-added)
+                // Elements related to applicant management
                 refreshDataBtn: document.getElementById('refreshDataBtn'),
                 saveChangesBtn: document.getElementById('saveChangesBtn'),
                 deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
@@ -475,8 +448,8 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 newNrp: document.getElementById('newNrp'),
                 newPassword: document.getElementById('newPassword'),
                 newStatusInterview: document.getElementById('newStatusInterview'),
-                newInterviewTime: document.getElementById('newInterviewTime'),
-                newBreakoutRoom: document.getElementById('newBreakoutRoom'),
+                // newInterviewTime: document.getElementById('newInterviewTime'), // Removed
+                // newBreakoutRoom: document.getElementById('newBreakoutRoom'), // Removed
                 editCandidateModal: document.getElementById('editCandidateModal'),
                 editCandidateForm: document.getElementById('editCandidateForm'),
                 editCandidateId: document.getElementById('editCandidateId'),
@@ -484,8 +457,8 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 editNrp: document.getElementById('editNrp'),
                 editStatusInterview: document.getElementById('editStatusInterview'),
                 editPassword: document.getElementById('editPassword'),
-                editInterviewTime: document.getElementById('editInterviewTime'),
-                editBreakoutRoom: document.getElementById('editBreakoutRoom'),
+                // editInterviewTime: document.getElementById('editInterviewTime'), // Removed
+                // editBreakoutRoom: document.getElementById('editBreakoutRoom'), // Removed
                 cancelEdit: document.getElementById('cancelEdit'),
 
                 hayooModal: document.getElementById('hayooModal'),
@@ -493,9 +466,9 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
             };
 
             let selectedFile = null;
-            let currentApplicantsData = []; // Re-added
-            let editedApplicants = new Set(); // Re-added
-            let selectedForDeletion = new Set(); // Re-added
+            let currentApplicantsData = [];
+            let editedApplicants = new Set();
+            let selectedForDeletion = new Set();
             let parsedCsvData = []; 
 
             // --- Helper Functions ---
@@ -587,7 +560,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 if (lines.length > 0) {
                     const headers = lines[0].split(separator).map(h => h.trim());
                     const expectedCoreHeaders = ['Nama', 'NRP', 'Keterangan Interview', 'Password'];
-                    const optionalHeaders = ['Waktu Interview', 'Breakout Room']; 
+                    // Removed optionalHeaders as they are no longer needed
 
                     const hasCoreHeaders = expectedCoreHeaders.every(expectedH => 
                         headers.some(h => h.toLowerCase() === expectedH.toLowerCase())
@@ -628,16 +601,8 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                                 nrp: values[headerMap['nrp']] || '',
                                 keteranganInterview: keteranganInterviewValue,
                                 password: values[headerMap['password']] || '',
-                                interviewDetails: {}
+                                // Removed interviewDetails
                             };
-
-                            if (headerMap['waktu interview'] !== undefined) candidate.interviewDetails.time = values[headerMap['waktu interview']] || '';
-                            if (headerMap['breakout room'] !== undefined) candidate.interviewDetails.breakoutRoom = values[headerMap['breakout room']] || '';
-                            
-                            // Remove interviewDetails if all its properties are empty
-                            if (Object.values(candidate.interviewDetails).every(val => val === '')) {
-                                delete candidate.interviewDetails;
-                            }
 
                             if (candidate.name && validateNRP(candidate.nrp) && validateKeteranganInterview(candidate.keteranganInterview) && candidate.password) {
                                 result.push(candidate);
@@ -673,8 +638,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                         <td>${row.nrp || '-'}</td>
                         <td>${row.keteranganInterview || '-'}</td>
                         <td>${row.password || '-'}</td>
-                        <td>${row.interviewDetails?.time || '-'}</td>
-                        <td>${row.interviewDetails?.breakoutRoom || '-'}</td>
+                        <!-- Removed interviewDetails columns -->
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
                 });
@@ -682,7 +646,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 if (data.length > 10) {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td colspan="6" class="py-2 px-3 text-center text-gray-400">
+                        <td colspan="4" class="py-2 px-3 text-center text-gray-400">
                             ... dan ${data.length - 10} data lainnya (total ${data.length} data)
                         </td>
                     `;
@@ -690,7 +654,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 }
             }
 
-            async function loadApplicantsData() { // Re-added
+            async function loadApplicantsData() {
                 DOMElements.manageDataStatus.textContent = 'Memuat data...';
                 DOMElements.applicantsTableBody.innerHTML = '';
                 currentApplicantsData = [];
@@ -720,7 +684,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 }
             }
 
-            function renderApplicantsTable() { // Re-added
+            function renderApplicantsTable() {
                 DOMElements.applicantsTableBody.innerHTML = '';
                 currentApplicantsData.forEach(applicant => {
                     const tr = document.createElement('tr');
@@ -737,8 +701,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                             </select>
                         </td>
                         <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
-                        <td><input type="datetime-local" class="edit-field" data-field="interviewDetails.time" value="${applicant.interviewDetails?.time || ''}"></td>
-                        <td><input type="text" class="edit-field" data-field="interviewDetails.breakoutRoom" value="${applicant.interviewDetails?.breakoutRoom || ''}" placeholder="Room A"></td>
+                        <!-- Removed interviewDetails fields -->
                         <td>
                             <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
                             <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
@@ -755,15 +718,8 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
 
                         const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
                         if (applicantIndex > -1) {
-                            const parts = fieldPath.split('.');
-                            let current = currentApplicantsData[applicantIndex];
-                            for (let i = 0; i < parts.length - 1; i++) {
-                                if (!current[parts[i]]) {
-                                    current[parts[i]] = {};
-                                }
-                                current = current[parts[i]];
-                            }
-                            current[parts[parts.length - 1]] = value;
+                            // Simplified field update as interviewDetails is removed
+                            currentApplicantsData[applicantIndex][fieldPath] = value;
                             editedApplicants.add(docId);
                             DOMElements.saveChangesBtn.disabled = false;
                         }
@@ -809,8 +765,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                             DOMElements.editNrp.value = applicant.nrp || '';
                             DOMElements.editStatusInterview.value = applicant.keteranganInterview || 'Menunggu';
                             DOMElements.editPassword.value = applicant.password || '';
-                            DOMElements.editInterviewTime.value = applicant.interviewDetails?.time || '';
-                            DOMElements.editBreakoutRoom.value = applicant.interviewDetails?.breakoutRoom || '';
+                            // Removed interviewDetails fields
                             DOMElements.editCandidateModal.classList.remove('hidden');
                         }
                     });
@@ -824,10 +779,9 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                     if (snapshot.exists()) {
                         const settings = snapshot.val();
                         DOMElements.globalNextStepLink.value = settings.nextStepLink || '';
-                        DOMElements.globalNextStepDocLink.value = settings.nextStepDocLink || '';
+                        // Removed globalNextStepDocLink
                     } else {
                         DOMElements.globalNextStepLink.value = '';
-                        DOMElements.globalNextStepDocLink.value = '';
                     }
                     DOMElements.globalSettingsStatus.textContent = 'Pengaturan global dimuat.';
                 } catch (error) {
@@ -844,7 +798,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
 
                 const settings = {
                     nextStepLink: DOMElements.globalNextStepLink.value,
-                    nextStepDocLink: DOMElements.globalNextStepDocLink.value
+                    // Removed nextStepDocLink
                 };
 
                 try {
@@ -865,14 +819,14 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 if (user) {
                     DOMElements.authSection.classList.add('hidden');
                     DOMElements.importSection.classList.remove('hidden');
-                    DOMElements.manageSection.classList.remove('hidden'); // Re-added
-                    loadApplicantsData(); // Re-added
-                    loadGlobalSettings(); // Load global settings when admin logs in
+                    DOMElements.manageSection.classList.remove('hidden');
+                    loadApplicantsData();
+                    loadGlobalSettings();
                     console.log("Admin logged in:", user.email);
                 } else {
                     DOMElements.authSection.classList.remove('hidden');
                     DOMElements.importSection.classList.add('hidden');
-                    DOMElements.manageSection.classList.add('hidden'); // Re-added
+                    DOMElements.manageSection.classList.add('hidden');
                     console.log("Admin logged out.");
                 }
             });
@@ -990,11 +944,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                             timestamp: firebase.database.ServerValue.TIMESTAMP 
                         };
 
-                        if (applicant.interviewDetails && Object.keys(applicant.interviewDetails).length > 0) {
-                            dataToSave.interviewDetails = applicant.interviewDetails;
-                        } else {
-                            dataToSave.interviewDetails = null; // Ensure it's null if empty
-                        }
+                        // Removed interviewDetails handling
 
                         if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeteranganInterview(dataToSave.keteranganInterview) || !dataToSave.password) {
                             console.error("Data tidak valid (Nama/NRP/Keterangan Interview/Password kosong/salah format):", applicant);
@@ -1036,12 +986,12 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
                 DOMElements.csvPreview.classList.add('hidden'); 
                 resetImportButtons();
-                loadApplicantsData(); // Re-load data after import
+                loadApplicantsData(); 
             });
 
-            DOMElements.refreshDataBtn.addEventListener('click', loadApplicantsData); // Re-added
+            DOMElements.refreshDataBtn.addEventListener('click', loadApplicantsData);
 
-            DOMElements.selectAllCheckbox.addEventListener('change', (e) => { // Re-added
+            DOMElements.selectAllCheckbox.addEventListener('change', (e) => {
                 const isChecked = e.target.checked;
                 DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
                     checkbox.checked = isChecked;
@@ -1053,9 +1003,10 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                     }
                 });
                 DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
+                DOMElements.selectAllCheckbox.checked = selectedForDeletion.size === currentApplicantsData.length && currentApplicantsData.length > 0;
             });
 
-            DOMElements.saveChangesBtn.addEventListener('click', async () => { // Re-added
+            DOMElements.saveChangesBtn.addEventListener('click', async () => {
                 if (editedApplicants.size === 0) {
                     DOMElements.manageDataStatus.textContent = 'Tidak ada perubahan untuk disimpan.';
                     return;
@@ -1099,14 +1050,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                                 code: applicant.code || 'N/A' 
                             };
 
-                            if (applicant.interviewDetails && (applicant.interviewDetails.time || applicant.interviewDetails.breakoutRoom)) {
-                                updateData.interviewDetails = {
-                                    time: applicant.interviewDetails.time || '',
-                                    breakoutRoom: applicant.interviewDetails.breakoutRoom || ''
-                                };
-                            } else {
-                                updateData.interviewDetails = null; 
-                            }
+                            // Removed interviewDetails handling
 
                             await database.ref('applicants/' + docId).update(updateData);
                             updateCount++;
@@ -1128,7 +1072,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 loadApplicantsData(); 
             });
 
-            DOMElements.deleteSelectedBtn.addEventListener('click', async () => { // Re-added
+            DOMElements.deleteSelectedBtn.addEventListener('click', async () => {
                 if (selectedForDeletion.size === 0) {
                     DOMElements.manageDataStatus.textContent = 'Tidak ada data yang dipilih untuk dihapus.';
                     return;
@@ -1167,7 +1111,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 loadApplicantsData(); 
             });
 
-            DOMElements.addCandidateForm.addEventListener('submit', async (e) => { // Re-added
+            DOMElements.addCandidateForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
                 const newCandidate = {
@@ -1177,15 +1121,8 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                     code: 'N/A', 
                     keteranganInterview: DOMElements.newStatusInterview.value, 
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    interviewDetails: {}
+                    // Removed interviewDetails
                 };
-
-                if (DOMElements.newInterviewTime.value) newCandidate.interviewDetails.time = DOMElements.newInterviewTime.value;
-                if (DOMElements.newBreakoutRoom.value) newCandidate.interviewDetails.breakoutRoom = DOMElements.newBreakoutRoom.value;
-
-                if (Object.values(newCandidate.interviewDetails).every(val => val === '')) {
-                    delete newCandidate.interviewDetails;
-                }
 
                 if (!validateNRP(newCandidate.nrp)) {
                     alert('NRP harus 10 digit angka.');
@@ -1207,7 +1144,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 }
             });
 
-            DOMElements.editCandidateForm.addEventListener('submit', async (e) => { // Re-added
+            DOMElements.editCandidateForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
                 const candidateId = DOMElements.editCandidateId.value;
@@ -1217,15 +1154,8 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                     keteranganInterview: DOMElements.editStatusInterview.value, 
                     password: DOMElements.editPassword.value,
                     code: 'N/A', 
-                    interviewDetails: {}
+                    // Removed interviewDetails
                 };
-
-                if (DOMElements.editInterviewTime.value) updatedCandidate.interviewDetails.time = DOMElements.editInterviewTime.value;
-                if (DOMElements.editBreakoutRoom.value) updatedCandidate.interviewDetails.breakoutRoom = DOMElements.editBreakoutRoom.value;
-
-                if (Object.values(updatedCandidate.interviewDetails).every(val => val === '')) {
-                    delete updatedCandidate.interviewDetails;
-                }
 
                 if (!validateNRP(updatedCandidate.nrp)) {
                     alert('NRP harus 10 digit angka.');
@@ -1247,7 +1177,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 }
             });
 
-            DOMElements.cancelEdit.addEventListener('click', () => { // Re-added
+            DOMElements.cancelEdit.addEventListener('click', () => {
                 DOMElements.editCandidateModal.classList.add('hidden');
             });
         });
