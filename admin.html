@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Impor Data Kelulusan Tahap Interview</title>
+    <title>Admin Panel - Impor & Kelola Kelulusan Tahap Interview</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -247,6 +247,86 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 </div>
             </div>
         </div>
+
+        <div id="manageSection" class="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mt-8 hidden">
+            <div class="bg-theme-red text-white p-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold">Kelola Data Pendaftar</h2>
+                <button id="refreshDataBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Refresh Data</button>
+            </div>
+            <div class="p-6">
+                <!-- Add Candidate Form -->
+                <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Tambah Kandidat Baru</h3>
+                    <form id="addCandidateForm" class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label for="newName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newName" name="newName" required 
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newNrp" name="newNrp" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
+                                <input type="text" id="newPassword" name="newPassword" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newStatusInterview" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Interview <span class="text-theme-red">*</span></label>
+                                <select id="newStatusInterview" name="newStatusInterview" required
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                                    <option value="Lolos Interview">Lolos Interview</option>
+                                    <option value="Tidak Lolos Interview">Tidak Lolos Interview</option>
+                                    <option value="Menunggu">Menunggu</option>
+                                </select>
+                            </div>
+                            <!-- New fields for interview details -->
+                            <div>
+                                <label for="newInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
+                                <input type="datetime-local" id="newInterviewTime" name="newInterviewTime"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
+                                <input type="text" id="newBreakoutRoom" name="newBreakoutRoom" placeholder="Contoh: Room A"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
+                            Tambah Kandidat
+                        </button>
+                    </form>
+                </div>
+
+                <div class="mb-4 flex justify-end space-x-2">
+                    <button id="saveChangesBtn" class="btn-primary px-4 py-2 rounded-md font-medium" disabled>Simpan Perubahan</button>
+                    <button id="deleteSelectedBtn" class="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition" disabled>Hapus Terpilih</button>
+                </div>
+                <div class="table-container">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="w-10"><input type="checkbox" id="selectAllCheckbox"></th>
+                                <th>Nama</th>
+                                <th>NRP</th>
+                                <th>Keterangan Interview</th>
+                                <th>Password</th>
+                                <th>Waktu Interview</th> 
+                                <th>Breakout Room</th> 
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicantsTableBody">
+                            <!-- Applicant data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="manageDataStatus" class="mt-4 text-sm text-gray-600"></p>
+            </div>
+        </div>
     </main>
     
     <footer class="bg-theme-black text-white py-4 mt-12">
@@ -254,6 +334,68 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
             <p>&copy; 2025 Fisika Laboratorium 1 - Departemen Fisika ITS</p>
         </div>
     </footer>
+
+    <!-- Edit Candidate Modal -->
+    <div id="editCandidateModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
+            <div class="bg-theme-red text-white p-4 text-center">
+                <h3 class="text-xl font-bold">Edit Kandidat</h3>
+            </div>
+            <div class="p-6">
+                <form id="editCandidateForm" class="space-y-4">
+                    <input type="hidden" id="editCandidateId">
+                    
+                    <div>
+                        <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editName" name="editName" required 
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editNrp" name="editNrp" required 
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editStatusInterview" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Interview <span class="text-theme-red">*</span></label>
+                        <select id="editStatusInterview" name="editStatusInterview" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                            <option value="Lolos Interview">Lolos Interview</option>
+                            <option value="Tidak Lolos Interview">Tidak Lolos Interview</option>
+                            <option value="Menunggu">Menunggu</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="editPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
+                        <input type="text" id="editPassword" name="editPassword" required
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <!-- New fields for interview details in edit modal -->
+                    <div>
+                        <label for="editInterviewTime" class="block text-sm font-medium text-gray-700 mb-1">Waktu Interview</label>
+                        <input type="datetime-local" id="editInterviewTime" name="editInterviewTime"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editBreakoutRoom" class="block text-sm font-medium text-gray-700 mb-1">Breakout Room</label>
+                        <input type="text" id="editBreakoutRoom" name="editBreakoutRoom" placeholder="Contoh: Room A"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button type="submit" 
+                            class="flex-1 btn-primary py-2 px-4 rounded-md font-medium">
+                            Simpan
+                        </button>
+                        
+                        <button type="button" id="cancelEdit" 
+                            class="flex-1 bg-gray-300 text-gray-800 hover:bg-gray-400 py-2 px-4 rounded-md font-medium transition-colors duration-300">
+                            Batal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Hayoo Modal (untuk pesan error login admin) -->
     <div id="hayooModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
@@ -297,7 +439,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
             const DOMElements = {
                 authSection: document.getElementById('authSection'),
                 importSection: document.getElementById('importSection'),
-                // manageSection: document.getElementById('manageSection'), // Removed
+                manageSection: document.getElementById('manageSection'), // Re-added
                 adminEmailInput: document.getElementById('adminEmail'),
                 adminPasswordLoginInput: document.getElementById('adminPasswordLogin'),
                 loginBtn: document.getElementById('loginBtn'),
@@ -321,39 +463,39 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 confirmImportButton: document.getElementById('confirmImportButton'),
                 uploadResultDiv: document.getElementById('uploadResult'),
 
-                // Removed elements related to applicant management
-                // refreshDataBtn: document.getElementById('refreshDataBtn'),
-                // saveChangesBtn: document.getElementById('saveChangesBtn'),
-                // deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
-                // selectAllCheckbox: document.getElementById('selectAllCheckbox'),
-                // applicantsTableBody: document.getElementById('applicantsTableBody'),
-                // manageDataStatus: document.getElementById('manageDataStatus'),
-                // addCandidateForm: document.getElementById('addCandidateForm'),
-                // newName: document.getElementById('newName'),
-                // newNrp: document.getElementById('newNrp'),
-                // newPassword: document.getElementById('newPassword'),
-                // newStatusInterview: document.getElementById('newStatusInterview'),
-                // newInterviewTime: document.getElementById('newInterviewTime'),
-                // newBreakoutRoom: document.getElementById('newBreakoutRoom'),
-                // editCandidateModal: document.getElementById('editCandidateModal'),
-                // editCandidateForm: document.getElementById('editCandidateForm'),
-                // editCandidateId: document.getElementById('editCandidateId'),
-                // editName: document.getElementById('editName'),
-                // editNrp: document.getElementById('editNrp'),
-                // editStatusInterview: document.getElementById('editStatusInterview'),
-                // editPassword: document.getElementById('editPassword'),
-                // editInterviewTime: document.getElementById('editInterviewTime'),
-                // editBreakoutRoom: document.getElementById('editBreakoutRoom'),
-                // cancelEdit: document.getElementById('cancelEdit'),
+                // Elements related to applicant management (re-added)
+                refreshDataBtn: document.getElementById('refreshDataBtn'),
+                saveChangesBtn: document.getElementById('saveChangesBtn'),
+                deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
+                selectAllCheckbox: document.getElementById('selectAllCheckbox'),
+                applicantsTableBody: document.getElementById('applicantsTableBody'),
+                manageDataStatus: document.getElementById('manageDataStatus'),
+                addCandidateForm: document.getElementById('addCandidateForm'),
+                newName: document.getElementById('newName'),
+                newNrp: document.getElementById('newNrp'),
+                newPassword: document.getElementById('newPassword'),
+                newStatusInterview: document.getElementById('newStatusInterview'),
+                newInterviewTime: document.getElementById('newInterviewTime'),
+                newBreakoutRoom: document.getElementById('newBreakoutRoom'),
+                editCandidateModal: document.getElementById('editCandidateModal'),
+                editCandidateForm: document.getElementById('editCandidateForm'),
+                editCandidateId: document.getElementById('editCandidateId'),
+                editName: document.getElementById('editName'),
+                editNrp: document.getElementById('editNrp'),
+                editStatusInterview: document.getElementById('editStatusInterview'),
+                editPassword: document.getElementById('editPassword'),
+                editInterviewTime: document.getElementById('editInterviewTime'),
+                editBreakoutRoom: document.getElementById('editBreakoutRoom'),
+                cancelEdit: document.getElementById('cancelEdit'),
 
                 hayooModal: document.getElementById('hayooModal'),
                 closeHayooModal: document.getElementById('closeHayooModal')
             };
 
             let selectedFile = null;
-            // let currentApplicantsData = []; // Removed
-            // let editedApplicants = new Set(); // Removed
-            // let selectedForDeletion = new Set(); // Removed
+            let currentApplicantsData = []; // Re-added
+            let editedApplicants = new Set(); // Re-added
+            let selectedForDeletion = new Set(); // Re-added
             let parsedCsvData = []; 
 
             // --- Helper Functions ---
@@ -548,7 +690,132 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 }
             }
 
-            // Removed loadApplicantsData and renderApplicantsTable as they are for management
+            async function loadApplicantsData() { // Re-added
+                DOMElements.manageDataStatus.textContent = 'Memuat data...';
+                DOMElements.applicantsTableBody.innerHTML = '';
+                currentApplicantsData = [];
+                editedApplicants.clear();
+                selectedForDeletion.clear();
+                DOMElements.saveChangesBtn.disabled = true;
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.selectAllCheckbox.checked = false;
+
+                try {
+                    const snapshot = await database.ref('applicants').once('value');
+                    
+                    if (!snapshot.exists()) {
+                        DOMElements.manageDataStatus.textContent = 'Tidak ada data pendaftar.';
+                        return;
+                    }
+
+                    snapshot.forEach(childSnapshot => {
+                        const data = childSnapshot.val();
+                        currentApplicantsData.push({ id: childSnapshot.key, ...data });
+                    });
+                    renderApplicantsTable();
+                    DOMElements.manageDataStatus.textContent = `Data berhasil dimuat. Total: ${currentApplicantsData.length} pendaftar.`;
+                } catch (error) {
+                    console.error("Error loading applicants data:", error);
+                    DOMElements.manageDataStatus.textContent = `Gagal memuat data: ${error.message}`;
+                }
+            }
+
+            function renderApplicantsTable() { // Re-added
+                DOMElements.applicantsTableBody.innerHTML = '';
+                currentApplicantsData.forEach(applicant => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.id = applicant.id;
+                    tr.innerHTML = `
+                        <td><input type="checkbox" class="delete-checkbox" data-id="${applicant.id}" ${selectedForDeletion.has(applicant.id) ? 'checked' : ''}></td>
+                        <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="nrp" value="${applicant.nrp || ''}"></td>
+                        <td>
+                            <select class="edit-field" data-field="keteranganInterview">
+                                <option value="Lolos Interview" ${applicant.keteranganInterview === 'Lolos Interview' ? 'selected' : ''}>Lolos Interview</option>
+                                <option value="Tidak Lolos Interview" ${applicant.keteranganInterview === 'Tidak Lolos Interview' ? 'selected' : ''}>Tidak Lolos Interview</option>
+                                <option value="Menunggu" ${applicant.keteranganInterview === 'Menunggu' ? 'selected' : ''}>Menunggu</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
+                        <td><input type="datetime-local" class="edit-field" data-field="interviewDetails.time" value="${applicant.interviewDetails?.time || ''}"></td>
+                        <td><input type="text" class="edit-field" data-field="interviewDetails.breakoutRoom" value="${applicant.interviewDetails?.breakoutRoom || ''}" placeholder="Room A"></td>
+                        <td>
+                            <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
+                            <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
+                        </td>
+                    `;
+                    DOMElements.applicantsTableBody.appendChild(tr);
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.edit-field').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const docId = e.target.closest('tr').dataset.id;
+                        const fieldPath = e.target.dataset.field; 
+                        const value = e.target.value;
+
+                        const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
+                        if (applicantIndex > -1) {
+                            const parts = fieldPath.split('.');
+                            let current = currentApplicantsData[applicantIndex];
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                if (!current[parts[i]]) {
+                                    current[parts[i]] = {};
+                                }
+                                current = current[parts[i]];
+                            }
+                            current[parts[parts.length - 1]] = value;
+                            editedApplicants.add(docId);
+                            DOMElements.saveChangesBtn.disabled = false;
+                        }
+                    });
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const docId = e.target.dataset.id;
+                        if (e.target.checked) {
+                            selectedForDeletion.add(docId);
+                        } else {
+                            selectedForDeletion.delete(docId);
+                        }
+                        DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
+                        DOMElements.selectAllCheckbox.checked = selectedForDeletion.size === currentApplicantsData.length && currentApplicantsData.length > 0;
+                    });
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-single-button').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const docId = e.target.dataset.id;
+                        if (confirm(`Anda yakin ingin menghapus pendaftar ini (ID: ${docId})?`)) {
+                            try {
+                                await database.ref('applicants/' + docId).remove();
+                                DOMElements.manageDataStatus.textContent = `Pendaftar ${docId} berhasil dihapus.`;
+                                loadApplicantsData(); 
+                            } catch (error) {
+                                console.error("Error deleting single applicant:", error);
+                                DOMElements.manageDataStatus.textContent = `Gagal menghapus pendaftar: ${error.message}`;
+                            }
+                        }
+                    });
+                });
+
+                DOMElements.applicantsTableBody.querySelectorAll('.edit-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const docId = e.target.dataset.id;
+                        const applicant = currentApplicantsData.find(app => app.id === docId);
+                        if (applicant) {
+                            DOMElements.editCandidateId.value = applicant.id;
+                            DOMElements.editName.value = applicant.name || '';
+                            DOMElements.editNrp.value = applicant.nrp || '';
+                            DOMElements.editStatusInterview.value = applicant.keteranganInterview || 'Menunggu';
+                            DOMElements.editPassword.value = applicant.password || '';
+                            DOMElements.editInterviewTime.value = applicant.interviewDetails?.time || '';
+                            DOMElements.editBreakoutRoom.value = applicant.interviewDetails?.breakoutRoom || '';
+                            DOMElements.editCandidateModal.classList.remove('hidden');
+                        }
+                    });
+                });
+            }
 
             // --- Global Settings Functions ---
             async function loadGlobalSettings() {
@@ -598,14 +865,14 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 if (user) {
                     DOMElements.authSection.classList.add('hidden');
                     DOMElements.importSection.classList.remove('hidden');
-                    // DOMElements.manageSection.classList.remove('hidden'); // Removed
-                    // loadApplicantsData(); // Removed
+                    DOMElements.manageSection.classList.remove('hidden'); // Re-added
+                    loadApplicantsData(); // Re-added
                     loadGlobalSettings(); // Load global settings when admin logs in
                     console.log("Admin logged in:", user.email);
                 } else {
                     DOMElements.authSection.classList.remove('hidden');
                     DOMElements.importSection.classList.add('hidden');
-                    // DOMElements.manageSection.classList.add('hidden'); // Removed
+                    DOMElements.manageSection.classList.add('hidden'); // Re-added
                     console.log("Admin logged out.");
                 }
             });
@@ -719,12 +986,14 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                             nrp: applicant.nrp,
                             keteranganInterview: applicant.keteranganInterview,
                             password: applicant.password,
-                            code: 'N/A', // Default value, can be removed if not needed
+                            code: 'N/A', 
                             timestamp: firebase.database.ServerValue.TIMESTAMP 
                         };
 
                         if (applicant.interviewDetails && Object.keys(applicant.interviewDetails).length > 0) {
                             dataToSave.interviewDetails = applicant.interviewDetails;
+                        } else {
+                            dataToSave.interviewDetails = null; // Ensure it's null if empty
                         }
 
                         if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeteranganInterview(dataToSave.keteranganInterview) || !dataToSave.password) {
@@ -767,18 +1036,220 @@ Joko Susilo,1122334455,Menunggu,passjoko,2025-01-11T13:00,Room B</code></pre>
                 DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
                 DOMElements.csvPreview.classList.add('hidden'); 
                 resetImportButtons();
-                // No need to load applicants data as management section is removed
+                loadApplicantsData(); // Re-load data after import
             });
 
-            // Removed refreshDataBtn listener
+            DOMElements.refreshDataBtn.addEventListener('click', loadApplicantsData); // Re-added
 
-            // Removed selectAllCheckbox, saveChangesBtn, deleteSelectedBtn listeners
+            DOMElements.selectAllCheckbox.addEventListener('change', (e) => { // Re-added
+                const isChecked = e.target.checked;
+                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                    const docId = checkbox.dataset.id;
+                    if (isChecked) {
+                        selectedForDeletion.add(docId);
+                    } else {
+                        selectedForDeletion.delete(docId);
+                    }
+                });
+                DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
+            });
 
-            // Removed addCandidateForm listener
+            DOMElements.saveChangesBtn.addEventListener('click', async () => { // Re-added
+                if (editedApplicants.size === 0) {
+                    DOMElements.manageDataStatus.textContent = 'Tidak ada perubahan untuk disimpan.';
+                    return;
+                }
 
-            // Removed editCandidateForm listener
+                DOMElements.saveChangesBtn.disabled = true;
+                DOMElements.saveChangesBtn.textContent = 'Menyimpan...';
+                DOMElements.manageDataStatus.textContent = 'Menyimpan perubahan...';
 
-            // Removed cancelEdit listener
+                let updateCount = 0;
+                let errorCount = 0;
+
+                for (const docId of editedApplicants) {
+                    const applicant = currentApplicantsData.find(app => app.id === docId);
+                    if (applicant) {
+                        if (!validateNRP(applicant.nrp)) {
+                            console.error(`NRP tidak valid untuk ${applicant.name}: ${applicant.nrp}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: NRP tidak valid untuk ${applicant.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+                        if (!validateKeteranganInterview(applicant.keteranganInterview)) {
+                            console.error(`Keterangan Interview tidak valid untuk ${applicant.name}: ${applicant.keteranganInterview}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Keterangan Interview tidak valid untuk ${applicant.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+                        if (!applicant.password) {
+                            console.error(`Password kosong untuk ${applicant.name}`);
+                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Password kosong untuk ${applicant.name}.`;
+                            errorCount++;
+                            continue;
+                        }
+
+                        try {
+                            const updateData = {
+                                name: applicant.name,
+                                nrp: applicant.nrp,
+                                keteranganInterview: applicant.keteranganInterview,
+                                password: applicant.password,
+                                code: applicant.code || 'N/A' 
+                            };
+
+                            if (applicant.interviewDetails && (applicant.interviewDetails.time || applicant.interviewDetails.breakoutRoom)) {
+                                updateData.interviewDetails = {
+                                    time: applicant.interviewDetails.time || '',
+                                    breakoutRoom: applicant.interviewDetails.breakoutRoom || ''
+                                };
+                            } else {
+                                updateData.interviewDetails = null; 
+                            }
+
+                            await database.ref('applicants/' + docId).update(updateData);
+                            updateCount++;
+                        } catch (error) {
+                            console.error("Error saving changes for", docId, ":", error);
+                            errorCount++;
+                        }
+                    }
+                }
+
+                if (errorCount === 0) {
+                    DOMElements.manageDataStatus.textContent = `Perubahan berhasil disimpan! ${updateCount} data diupdate.`;
+                    editedApplicants.clear();
+                    DOMElements.saveChangesBtn.disabled = true;
+                } else {
+                    DOMElements.manageDataStatus.textContent = `Selesai menyimpan. ${updateCount} data diupdate, ${errorCount} data gagal.`;
+                }
+                DOMElements.saveChangesBtn.textContent = 'Simpan Perubahan';
+                loadApplicantsData(); 
+            });
+
+            DOMElements.deleteSelectedBtn.addEventListener('click', async () => { // Re-added
+                if (selectedForDeletion.size === 0) {
+                    DOMElements.manageDataStatus.textContent = 'Tidak ada data yang dipilih untuk dihapus.';
+                    return;
+                }
+
+                if (!confirm(`Anda yakin ingin menghapus ${selectedForDeletion.size} pendaftar yang dipilih?`)) {
+                    return;
+                }
+
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.deleteSelectedBtn.textContent = 'Menghapus...';
+                DOMElements.manageDataStatus.textContent = 'Menghapus data terpilih...';
+
+                let deleteCount = 0;
+                let errorCount = 0;
+
+                for (const docId of selectedForDeletion) {
+                    try {
+                        await database.ref('applicants/' + docId).remove();
+                        deleteCount++;
+                    } catch (error) {
+                        console.error("Error deleting selected applicant:", docId, error);
+                        errorCount++;
+                    }
+                }
+
+                if (errorCount === 0) {
+                    DOMElements.manageDataStatus.textContent = `${deleteCount} pendaftar berhasil dihapus.`;
+                } else {
+                    DOMElements.manageDataStatus.textContent = `Selesai menghapus. ${deleteCount} pendaftar berhasil dihapus, ${errorCount} gagal.`;
+                }
+                selectedForDeletion.clear();
+                DOMElements.deleteSelectedBtn.disabled = true;
+                DOMElements.selectAllCheckbox.checked = false;
+                DOMElements.deleteSelectedBtn.textContent = 'Hapus Terpilih';
+                loadApplicantsData(); 
+            });
+
+            DOMElements.addCandidateForm.addEventListener('submit', async (e) => { // Re-added
+                e.preventDefault();
+
+                const newCandidate = {
+                    name: DOMElements.newName.value,
+                    nrp: DOMElements.newNrp.value,
+                    password: DOMElements.newPassword.value,
+                    code: 'N/A', 
+                    keteranganInterview: DOMElements.newStatusInterview.value, 
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    interviewDetails: {}
+                };
+
+                if (DOMElements.newInterviewTime.value) newCandidate.interviewDetails.time = DOMElements.newInterviewTime.value;
+                if (DOMElements.newBreakoutRoom.value) newCandidate.interviewDetails.breakoutRoom = DOMElements.newBreakoutRoom.value;
+
+                if (Object.values(newCandidate.interviewDetails).every(val => val === '')) {
+                    delete newCandidate.interviewDetails;
+                }
+
+                if (!validateNRP(newCandidate.nrp)) {
+                    alert('NRP harus 10 digit angka.');
+                    return;
+                }
+                if (!newCandidate.name || !newCandidate.password || !validateKeteranganInterview(newCandidate.keteranganInterview)) {
+                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan Interview harus "Lolos Interview", "Tidak Lolos Interview", atau "Menunggu".');
+                    return;
+                }
+
+                try {
+                    await database.ref('applicants').push(newCandidate);
+                    alert('Kandidat berhasil ditambahkan!');
+                    DOMElements.addCandidateForm.reset();
+                    loadApplicantsData(); 
+                } catch (error) {
+                    console.error("Error adding candidate:", error);
+                    alert('Gagal menambahkan kandidat: ' + error.message);
+                }
+            });
+
+            DOMElements.editCandidateForm.addEventListener('submit', async (e) => { // Re-added
+                e.preventDefault();
+
+                const candidateId = DOMElements.editCandidateId.value;
+                const updatedCandidate = {
+                    name: DOMElements.editName.value,
+                    nrp: DOMElements.editNrp.value,
+                    keteranganInterview: DOMElements.editStatusInterview.value, 
+                    password: DOMElements.editPassword.value,
+                    code: 'N/A', 
+                    interviewDetails: {}
+                };
+
+                if (DOMElements.editInterviewTime.value) updatedCandidate.interviewDetails.time = DOMElements.editInterviewTime.value;
+                if (DOMElements.editBreakoutRoom.value) updatedCandidate.interviewDetails.breakoutRoom = DOMElements.editBreakoutRoom.value;
+
+                if (Object.values(updatedCandidate.interviewDetails).every(val => val === '')) {
+                    delete updatedCandidate.interviewDetails;
+                }
+
+                if (!validateNRP(updatedCandidate.nrp)) {
+                    alert('NRP harus 10 digit angka.');
+                    return;
+                }
+                if (!updatedCandidate.name || !updatedCandidate.password || !validateKeteranganInterview(updatedCandidate.keteranganInterview)) {
+                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan Interview harus "Lolos Interview", "Tidak Lolos Interview", atau "Menunggu".');
+                    return;
+                }
+
+                try {
+                    await database.ref('applicants/' + candidateId).update(updatedCandidate);
+                    alert('Kandidat berhasil diperbarui!');
+                    DOMElements.editCandidateModal.classList.add('hidden');
+                    loadApplicantsData(); 
+                } catch (error) {
+                    console.error("Error updating candidate:", error);
+                    alert('Gagal memperbarui kandidat: ' + error.message);
+                }
+            });
+
+            DOMElements.cancelEdit.addEventListener('click', () => { // Re-added
+                DOMElements.editCandidateModal.classList.add('hidden');
+            });
         });
     </script>
 </body>
