@@ -142,6 +142,34 @@
         .status-card-modal strong {
             font-weight: 700; /* Pastikan bold benar-benar tebal */
         }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .score-item {
+            background-color: #f9fafb;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .score-item strong {
+            display: block;
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin-bottom: 0.25rem;
+        }
+
+        .score-item span {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -243,7 +271,6 @@
         const database = firebase.database(); 
 
         let globalNextStepLink = '#'; // Link untuk langkah selanjutnya (misal: grup WA, pengarahan)
-        let globalNextStepDocLink = '#'; // Link untuk dokumen panduan langkah selanjutnya
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
@@ -269,7 +296,6 @@
                     if (snapshot.exists()) {
                         const settings = snapshot.val();
                         globalNextStepLink = settings.nextStepLink || '#';
-                        globalNextStepDocLink = settings.nextStepDocLink || '#';
                         console.log("Global next step settings loaded:", settings);
                     } else {
                         console.log("No global next step settings found.");
@@ -315,7 +341,48 @@
                         `;
                         
                         const currentNextStepLink = globalNextStepLink;
-                        const currentNextStepDocLink = globalNextStepDocLink;
+
+                        let scoreDetails = '';
+                        const scores = [
+                            { label: 'Perkenalan, kelebihan dan kekurangan', value: data.Perkenalan },
+                            { label: 'Kesibukan akademik, dan non-akademik', value: data.Kesibukan },
+                            { label: 'Skala prioritas/komitmen', value: data.Komitmen },
+                            { label: 'Penjelasan judul praktikum pilihan 1', value: data.Praktikum1 },
+                            { label: 'Penjelasan judul praktikum pilihan 2', value: data.Praktikum2 },
+                            { label: 'Yang diketahui mengenai format laporan Dummy POMITS', value: data.LaporanDummy },
+                            { label: 'Yang diketahui mengenai ralat yang digunakan pada laporan POMITS', value: data.Ralat },
+                            { label: 'Skema pembagian waktu saat praktikum', value: data.SkemaWaktu },
+                            { label: 'Komitmen dalam ketepatan untuk menginput nilai', value: data.KomitmenInputNilai },
+                            { label: 'Seberapa yakin diterima jadi aslab?', value: data.KeyakinanDiterima }
+                        ];
+
+                        scores.forEach(score => {
+                            if (score.value !== null && score.value !== undefined) {
+                                scoreDetails += `
+                                    <div class="score-item">
+                                        <strong>${score.label}</strong>
+                                        <span>${score.value}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        if (scoreDetails) {
+                            scoreDetails = `
+                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Detail Penilaian Interview:</h5>
+                                <div class="score-grid">
+                                    ${scoreDetails}
+                                </div>
+                            `;
+                        }
+
+                        let keteranganAdmin = '';
+                        if (data.Keterangan) {
+                            keteranganAdmin = `
+                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Keterangan Admin:</h5>
+                                <p class="text-base text-gray-700 text-left">${data.Keterangan}</p>
+                            `;
+                        }
 
                         content = `
                             <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> sebagai Asisten Fisika Laboratorium 1!</p>
@@ -334,6 +401,8 @@
                                     Gabung Grup Komunikasi
                                 </a>
                             ` : `<p class="text-sm text-gray-500 mb-4">Link grup komunikasi belum tersedia.</p>`}
+                            ${scoreDetails}
+                            ${keteranganAdmin}
                         `;
                         break;
                     case 'Tidak Lolos Interview':
@@ -449,7 +518,6 @@
                             const applicantData = childSnapshot.val();
                             if (applicantData.password === password) {
                                 found = true;
-                                // Menggunakan 'keteranganInterview' sebagai properti status kelulusan interview
                                 const statusInterview = applicantData.keteranganInterview || 'Menunggu'; 
                                 displayStatus(statusInterview, applicantData);
                             }
