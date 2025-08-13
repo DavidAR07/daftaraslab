@@ -170,6 +170,27 @@
             font-weight: 600;
             color: #1f2937;
         }
+
+        /* New styles for collapsible score details */
+        .score-details-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .score-details-container.expanded {
+            max-height: 1000px; /* Adjust as needed to fit content */
+            transition: max-height 0.5s ease-in;
+        }
+
+        .toggle-score-details {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #c41e3a;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -342,39 +363,38 @@
                         
                         const currentNextStepLink = globalNextStepLink;
 
-                        let scoreDetails = '';
+                        let scoreDetailsHtml = '';
+                        let totalScore = 0;
+                        let scoreCount = 0;
+
                         const scores = [
-                            { label: 'Perkenalan, kelebihan dan kekurangan', value: data.Perkenalan },
-                            { label: 'Kesibukan akademik, dan non-akademik', value: data.Kesibukan },
-                            { label: 'Skala prioritas/komitmen', value: data.Komitmen },
-                            { label: 'Penjelasan judul praktikum pilihan 1', value: data.Praktikum1 },
-                            { label: 'Penjelasan judul praktikum pilihan 2', value: data.Praktikum2 },
-                            { label: 'Yang diketahui mengenai format laporan Dummy POMITS', value: data.LaporanDummy },
-                            { label: 'Yang diketahui mengenai ralat yang digunakan pada laporan POMITS', value: data.Ralat },
-                            { label: 'Skema pembagian waktu saat praktikum', value: data.SkemaWaktu },
-                            { label: 'Komitmen dalam ketepatan untuk menginput nilai', value: data.KomitmenInputNilai },
-                            { label: 'Seberapa yakin diterima jadi aslab?', value: data.KeyakinanDiterima }
+                            { label: 'Perkenalan, kelebihan dan kekurangan', value: data.Perkenalan, keterangan: data.KeteranganPerkenalan },
+                            { label: 'Kesibukan akademik, dan non-akademik', value: data.Kesibukan, keterangan: data.KeteranganKesibukan },
+                            { label: 'Skala prioritas/komitmen', value: data.Komitmen, keterangan: data.KeteranganKomitmen },
+                            { label: 'Penjelasan judul praktikum pilihan 1', value: data.Praktikum1, keterangan: data.KeteranganPraktikum1 },
+                            { label: 'Penjelasan judul praktikum pilihan 2', value: data.Praktikum2, keterangan: data.KeteranganPraktikum2 },
+                            { label: 'Yang diketahui mengenai format laporan Dummy POMITS', value: data.LaporanDummy, keterangan: data.KeteranganLaporanDummy },
+                            { label: 'Yang diketahui mengenai ralat yang digunakan pada laporan POMITS', value: data.Ralat, keterangan: data.KeteranganRalat },
+                            { label: 'Skema pembagian waktu saat praktikum', value: data.SkemaWaktu, keterangan: data.KeteranganSkemaWaktu },
+                            { label: 'Komitmen dalam ketepatan untuk menginput nilai', value: data.KomitmenInputNilai, keterangan: data.KeteranganKomitmenInputNilai },
+                            { label: 'Seberapa yakin diterima jadi aslab?', value: data.KeyakinanDiterima, keterangan: data.KeteranganKeyakinanDiterima }
                         ];
 
                         scores.forEach(score => {
-                            if (score.value !== null && score.value !== undefined) {
-                                scoreDetails += `
+                            if (score.value !== null && score.value !== undefined && !isNaN(score.value)) {
+                                totalScore += parseFloat(score.value);
+                                scoreCount++;
+                                scoreDetailsHtml += `
                                     <div class="score-item">
                                         <strong>${score.label}</strong>
                                         <span>${score.value}</span>
+                                        ${score.keterangan ? `<p class="text-xs text-gray-600 mt-1">${score.keterangan}</p>` : ''}
                                     </div>
                                 `;
                             }
                         });
 
-                        if (scoreDetails) {
-                            scoreDetails = `
-                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Detail Penilaian Interview:</h5>
-                                <div class="score-grid">
-                                    ${scoreDetails}
-                                </div>
-                            `;
-                        }
+                        const averageScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(2) : 'N/A';
 
                         let keteranganAdmin = '';
                         if (data.Keterangan) {
@@ -401,7 +421,15 @@
                                     Gabung Grup Komunikasi
                                 </a>
                             ` : `<p class="text-sm text-gray-500 mb-4">Link grup komunikasi belum tersedia.</p>`}
-                            ${scoreDetails}
+                            
+                            <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Nilai Total Interview: <span class="text-theme-red">${averageScore}</span></h5>
+                            <p class="toggle-score-details" id="toggleScoreDetails">Lihat Detail Penilaian</p>
+                            <div id="scoreDetailsContainer" class="score-details-container">
+                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Detail Penilaian Interview:</h5>
+                                <div class="score-grid">
+                                    ${scoreDetailsHtml}
+                                </div>
+                            </div>
                             ${keteranganAdmin}
                         `;
                         break;
@@ -456,6 +484,14 @@
                 
                 setTimeout(() => {
                     DOMElements.statusModalOverlay.classList.add('show');
+                    if (status === 'Lolos Interview') {
+                        const toggleBtn = document.getElementById('toggleScoreDetails');
+                        const scoreContainer = document.getElementById('scoreDetailsContainer');
+                        toggleBtn.addEventListener('click', () => {
+                            scoreContainer.classList.toggle('expanded');
+                            toggleBtn.textContent = scoreContainer.classList.contains('expanded') ? 'Sembunyikan Detail Penilaian' : 'Lihat Detail Penilaian';
+                        });
+                    }
                 }, 100); 
             }
 
