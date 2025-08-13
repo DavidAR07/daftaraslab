@@ -86,14 +86,14 @@
             background-color: #f3f4f6;
         }
 
-        td input[type="text"], td select, td input[type="datetime-local"], td input[type="number"], td textarea {
+        td input[type="text"], td select, td input[type="datetime-local"] {
             width: 100%;
             padding: 0.25rem 0.5rem;
             border: 1px solid #d1d5db;
             border-radius: 0.25rem;
             font-size: 0.875rem;
         }
-        td input[type="text"]:focus, td select:focus, td input[type="datetime-local"]:focus, td input[type="number"]:focus, td textarea:focus {
+        td input[type="text"]:focus, td select:focus, td input[type="datetime-local"]:focus {
             outline: none;
             border-color: #c41e3a;
             box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
@@ -188,23 +188,33 @@
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
                         <li>`Keterangan Interview`: Status kelulusan tahap interview (`Lolos Interview`, `Tidak Lolos Interview`, atau `Menunggu`).</li>
                         <li>`Password`: Kata sandi untuk login pendaftar.</li>
-                        <li>`Perkenalan`: Nilai (0-100) untuk Perkenalan, kelebihan dan kekurangan.</li>
-                        <li>`Kesibukan`: Nilai (0-100) untuk Kesibukan akademik, dan non-akademik.</li>
-                        <li>`Komitmen`: Nilai (0-100) untuk Skala prioritas/komitmen.</li>
-                        <li>`Praktikum1`: Nilai (0-100) untuk Penjelasan judul praktikum pilihan 1.</li>
-                        <li>`Praktikum2`: Nilai (0-100) untuk Penjelasan judul praktikum pilihan 2.</li>
-                        <li>`LaporanDummy`: Nilai (0-100) untuk Yang diketahui mengenai format laporan Dummy POMITS.</li>
-                        <li>`Ralat`: Nilai (0-100) untuk Yang diketahui mengenai ralat yang digunakan pada laporan POMITS.</li>
-                        <li>`SkemaWaktu`: Nilai (0-100) untuk Skema pembagian waktu saat praktikum.</li>
-                        <li>`KomitmenInputNilai`: Nilai (0-100) untuk Komitmen dalam ketepatan untuk menginput nilai.</li>
-                        <li>`KeyakinanDiterima`: Nilai (0-100) untuk Seberapa yakin diterima jadi aslab.</li>
-                        <li>`Keterangan`: Opsional, keterangan tambahan dari admin.</li>
+                        <li>`Perkenalan`: Nilai (1-10) untuk Perkenalan.</li>
+                        <li>`KeteranganPerkenalan`: Keterangan untuk nilai Perkenalan.</li>
+                        <li>`Kesibukan`: Nilai (1-10) untuk Kesibukan.</li>
+                        <li>`KeteranganKesibukan`: Keterangan untuk nilai Kesibukan.</li>
+                        <li>`Komitmen`: Nilai (1-10) untuk Komitmen.</li>
+                        <li>`KeteranganKomitmen`: Keterangan untuk nilai Komitmen.</li>
+                        <li>`Praktikum1`: Nilai (1-10) untuk Praktikum Pilihan 1.</li>
+                        <li>`KeteranganPraktikum1`: Keterangan untuk nilai Praktikum Pilihan 1.</li>
+                        <li>`Praktikum2`: Nilai (1-10) untuk Praktikum Pilihan 2.</li>
+                        <li>`KeteranganPraktikum2`: Keterangan untuk nilai Praktikum Pilihan 2.</li>
+                        <li>`LaporanDummy`: Nilai (1-10) untuk Laporan Dummy.</li>
+                        <li>`KeteranganLaporanDummy`: Keterangan untuk nilai Laporan Dummy.</li>
+                        <li>`Ralat`: Nilai (1-10) untuk Ralat.</li>
+                        <li>`KeteranganRalat`: Keterangan untuk nilai Ralat.</li>
+                        <li>`SkemaWaktu`: Nilai (1-10) untuk Skema Waktu.</li>
+                        <li>`KeteranganSkemaWaktu`: Keterangan untuk nilai Skema Waktu.</li>
+                        <li>`KomitmenInputNilai`: Nilai (1-10) untuk Komitmen Input Nilai.</li>
+                        <li>`KeteranganKomitmenInputNilai`: Keterangan untuk nilai Komitmen Input Nilai.</li>
+                        <li>`KeyakinanDiterima`: Nilai (1-10) untuk Keyakinan Diterima.</li>
+                        <li>`KeteranganKeyakinanDiterima`: Keterangan untuk nilai Keyakinan Diterima.</li>
+                        <li>`Keterangan`: Keterangan umum dari admin.</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan Interview,Password,Perkenalan,Kesibukan,Komitmen,Praktikum1,Praktikum2,LaporanDummy,Ralat,SkemaWaktu,KomitmenInputNilai,KeyakinanDiterima,Keterangan
-Budi Santoso,1234567890,Lolos Interview,passbudi,80,75,90,85,88,70,72,92,95,90,Baik sekali
-Siti Aminah,0987654321,Tidak Lolos Interview,passsiti,60,65,50,55,60,40,45,50,55,60,Perlu peningkatan
-Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></pre>
+                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan Interview,Password,Perkenalan,KeteranganPerkenalan,Kesibukan,KeteranganKesibukan,Komitmen,KeteranganKomitmen,Praktikum1,KeteranganPraktikum1,Praktikum2,KeteranganPraktikum2,LaporanDummy,KeteranganLaporanDummy,Ralat,KeteranganRalat,SkemaWaktu,KeteranganSkemaWaktu,KomitmenInputNilai,KeteranganKomitmenInputNilai,KeyakinanDiterima,KeteranganKeyakinanDiterima,Keterangan
+Budi Santoso,1234567890,Lolos Interview,passbudi,8,Baik sekali,7,Cukup baik,9,Sangat berkomitmen,8,Penjelasan jelas,7,Penjelasan cukup,9,Memahami format,8,Memahami ralat,7,Skema waktu realistis,9,Sangat berkomitmen,10,Sangat yakin,Pendaftar sangat potensial.
+Siti Aminah,0987654321,Tidak Lolos Interview,passsiti,5,Perlu ditingkatkan,6,Kurang fokus,4,Kurang komitmen,5,Penjelasan kurang,6,Penjelasan kurang,5,Kurang memahami,4,Kurang memahami,5,Skema waktu tidak jelas,6,Kurang berkomitmen,7,Cukup yakin,Perlu belajar lebih banyak.
+Joko Susilo,1122334455,Menunggu,passjoko,7,Cukup baik,7,Cukup baik,7,Cukup berkomitmen,7,Penjelasan cukup,7,Penjelasan cukup,7,Cukup memahami,7,Cukup memahami,7,Skema waktu cukup,7,Cukup berkomitmen,7,Cukup yakin,Menunggu hasil akhir.</code></pre>
                 </div>
 
                 <div class="mb-6">
@@ -232,13 +242,13 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                                     <th>Perkenalan</th>
                                     <th>Kesibukan</th>
                                     <th>Komitmen</th>
-                                    <th>Praktikum 1</th>
-                                    <th>Praktikum 2</th>
-                                    <th>Laporan Dummy</th>
+                                    <th>Praktikum1</th>
+                                    <th>Praktikum2</th>
+                                    <th>LaporanDummy</th>
                                     <th>Ralat</th>
-                                    <th>Skema Waktu</th>
-                                    <th>Komitmen Input Nilai</th>
-                                    <th>Keyakinan Diterima</th>
+                                    <th>SkemaWaktu</th>
+                                    <th>KomitmenInputNilai</th>
+                                    <th>KeyakinanDiterima</th>
                                     <th>Keterangan</th>
                                 </tr>
                             </thead>
@@ -296,51 +306,111 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                                     <option value="Menunggu">Menunggu</option>
                                 </select>
                             </div>
-                            <div class="col-span-full grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div>
-                                    <label for="newPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (0-100)</label>
-                                    <input type="number" id="newPerkenalan" name="newPerkenalan" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (0-100)</label>
-                                    <input type="number" id="newKesibukan" name="newKesibukan" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (0-100)</label>
-                                    <input type="number" id="newKomitmen" name="newKomitmen" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 1 (0-100)</label>
-                                    <input type="number" id="newPraktikum1" name="newPraktikum1" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 2 (0-100)</label>
-                                    <input type="number" id="newPraktikum2" name="newPraktikum2" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (0-100)</label>
-                                    <input type="number" id="newLaporanDummy" name="newLaporanDummy" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (0-100)</label>
-                                    <input type="number" id="newRalat" name="newRalat" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (0-100)</label>
-                                    <input type="number" id="newSkemaWaktu" name="newSkemaWaktu" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (0-100)</label>
-                                    <input type="number" id="newKomitmenInputNilai" name="newKomitmenInputNilai" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="newKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (0-100)</label>
-                                    <input type="number" id="newKeyakinanDiterima" name="newKeyakinanDiterima" min="0" max="100" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                </div>
+                            <!-- New score inputs -->
+                            <div>
+                                <label for="newPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (1-10)</label>
+                                <input type="number" id="newPerkenalan" name="newPerkenalan" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
-                            <div class="col-span-full">
-                                <label for="newKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan (Opsional)</label>
-                                <textarea id="newKeterangan" name="newKeterangan" rows="2" class="form-input w-full px-3 py-2 border rounded-md focus:outline-none"></textarea>
+                            <div>
+                                <label for="newKeteranganPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Perkenalan</label>
+                                <input type="text" id="newKeteranganPerkenalan" name="newKeteranganPerkenalan"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (1-10)</label>
+                                <input type="number" id="newKesibukan" name="newKesibukan" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Kesibukan</label>
+                                <input type="text" id="newKeteranganKesibukan" name="newKeteranganKesibukan"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (1-10)</label>
+                                <input type="number" id="newKomitmen" name="newKomitmen" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen</label>
+                                <input type="text" id="newKeteranganKomitmen" name="newKeteranganKomitmen"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 1 (1-10)</label>
+                                <input type="number" id="newPraktikum1" name="newPraktikum1" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 1</label>
+                                <input type="text" id="newKeteranganPraktikum1" name="newKeteranganPraktikum1"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 2 (1-10)</label>
+                                <input type="number" id="newPraktikum2" name="newPraktikum2" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 2</label>
+                                <input type="text" id="newKeteranganPraktikum2" name="newKeteranganPraktikum2"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (1-10)</label>
+                                <input type="number" id="newLaporanDummy" name="newLaporanDummy" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Laporan Dummy</label>
+                                <input type="text" id="newKeteranganLaporanDummy" name="newKeteranganLaporanDummy"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (1-10)</label>
+                                <input type="number" id="newRalat" name="newRalat" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganRalat" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Ralat</label>
+                                <input type="text" id="newKeteranganRalat" name="newKeteranganRalat"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (1-10)</label>
+                                <input type="number" id="newSkemaWaktu" name="newSkemaWaktu" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Skema Waktu</label>
+                                <input type="text" id="newKeteranganSkemaWaktu" name="newKeteranganSkemaWaktu"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (1-10)</label>
+                                <input type="number" id="newKomitmenInputNilai" name="newKomitmenInputNilai" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen Input Nilai</label>
+                                <input type="text" id="newKeteranganKomitmenInputNilai" name="newKeteranganKomitmenInputNilai"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (1-10)</label>
+                                <input type="number" id="newKeyakinanDiterima" name="newKeyakinanDiterima" min="1" max="10"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeteranganKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Keyakinan Diterima</label>
+                                <input type="text" id="newKeteranganKeyakinanDiterima" name="newKeteranganKeyakinanDiterima"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
+                            </div>
+                            <div>
+                                <label for="newKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Umum Admin</label>
+                                <input type="text" id="newKeterangan" name="newKeterangan"
+                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
                             </div>
                         </div>
                         <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
@@ -365,13 +435,13 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                                 <th>Perkenalan</th>
                                 <th>Kesibukan</th>
                                 <th>Komitmen</th>
-                                <th>Praktikum 1</th>
-                                <th>Praktikum 2</th>
-                                <th>Laporan Dummy</th>
+                                <th>Praktikum1</th>
+                                <th>Praktikum2</th>
+                                <th>LaporanDummy</th>
                                 <th>Ralat</th>
-                                <th>Skema Waktu</th>
-                                <th>Komitmen Input Nilai</th>
-                                <th>Keyakinan Diterima</th>
+                                <th>SkemaWaktu</th>
+                                <th>KomitmenInputNilai</th>
+                                <th>KeyakinanDiterima</th>
                                 <th>Keterangan</th>
                                 <th>Aksi</th>
                             </tr>
@@ -426,51 +496,111 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                         <input type="text" id="editPassword" name="editPassword" required
                             class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <label for="editPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (0-100)</label>
-                            <input type="number" id="editPerkenalan" name="editPerkenalan" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (0-100)</label>
-                            <input type="number" id="editKesibukan" name="editKesibukan" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (0-100)</label>
-                            <input type="number" id="editKomitmen" name="editKomitmen" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 1 (0-100)</label>
-                            <input type="number" id="editPraktikum1" name="editPraktikum1" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum 2 (0-100)</label>
-                            <input type="number" id="editPraktikum2" name="editPraktikum2" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (0-100)</label>
-                            <input type="number" id="editLaporanDummy" name="editLaporanDummy" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (0-100)</label>
-                            <input type="number" id="editRalat" name="editRalat" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (0-100)</label>
-                            <input type="number" id="editSkemaWaktu" name="editSkemaWaktu" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (0-100)</label>
-                            <input type="number" id="editKomitmenInputNilai" name="editKomitmenInputNilai" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="editKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (0-100)</label>
-                            <input type="number" id="editKeyakinanDiterima" name="editKeyakinanDiterima" min="0" max="100" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                        </div>
+                    <!-- Edit score inputs -->
+                    <div>
+                        <label for="editPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (1-10)</label>
+                        <input type="number" id="editPerkenalan" name="editPerkenalan" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
                     <div>
-                        <label for="editKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan (Opsional)</label>
-                        <textarea id="editKeterangan" name="editKeterangan" rows="2" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none"></textarea>
+                        <label for="editKeteranganPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Perkenalan</label>
+                        <input type="text" id="editKeteranganPerkenalan" name="editKeteranganPerkenalan"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (1-10)</label>
+                        <input type="number" id="editKesibukan" name="editKesibukan" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Kesibukan</label>
+                        <input type="text" id="editKeteranganKesibukan" name="editKeteranganKesibukan"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (1-10)</label>
+                        <input type="number" id="editKomitmen" name="editKomitmen" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen</label>
+                        <input type="text" id="editKeteranganKomitmen" name="editKeteranganKomitmen"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 1 (1-10)</label>
+                        <input type="number" id="editPraktikum1" name="editPraktikum1" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 1</label>
+                        <input type="text" id="editKeteranganPraktikum1" name="editKeteranganPraktikum1"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 2 (1-10)</label>
+                        <input type="number" id="editPraktikum2" name="editPraktikum2" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 2</label>
+                        <input type="text" id="editKeteranganPraktikum2" name="editKeteranganPraktikum2"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (1-10)</label>
+                        <input type="number" id="editLaporanDummy" name="editLaporanDummy" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Laporan Dummy</label>
+                        <input type="text" id="editKeteranganLaporanDummy" name="editKeteranganLaporanDummy"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (1-10)</label>
+                        <input type="number" id="editRalat" name="editRalat" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganRalat" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Ralat</label>
+                        <input type="text" id="editKeteranganRalat" name="editKeteranganRalat"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (1-10)</label>
+                        <input type="number" id="editSkemaWaktu" name="editSkemaWaktu" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Skema Waktu</label>
+                        <input type="text" id="editKeteranganSkemaWaktu" name="editKeteranganSkemaWaktu"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (1-10)</label>
+                        <input type="number" id="editKomitmenInputNilai" name="editKomitmenInputNilai" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen Input Nilai</label>
+                        <input type="text" id="editKeteranganKomitmenInputNilai" name="editKeteranganKomitmenInputNilai"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (1-10)</label>
+                        <input type="number" id="editKeyakinanDiterima" name="editKeyakinanDiterima" min="1" max="10"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeteranganKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Keyakinan Diterima</label>
+                        <input type="text" id="editKeteranganKeyakinanDiterima" name="editKeteranganKeyakinanDiterima"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="editKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Umum Admin</label>
+                        <input type="text" id="editKeterangan" name="editKeterangan"
+                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
                     </div>
                     
                     <div class="flex space-x-3">
@@ -567,15 +697,25 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                 newPassword: document.getElementById('newPassword'),
                 newStatusInterview: document.getElementById('newStatusInterview'),
                 newPerkenalan: document.getElementById('newPerkenalan'),
+                newKeteranganPerkenalan: document.getElementById('newKeteranganPerkenalan'),
                 newKesibukan: document.getElementById('newKesibukan'),
+                newKeteranganKesibukan: document.getElementById('newKeteranganKesibukan'),
                 newKomitmen: document.getElementById('newKomitmen'),
+                newKeteranganKomitmen: document.getElementById('newKeteranganKomitmen'),
                 newPraktikum1: document.getElementById('newPraktikum1'),
+                newKeteranganPraktikum1: document.getElementById('newKeteranganPraktikum1'),
                 newPraktikum2: document.getElementById('newPraktikum2'),
+                newKeteranganPraktikum2: document.getElementById('newKeteranganPraktikum2'),
                 newLaporanDummy: document.getElementById('newLaporanDummy'),
+                newKeteranganLaporanDummy: document.getElementById('newKeteranganLaporanDummy'),
                 newRalat: document.getElementById('newRalat'),
+                newKeteranganRalat: document.getElementById('newKeteranganRalat'),
                 newSkemaWaktu: document.getElementById('newSkemaWaktu'),
+                newKeteranganSkemaWaktu: document.getElementById('newKeteranganSkemaWaktu'),
                 newKomitmenInputNilai: document.getElementById('newKomitmenInputNilai'),
+                newKeteranganKomitmenInputNilai: document.getElementById('newKeteranganKomitmenInputNilai'),
                 newKeyakinanDiterima: document.getElementById('newKeyakinanDiterima'),
+                newKeteranganKeyakinanDiterima: document.getElementById('newKeteranganKeyakinanDiterima'),
                 newKeterangan: document.getElementById('newKeterangan'),
 
                 editCandidateModal: document.getElementById('editCandidateModal'),
@@ -586,15 +726,25 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                 editStatusInterview: document.getElementById('editStatusInterview'),
                 editPassword: document.getElementById('editPassword'),
                 editPerkenalan: document.getElementById('editPerkenalan'),
+                editKeteranganPerkenalan: document.getElementById('editKeteranganPerkenalan'),
                 editKesibukan: document.getElementById('editKesibukan'),
+                editKeteranganKesibukan: document.getElementById('editKeteranganKesibukan'),
                 editKomitmen: document.getElementById('editKomitmen'),
+                editKeteranganKomitmen: document.getElementById('editKeteranganKomitmen'),
                 editPraktikum1: document.getElementById('editPraktikum1'),
+                editKeteranganPraktikum1: document.getElementById('editKeteranganPraktikum1'),
                 editPraktikum2: document.getElementById('editPraktikum2'),
+                editKeteranganPraktikum2: document.getElementById('editKeteranganPraktikum2'),
                 editLaporanDummy: document.getElementById('editLaporanDummy'),
+                editKeteranganLaporanDummy: document.getElementById('editKeteranganLaporanDummy'),
                 editRalat: document.getElementById('editRalat'),
+                editKeteranganRalat: document.getElementById('editKeteranganRalat'),
                 editSkemaWaktu: document.getElementById('editSkemaWaktu'),
+                editKeteranganSkemaWaktu: document.getElementById('editKeteranganSkemaWaktu'),
                 editKomitmenInputNilai: document.getElementById('editKomitmenInputNilai'),
+                editKeteranganKomitmenInputNilai: document.getElementById('editKeteranganKomitmenInputNilai'),
                 editKeyakinanDiterima: document.getElementById('editKeyakinanDiterima'),
+                editKeteranganKeyakinanDiterima: document.getElementById('editKeteranganKeyakinanDiterima'),
                 editKeterangan: document.getElementById('editKeterangan'),
                 cancelEdit: document.getElementById('cancelEdit'),
 
@@ -697,10 +847,13 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                 if (lines.length > 0) {
                     const headers = lines[0].split(separator).map(h => h.trim());
                     const expectedCoreHeaders = ['Nama', 'NRP', 'Keterangan Interview', 'Password'];
-                    const optionalHeaders = [
-                        'Perkenalan', 'Kesibukan', 'Komitmen', 'Praktikum1', 'Praktikum2',
-                        'LaporanDummy', 'Ralat', 'SkemaWaktu', 'KomitmenInputNilai',
-                        'KeyakinanDiterima', 'Keterangan'
+                    const scoreHeaders = [
+                        'Perkenalan', 'KeteranganPerkenalan', 'Kesibukan', 'KeteranganKesibukan',
+                        'Komitmen', 'KeteranganKomitmen', 'Praktikum1', 'KeteranganPraktikum1',
+                        'Praktikum2', 'KeteranganPraktikum2', 'LaporanDummy', 'KeteranganLaporanDummy',
+                        'Ralat', 'KeteranganRalat', 'SkemaWaktu', 'KeteranganSkemaWaktu',
+                        'KomitmenInputNilai', 'KeteranganKomitmenInputNilai', 'KeyakinanDiterima', 'KeteranganKeyakinanDiterima',
+                        'Keterangan'
                     ];
 
                     const hasCoreHeaders = expectedCoreHeaders.every(expectedH => 
@@ -744,17 +897,10 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                                 password: values[headerMap['password']] || '',
                             };
 
-                            optionalHeaders.forEach(optHeader => {
-                                const headerKey = optHeader.toLowerCase();
-                                if (headerMap.hasOwnProperty(headerKey)) {
-                                    let value = values[headerMap[headerKey]];
-                                    if (['perkenalan', 'kesibukan', 'komitmen', 'praktikum1', 'praktikum2',
-                                         'laporandummy', 'ralat', 'skemawaktu', 'komitmeninputnilai',
-                                         'keyakinanditerima'].includes(headerKey)) {
-                                        candidate[optHeader] = value ? parseInt(value) : null;
-                                    } else {
-                                        candidate[optHeader] = value || '';
-                                    }
+                            scoreHeaders.forEach(scoreHeader => {
+                                const lowerCaseHeader = scoreHeader.toLowerCase();
+                                if (headerMap.hasOwnProperty(lowerCaseHeader)) {
+                                    candidate[scoreHeader] = values[headerMap[lowerCaseHeader]];
                                 }
                             });
 
@@ -792,16 +938,16 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                         <td>${row.nrp || '-'}</td>
                         <td>${row.keteranganInterview || '-'}</td>
                         <td>${row.password || '-'}</td>
-                        <td>${row.Perkenalan !== undefined ? row.Perkenalan : '-'}</td>
-                        <td>${row.Kesibukan !== undefined ? row.Kesibukan : '-'}</td>
-                        <td>${row.Komitmen !== undefined ? row.Komitmen : '-'}</td>
-                        <td>${row.Praktikum1 !== undefined ? row.Praktikum1 : '-'}</td>
-                        <td>${row.Praktikum2 !== undefined ? row.Praktikum2 : '-'}</td>
-                        <td>${row.LaporanDummy !== undefined ? row.LaporanDummy : '-'}</td>
-                        <td>${row.Ralat !== undefined ? row.Ralat : '-'}</td>
-                        <td>${row.SkemaWaktu !== undefined ? row.SkemaWaktu : '-'}</td>
-                        <td>${row.KomitmenInputNilai !== undefined ? row.KomitmenInputNilai : '-'}</td>
-                        <td>${row.KeyakinanDiterima !== undefined ? row.KeyakinanDiterima : '-'}</td>
+                        <td>${row.Perkenalan || '-'}</td>
+                        <td>${row.Kesibukan || '-'}</td>
+                        <td>${row.Komitmen || '-'}</td>
+                        <td>${row.Praktikum1 || '-'}</td>
+                        <td>${row.Praktikum2 || '-'}</td>
+                        <td>${row.LaporanDummy || '-'}</td>
+                        <td>${row.Ralat || '-'}</td>
+                        <td>${row.SkemaWaktu || '-'}</td>
+                        <td>${row.KomitmenInputNilai || '-'}</td>
+                        <td>${row.KeyakinanDiterima || '-'}</td>
                         <td>${row.Keterangan || '-'}</td>
                     `;
                     DOMElements.csvPreviewBody.appendChild(tr);
@@ -865,17 +1011,17 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                             </select>
                         </td>
                         <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
-                        <td><input type="number" class="edit-field" data-field="Perkenalan" value="${applicant.Perkenalan !== undefined ? applicant.Perkenalan : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="Kesibukan" value="${applicant.Kesibukan !== undefined ? applicant.Kesibukan : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="Komitmen" value="${applicant.Komitmen !== undefined ? applicant.Komitmen : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="Praktikum1" value="${applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="Praktikum2" value="${applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="LaporanDummy" value="${applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="Ralat" value="${applicant.Ralat !== undefined ? applicant.Ralat : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="SkemaWaktu" value="${applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="KomitmenInputNilai" value="${applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : ''}" min="0" max="100"></td>
-                        <td><input type="number" class="edit-field" data-field="KeyakinanDiterima" value="${applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : ''}" min="0" max="100"></td>
-                        <td><textarea class="edit-field" data-field="Keterangan" rows="1">${applicant.Keterangan || ''}</textarea></td>
+                        <td><input type="number" class="edit-field" data-field="Perkenalan" value="${applicant.Perkenalan || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="Kesibukan" value="${applicant.Kesibukan || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="Komitmen" value="${applicant.Komitmen || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="Praktikum1" value="${applicant.Praktikum1 || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="Praktikum2" value="${applicant.Praktikum2 || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="LaporanDummy" value="${applicant.LaporanDummy || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="Ralat" value="${applicant.Ralat || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="SkemaWaktu" value="${applicant.SkemaWaktu || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="KomitmenInputNilai" value="${applicant.KomitmenInputNilai || ''}" min="1" max="10"></td>
+                        <td><input type="number" class="edit-field" data-field="KeyakinanDiterima" value="${applicant.KeyakinanDiterima || ''}" min="1" max="10"></td>
+                        <td><input type="text" class="edit-field" data-field="Keterangan" value="${applicant.Keterangan || ''}"></td>
                         <td>
                             <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
                             <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
@@ -888,11 +1034,7 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                     input.addEventListener('change', (e) => {
                         const docId = e.target.closest('tr').dataset.id;
                         const fieldPath = e.target.dataset.field; 
-                        let value = e.target.value;
-
-                        if (e.target.type === 'number') {
-                            value = value === '' ? null : parseInt(value);
-                        }
+                        const value = e.target.value;
 
                         const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
                         if (applicantIndex > -1) {
@@ -942,16 +1084,26 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                             DOMElements.editNrp.value = applicant.nrp || '';
                             DOMElements.editStatusInterview.value = applicant.keteranganInterview || 'Menunggu';
                             DOMElements.editPassword.value = applicant.password || '';
-                            DOMElements.editPerkenalan.value = applicant.Perkenalan !== undefined ? applicant.Perkenalan : '';
-                            DOMElements.editKesibukan.value = applicant.Kesibukan !== undefined ? applicant.Kesibukan : '';
-                            DOMElements.editKomitmen.value = applicant.Komitmen !== undefined ? applicant.Komitmen : '';
-                            DOMElements.editPraktikum1.value = applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : '';
-                            DOMElements.editPraktikum2.value = applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : '';
-                            DOMElements.editLaporanDummy.value = applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : '';
-                            DOMElements.editRalat.value = applicant.Ralat !== undefined ? applicant.Ralat : '';
-                            DOMElements.editSkemaWaktu.value = applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : '';
-                            DOMElements.editKomitmenInputNilai.value = applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : '';
-                            DOMElements.editKeyakinanDiterima.value = applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : '';
+                            DOMElements.editPerkenalan.value = applicant.Perkenalan || '';
+                            DOMElements.editKeteranganPerkenalan.value = applicant.KeteranganPerkenalan || '';
+                            DOMElements.editKesibukan.value = applicant.Kesibukan || '';
+                            DOMElements.editKeteranganKesibukan.value = applicant.KeteranganKesibukan || '';
+                            DOMElements.editKomitmen.value = applicant.Komitmen || '';
+                            DOMElements.editKeteranganKomitmen.value = applicant.KeteranganKomitmen || '';
+                            DOMElements.editPraktikum1.value = applicant.Praktikum1 || '';
+                            DOMElements.editKeteranganPraktikum1.value = applicant.KeteranganPraktikum1 || '';
+                            DOMElements.editPraktikum2.value = applicant.Praktikum2 || '';
+                            DOMElements.editKeteranganPraktikum2.value = applicant.KeteranganPraktikum2 || '';
+                            DOMElements.editLaporanDummy.value = applicant.LaporanDummy || '';
+                            DOMElements.editKeteranganLaporanDummy.value = applicant.KeteranganLaporanDummy || '';
+                            DOMElements.editRalat.value = applicant.Ralat || '';
+                            DOMElements.editKeteranganRalat.value = applicant.KeteranganRalat || '';
+                            DOMElements.editSkemaWaktu.value = applicant.SkemaWaktu || '';
+                            DOMElements.editKeteranganSkemaWaktu.value = applicant.KeteranganSkemaWaktu || '';
+                            DOMElements.editKomitmenInputNilai.value = applicant.KomitmenInputNilai || '';
+                            DOMElements.editKeteranganKomitmenInputNilai.value = applicant.KeteranganKomitmenInputNilai || '';
+                            DOMElements.editKeyakinanDiterima.value = applicant.KeyakinanDiterima || '';
+                            DOMElements.editKeteranganKeyakinanDiterima.value = applicant.KeteranganKeyakinanDiterima || '';
                             DOMElements.editKeterangan.value = applicant.Keterangan || '';
                             DOMElements.editCandidateModal.classList.remove('hidden');
                         }
@@ -1127,17 +1279,27 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                             password: applicant.password,
                             code: 'N/A', 
                             timestamp: firebase.database.ServerValue.TIMESTAMP,
-                            Perkenalan: applicant.Perkenalan !== undefined ? applicant.Perkenalan : null,
-                            Kesibukan: applicant.Kesibukan !== undefined ? applicant.Kesibukan : null,
-                            Komitmen: applicant.Komitmen !== undefined ? applicant.Komitmen : null,
-                            Praktikum1: applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : null,
-                            Praktikum2: applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : null,
-                            LaporanDummy: applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : null,
-                            Ralat: applicant.Ralat !== undefined ? applicant.Ralat : null,
-                            SkemaWaktu: applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : null,
-                            KomitmenInputNilai: applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : null,
-                            KeyakinanDiterima: applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : null,
-                            Keterangan: applicant.Keterangan || ''
+                            Perkenalan: applicant.Perkenalan || null,
+                            KeteranganPerkenalan: applicant.KeteranganPerkenalan || null,
+                            Kesibukan: applicant.Kesibukan || null,
+                            KeteranganKesibukan: applicant.KeteranganKesibukan || null,
+                            Komitmen: applicant.Komitmen || null,
+                            KeteranganKomitmen: applicant.KeteranganKomitmen || null,
+                            Praktikum1: applicant.Praktikum1 || null,
+                            KeteranganPraktikum1: applicant.KeteranganPraktikum1 || null,
+                            Praktikum2: applicant.Praktikum2 || null,
+                            KeteranganPraktikum2: applicant.KeteranganPraktikum2 || null,
+                            LaporanDummy: applicant.LaporanDummy || null,
+                            KeteranganLaporanDummy: applicant.KeteranganLaporanDummy || null,
+                            Ralat: applicant.Ralat || null,
+                            KeteranganRalat: applicant.KeteranganRalat || null,
+                            SkemaWaktu: applicant.SkemaWaktu || null,
+                            KeteranganSkemaWaktu: applicant.KeteranganSkemaWaktu || null,
+                            KomitmenInputNilai: applicant.KomitmenInputNilai || null,
+                            KeteranganKomitmenInputNilai: applicant.KeteranganKomitmenInputNilai || null,
+                            KeyakinanDiterima: applicant.KeyakinanDiterima || null,
+                            KeteranganKeyakinanDiterima: applicant.KeteranganKeyakinanDiterima || null,
+                            Keterangan: applicant.Keterangan || null
                         };
 
                         if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeteranganInterview(dataToSave.keteranganInterview) || !dataToSave.password) {
@@ -1242,17 +1404,27 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                                 keteranganInterview: applicant.keteranganInterview,
                                 password: applicant.password,
                                 code: applicant.code || 'N/A',
-                                Perkenalan: applicant.Perkenalan !== undefined ? applicant.Perkenalan : null,
-                                Kesibukan: applicant.Kesibukan !== undefined ? applicant.Kesibukan : null,
-                                Komitmen: applicant.Komitmen !== undefined ? applicant.Komitmen : null,
-                                Praktikum1: applicant.Praktikum1 !== undefined ? applicant.Praktikum1 : null,
-                                Praktikum2: applicant.Praktikum2 !== undefined ? applicant.Praktikum2 : null,
-                                LaporanDummy: applicant.LaporanDummy !== undefined ? applicant.LaporanDummy : null,
-                                Ralat: applicant.Ralat !== undefined ? applicant.Ralat : null,
-                                SkemaWaktu: applicant.SkemaWaktu !== undefined ? applicant.SkemaWaktu : null,
-                                KomitmenInputNilai: applicant.KomitmenInputNilai !== undefined ? applicant.KomitmenInputNilai : null,
-                                KeyakinanDiterima: applicant.KeyakinanDiterima !== undefined ? applicant.KeyakinanDiterima : null,
-                                Keterangan: applicant.Keterangan || ''
+                                Perkenalan: applicant.Perkenalan || null,
+                                KeteranganPerkenalan: applicant.KeteranganPerkenalan || null,
+                                Kesibukan: applicant.Kesibukan || null,
+                                KeteranganKesibukan: applicant.KeteranganKesibukan || null,
+                                Komitmen: applicant.Komitmen || null,
+                                KeteranganKomitmen: applicant.KeteranganKomitmen || null,
+                                Praktikum1: applicant.Praktikum1 || null,
+                                KeteranganPraktikum1: applicant.KeteranganPraktikum1 || null,
+                                Praktikum2: applicant.Praktikum2 || null,
+                                KeteranganPraktikum2: applicant.KeteranganPraktikum2 || null,
+                                LaporanDummy: applicant.LaporanDummy || null,
+                                KeteranganLaporanDummy: applicant.KeteranganLaporanDummy || null,
+                                Ralat: applicant.Ralat || null,
+                                KeteranganRalat: applicant.KeteranganRalat || null,
+                                SkemaWaktu: applicant.SkemaWaktu || null,
+                                KeteranganSkemaWaktu: applicant.KeteranganSkemaWaktu || null,
+                                KomitmenInputNilai: applicant.KomitmenInputNilai || null,
+                                KeteranganKomitmenInputNilai: applicant.KeteranganKomitmenInputNilai || null,
+                                KeyakinanDiterima: applicant.KeyakinanDiterima || null,
+                                KeteranganKeyakinanDiterima: applicant.KeteranganKeyakinanDiterima || null,
+                                Keterangan: applicant.Keterangan || null
                             };
 
                             await database.ref('applicants/' + docId).update(updateData);
@@ -1324,17 +1496,27 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                     code: 'N/A', 
                     keteranganInterview: DOMElements.newStatusInterview.value, 
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    Perkenalan: DOMElements.newPerkenalan.value ? parseInt(DOMElements.newPerkenalan.value) : null,
-                    Kesibukan: DOMElements.newKesibukan.value ? parseInt(DOMElements.newKesibukan.value) : null,
-                    Komitmen: DOMElements.newKomitmen.value ? parseInt(DOMElements.newKomitmen.value) : null,
-                    Praktikum1: DOMElements.newPraktikum1.value ? parseInt(DOMElements.newPraktikum1.value) : null,
-                    Praktikum2: DOMElements.newPraktikum2.value ? parseInt(DOMElements.newPraktikum2.value) : null,
-                    LaporanDummy: DOMElements.newLaporanDummy.value ? parseInt(DOMElements.newLaporanDummy.value) : null,
-                    Ralat: DOMElements.newRalat.value ? parseInt(DOMElements.newRalat.value) : null,
-                    SkemaWaktu: DOMElements.newSkemaWaktu.value ? parseInt(DOMElements.newSkemaWaktu.value) : null,
-                    KomitmenInputNilai: DOMElements.newKomitmenInputNilai.value ? parseInt(DOMElements.newKomitmenInputNilai.value) : null,
-                    KeyakinanDiterima: DOMElements.newKeyakinanDiterima.value ? parseInt(DOMElements.newKeyakinanDiterima.value) : null,
-                    Keterangan: DOMElements.newKeterangan.value || ''
+                    Perkenalan: DOMElements.newPerkenalan.value ? parseFloat(DOMElements.newPerkenalan.value) : null,
+                    KeteranganPerkenalan: DOMElements.newKeteranganPerkenalan.value || null,
+                    Kesibukan: DOMElements.newKesibukan.value ? parseFloat(DOMElements.newKesibukan.value) : null,
+                    KeteranganKesibukan: DOMElements.newKeteranganKesibukan.value || null,
+                    Komitmen: DOMElements.newKomitmen.value ? parseFloat(DOMElements.newKomitmen.value) : null,
+                    KeteranganKomitmen: DOMElements.newKeteranganKomitmen.value || null,
+                    Praktikum1: DOMElements.newPraktikum1.value ? parseFloat(DOMElements.newPraktikum1.value) : null,
+                    KeteranganPraktikum1: DOMElements.newKeteranganPraktikum1.value || null,
+                    Praktikum2: DOMElements.newPraktikum2.value ? parseFloat(DOMElements.newPraktikum2.value) : null,
+                    KeteranganPraktikum2: DOMElements.newKeteranganPraktikum2.value || null,
+                    LaporanDummy: DOMElements.newLaporanDummy.value ? parseFloat(DOMElements.newLaporanDummy.value) : null,
+                    KeteranganLaporanDummy: DOMElements.newKeteranganLaporanDummy.value || null,
+                    Ralat: DOMElements.newRalat.value ? parseFloat(DOMElements.newRalat.value) : null,
+                    KeteranganRalat: DOMElements.newKeteranganRalat.value || null,
+                    SkemaWaktu: DOMElements.newSkemaWaktu.value ? parseFloat(DOMElements.newSkemaWaktu.value) : null,
+                    KeteranganSkemaWaktu: DOMElements.newKeteranganSkemaWaktu.value || null,
+                    KomitmenInputNilai: DOMElements.newKomitmenInputNilai.value ? parseFloat(DOMElements.newKomitmenInputNilai.value) : null,
+                    KeteranganKomitmenInputNilai: DOMElements.newKeteranganKomitmenInputNilai.value || null,
+                    KeyakinanDiterima: DOMElements.newKeyakinanDiterima.value ? parseFloat(DOMElements.newKeyakinanDiterima.value) : null,
+                    KeteranganKeyakinanDiterima: DOMElements.newKeteranganKeyakinanDiterima.value || null,
+                    Keterangan: DOMElements.newKeterangan.value || null
                 };
 
                 if (!validateNRP(newCandidate.nrp)) {
@@ -1367,17 +1549,27 @@ Joko Susilo,1122334455,Menunggu,passjoko,70,70,70,70,70,70,70,70,70,70,</code></
                     keteranganInterview: DOMElements.editStatusInterview.value, 
                     password: DOMElements.editPassword.value,
                     code: 'N/A', 
-                    Perkenalan: DOMElements.editPerkenalan.value ? parseInt(DOMElements.editPerkenalan.value) : null,
-                    Kesibukan: DOMElements.editKesibukan.value ? parseInt(DOMElements.editKesibukan.value) : null,
-                    Komitmen: DOMElements.editKomitmen.value ? parseInt(DOMElements.editKomitmen.value) : null,
-                    Praktikum1: DOMElements.editPraktikum1.value ? parseInt(DOMElements.editPraktikum1.value) : null,
-                    Praktikum2: DOMElements.editPraktikum2.value ? parseInt(DOMElements.editPraktikum2.value) : null,
-                    LaporanDummy: DOMElements.editLaporanDummy.value ? parseInt(DOMElements.editLaporanDummy.value) : null,
-                    Ralat: DOMElements.editRalat.value ? parseInt(DOMElements.editRalat.value) : null,
-                    SkemaWaktu: DOMElements.editSkemaWaktu.value ? parseInt(DOMElements.editSkemaWaktu.value) : null,
-                    KomitmenInputNilai: DOMElements.editKomitmenInputNilai.value ? parseInt(DOMElements.editKomitmenInputNilai.value) : null,
-                    KeyakinanDiterima: DOMElements.editKeyakinanDiterima.value ? parseInt(DOMElements.editKeyakinanDiterima.value) : null,
-                    Keterangan: DOMElements.editKeterangan.value || ''
+                    Perkenalan: DOMElements.editPerkenalan.value ? parseFloat(DOMElements.editPerkenalan.value) : null,
+                    KeteranganPerkenalan: DOMElements.editKeteranganPerkenalan.value || null,
+                    Kesibukan: DOMElements.editKesibukan.value ? parseFloat(DOMElements.editKesibukan.value) : null,
+                    KeteranganKesibukan: DOMElements.editKeteranganKesibukan.value || null,
+                    Komitmen: DOMElements.editKomitmen.value ? parseFloat(DOMElements.editKomitmen.value) : null,
+                    KeteranganKomitmen: DOMElements.editKeteranganKomitmen.value || null,
+                    Praktikum1: DOMElements.editPraktikum1.value ? parseFloat(DOMElements.editPraktikum1.value) : null,
+                    KeteranganPraktikum1: DOMElements.editKeteranganPraktikum1.value || null,
+                    Praktikum2: DOMElements.editPraktikum2.value ? parseFloat(DOMElements.editPraktikum2.value) : null,
+                    KeteranganPraktikum2: DOMElements.editKeteranganPraktikum2.value || null,
+                    LaporanDummy: DOMElements.editLaporanDummy.value ? parseFloat(DOMElements.editLaporanDummy.value) : null,
+                    KeteranganLaporanDummy: DOMElements.editKeteranganLaporanDummy.value || null,
+                    Ralat: DOMElements.editRalat.value ? parseFloat(DOMElements.editRalat.value) : null,
+                    KeteranganRalat: DOMElements.editKeteranganRalat.value || null,
+                    SkemaWaktu: DOMElements.editSkemaWaktu.value ? parseFloat(DOMElements.editSkemaWaktu.value) : null,
+                    KeteranganSkemaWaktu: DOMElements.editKeteranganSkemaWaktu.value || null,
+                    KomitmenInputNilai: DOMElements.editKomitmenInputNilai.value ? parseFloat(DOMElements.editKomitmenInputNilai.value) : null,
+                    KeteranganKomitmenInputNilai: DOMElements.editKeteranganKomitmenInputNilai.value || null,
+                    KeyakinanDiterima: DOMElements.editKeyakinanDiterima.value ? parseFloat(DOMElements.editKeyakinanDiterima.value) : null,
+                    KeteranganKeyakinanDiterima: DOMElements.editKeteranganKeyakinanDiterima.value || null,
+                    Keterangan: DOMElements.editKeterangan.value || null
                 };
 
                 if (!validateNRP(updatedCandidate.nrp)) {
