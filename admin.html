@@ -86,14 +86,14 @@
             background-color: #f3f4f6;
         }
 
-        td input[type="text"], td select, td input[type="datetime-local"], td input[type="number"] {
+        td input[type="text"], td select, td input[type="number"] {
             width: 100%;
             padding: 0.25rem 0.5rem;
             border: 1px solid #d1d5db;
             border-radius: 0.25rem;
             font-size: 0.875rem;
         }
-        td input[type="text"]:focus, td select:focus, td input[type="datetime-local"]:focus, td input[type="number"]:focus {
+        td input[type="text"]:focus, td select:focus, td input[type="number"]:focus {
             outline: none;
             border-color: #c41e3a;
             box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
@@ -187,8 +187,8 @@
                         <li>`Nama`: Nama lengkap pendaftar.</li>
                         <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
                         <li>`Keterangan Interview`: Status kelulusan tahap interview (`Lolos Interview`, `Tidak Lolos Interview`, atau `Menunggu`).</li>
-                        <li>`Nilai Akhir`: Nilai akhir pendaftar (opsional).</li>
-                        <li>`Catatan`: Keterangan tambahan (opsional).</li>
+                        <li>`Nilai Akhir`: Nilai akhir pendaftar (opsional, angka).</li>
+                        <li>`Catatan`: Keterangan tambahan (opsional, teks).</li>
                         <li>`Password`: Kata sandi untuk login pendaftar.</li>
                     </ul>
                     <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
