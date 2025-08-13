@@ -81,10 +81,11 @@
             box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3); /* Shadow lebih kuat */
             max-width: 550px; /* Sedikit lebih lebar */
             width: 90%;
+            max-height: 80vh; /* Batasi tinggi modal */
+            overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
             transform: scale(0.8); /* Mulai dari skala kecil */
             opacity: 0; /* Mulai dari transparan */
             transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease; /* Animasi bounce */
-            overflow: hidden;
         }
 
         .modal-overlay.show .modal-content {
@@ -356,184 +357,172 @@
                         title = 'Selamat, Anda Lolos Tahap Interview!';
                         className = 'status-lulus';
                         iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         `;
-                        
-                        const currentNextStepLink = globalNextStepLink;
-
-                        let scoreDetailsHtml = '';
-                        let totalScoreSum = 0;
-                        let validScoreCount = 0; // Untuk menghitung berapa kriteria yang memiliki nilai valid
-
-                        const scores = [
-                            { label: 'Perkenalan, kelebihan dan kekurangan', value: data.Perkenalan, keterangan: data.KeteranganPerkenalan },
-                            { label: 'Kesibukan akademik, dan non-akademik', value: data.Kesibukan, keterangan: data.KeteranganKesibukan },
-                            { label: 'Skala prioritas/komitmen', value: data.Komitmen, keterangan: data.KeteranganKomitmen },
-                            { label: 'Penjelasan judul praktikum pilihan 1', value: data.Praktikum1, keterangan: data.KeteranganPraktikum1 },
-                            { label: 'Penjelasan judul praktikum pilihan 2', value: data.Praktikum2, keterangan: data.KeteranganPraktikum2 },
-                            { label: 'Yang diketahui mengenai format laporan Dummy POMITS', value: data.LaporanDummy, keterangan: data.KeteranganLaporanDummy },
-                            { label: 'Yang diketahui mengenai ralat yang digunakan pada laporan POMITS', value: data.Ralat, keterangan: data.KeteranganRalat },
-                            { label: 'Skema pembagian waktu saat praktikum', value: data.SkemaWaktu, keterangan: data.KeteranganSkemaWaktu },
-                            { label: 'Komitmen dalam ketepatan untuk menginput nilai', value: data.KomitmenInputNilai, keterangan: data.KeteranganKomitmenInputNilai },
-                            { label: 'Seberapa yakin diterima jadi aslab?', value: data.KeyakinanDiterima, keterangan: data.KeteranganKeyakinanDiterima }
-                        ];
-
-                        scores.forEach(score => {
-                            const scoreValue = parseFloat(score.value);
-                            // Pastikan nilai adalah angka dan dalam rentang 1-10
-                            if (!isNaN(scoreValue) && scoreValue >= 1 && scoreValue <= 10) {
-                                totalScoreSum += scoreValue;
-                                validScoreCount++;
-                                scoreDetailsHtml += `
-                                    <div class="score-item">
-                                        <strong>${score.label}</strong>
-                                        <span>${scoreValue}</span>
-                                        ${score.keterangan ? `<p class="text-xs text-gray-600 mt-1">${score.keterangan}</p>` : ''}
-                                    </div>
-                                `;
-                            }
-                        });
-
-                        // Nilai total adalah penjumlahan dari semua nilai kriteria yang valid
-                        const finalTotalScore = validScoreCount > 0 ? totalScoreSum : 'N/A';
-
-                        let keteranganAdmin = '';
-                        if (data.Keterangan) {
-                            keteranganAdmin = `
-                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Keterangan Admin:</h5>
-                                <p class="text-base text-gray-700 text-left">${data.Keterangan}</p>
-                            `;
-                        }
-
                         content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> sebagai Asisten Fisika Laboratorium 1!</p>
-                            <p class="text-base font-semibold mb-2">Langkah selanjutnya:</p>
-                            <ul class="list-disc list-inside ml-4 mb-4 text-gray-700 text-left">
-                                <li>Silahkan masuk ke grup WhatsApp khusus asisten dibawah ini (DILARANG KERAS MEMBAGIKAN LINK GRUP KE SIAPAPUN)</li>
-                                <li>Segala informasi akan dikoordinasikan melalui grup tersebut</li>
-                            </ul>
-                            <p class="text-base mb-4">Silakan bergabung ke grup berikut untuk informasi lebih lanjut:</p>
-                            ${currentNextStepLink !== '#' ? `
-                                <a href="${currentNextStepLink}" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center mb-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
-                                        <path d="M15 7v2a4 4 0 01-4 4H9.024l-2.555 2.555A1 1 0 015 15.5v-5.029a1 1 0 01.832-.986l3.597-.832A4 4 0 0115 7z" />
-                                    </svg>
-                                    Gabung Grup Komunikasi
-                                </a>
-                            ` : `<p class="text-sm text-gray-500 mb-4">Link grup komunikasi belum tersedia.</p>`}
-                            
-                            <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Nilai Total Interview: <span class="text-theme-red">${finalTotalScore}</span></h5>
-                            <p class="toggle-score-details" id="toggleScoreDetails">Lihat Detail Penilaian</p>
-                            <div id="scoreDetailsContainer" class="score-details-container">
-                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Detail Penilaian Interview:</h5>
-                                <div class="score-grid">
-                                    ${scoreDetailsHtml}
-                                </div>
-                            </div>
-                            ${keteranganAdmin}
+                            <div class="status-icon">${iconSvg}</div>
+                            <h4>${title}</h4>
+                            <p class="mb-4">Halo ${applicantName},</p>
+                            <p class="mb-4">Berdasarkan hasil seleksi tahap interview, Anda dinyatakan <strong>LULUS</strong> sebagai calon Asisten Fisika Laboratorium 1.</p>
+                            <p class="mb-4">Informasi lebih lanjut mengenai langkah selanjutnya (seperti grup WhatsApp, pengarahan, dll.) akan disampaikan melalui link berikut:</p>
+                            <p class="mb-4"><a href="${globalNextStepLink}" target="_blank" class="text-theme-red hover:underline font-semibold">Klik di sini untuk informasi selanjutnya</a></p>
+                            <p class="text-sm text-gray-600">Mohon periksa secara berkala untuk update terbaru.</p>
                         `;
                         break;
                     case 'Tidak Lolos Interview':
-                        title = 'Mohon Maaf';
+                        title = 'Mohon Maaf, Anda Belum Lolos Tahap Interview';
                         className = 'status-tidak-lulus';
                         iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         `;
                         content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> tahap interview sebagai Asisten Fisika Laboratorium 1.</p>
-                            <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan usaha Anda. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
+                            <div class="status-icon">${iconSvg}</div>
+                            <h4>${title}</h4>
+                            <p class="mb-4">Halo ${applicantName},</p>
+                            <p class="mb-4">Terima kasih atas partisipasi Anda dalam seleksi Asisten Fisika Laboratorium 1. Berdasarkan hasil evaluasi, Anda dinyatakan <strong>BELUM LOLOS</strong> pada tahap interview.</p>
+                            <p class="mb-4">Jangan berkecil hati, terus tingkatkan kemampuan Anda dan coba lagi di kesempatan berikutnya.</p>
+                            <p class="text-sm text-gray-600">Semangat!</p>
                         `;
                         break;
-                    case 'Menunggu':
-                        title = 'Status Pendaftaran';
+                    case 'Menunggu Hasil':
+                        title = 'Status Anda Masih Menunggu';
                         className = 'status-menunggu';
                         iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         `;
                         content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, status kelulusan tahap interview Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
-                            <p class="text-base mb-4">Mohon bersabar, informasi lebih lanjut akan segera diumumkan.</p>
+                            <div class="status-icon">${iconSvg}</div>
+                            <h4>${title}</h4>
+                            <p class="mb-4">Halo ${applicantName},</p>
+                            <p class="mb-4">Status kelulusan Anda pada tahap interview masih dalam proses evaluasi. Mohon bersabar dan cek kembali secara berkala.</p>
+                            <p class="text-sm text-gray-600">Terima kasih atas pengertiannya.</p>
                         `;
                         break;
-                    case 'Tidak Ditemukan':
+                    case 'Data Tidak Ditemukan':
                     default:
                         title = 'Data Tidak Ditemukan';
                         className = 'status-not-found';
                         iconSvg = `
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         `;
                         content = `
-                            <p class="text-base mb-4">NRP atau Password yang Anda masukkan salah, atau data pendaftaran tidak ditemukan.</p>
-                            <p class="text-base mb-4">Mohon periksa kembali NRP dan Password Anda, atau pastikan Anda sudah mendaftar.</p>
+                            <div class="status-icon">${iconSvg}</div>
+                            <h4>${title}</h4>
+                            <p class="mb-4">Maaf, NRP atau Password yang Anda masukkan tidak ditemukan dalam database kami.</p>
+                            <p class="mb-4">Mohon periksa kembali NRP dan Password Anda, lalu coba lagi.</p>
+                            <p class="text-sm text-gray-600">Pastikan NRP dan Password sudah benar.</p>
                         `;
                         break;
                 }
 
                 DOMElements.modalStatusCard.classList.add(className);
-                DOMElements.modalStatusCard.innerHTML = `
-                    <div class="status-icon">${iconSvg}</div>
-                    <h4 class="text-xl font-bold mb-2">${title}</h4>
-                    ${content}
-                `;
-                
-                setTimeout(() => {
-                    DOMElements.statusModalOverlay.classList.add('show');
-                    if (status === 'Lolos Interview') {
-                        const toggleBtn = document.getElementById('toggleScoreDetails');
-                        const scoreContainer = document.getElementById('scoreDetailsContainer');
-                        if (toggleBtn && scoreContainer) {
-                            toggleBtn.addEventListener('click', () => {
-                                scoreContainer.classList.toggle('expanded');
-                                toggleBtn.textContent = scoreContainer.classList.contains('expanded') ? 'Sembunyikan Detail Penilaian' : 'Lihat Detail Penilaian';
-                            });
+                DOMElements.modalStatusCard.innerHTML = content;
+
+                // Tambahkan detail skor jika ada dan statusnya lolos/tidak lolos
+                if ((status === 'Lolos Interview' || status === 'Tidak Lolos Interview') && data.scores) {
+                    const scoreDetailsHtml = `
+                        <div class="mt-6">
+                            <span class="toggle-score-details" id="toggleScoreDetails">Lihat Detail Penilaian</span>
+                            <div class="score-details-container" id="scoreDetailsContainer">
+                                <div class="score-grid mt-4">
+                                    <div class="score-item">
+                                        <strong>Pengetahuan Dasar Fisika</strong>
+                                        <span>${data.scores.pengetahuan_dasar_fisika || '-'}</span>
+                                    </div>
+                                    <div class="score-item">
+                                        <strong>Pemahaman Konsep Praktikum</strong>
+                                        <span>${data.scores.pemahaman_konsep_praktikum || '-'}</span>
+                                    </div>
+                                    <div class="score-item">
+                                        <strong>Kemampuan Komunikasi</strong>
+                                        <span>${data.scores.kemampuan_komunikasi || '-'}</span>
+                                    </div>
+                                    <div class="score-item">
+                                        <strong>Sikap dan Motivasi</strong>
+                                        <span>${data.scores.sikap_motivasi || '-'}</span>
+                                    </div>
+                                    <div class="score-item">
+                                        <strong>Pengalaman Organisasi/Asisten</strong>
+                                        <span>${data.scores.pengalaman_organisasi_asisten || '-'}</span>
+                                    </div>
+                                    <div class="score-item">
+                                        <strong>Total Skor</strong>
+                                        <span>${data.scores.total_score || '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    DOMElements.modalStatusCard.insertAdjacentHTML('beforeend', scoreDetailsHtml);
+
+                    const toggleBtn = document.getElementById('toggleScoreDetails');
+                    const scoreContainer = document.getElementById('scoreDetailsContainer');
+
+                    toggleBtn.addEventListener('click', () => {
+                        scoreContainer.classList.toggle('expanded');
+                        if (scoreContainer.classList.contains('expanded')) {
+                            toggleBtn.textContent = 'Sembunyikan Detail Penilaian';
+                        } else {
+                            toggleBtn.textContent = 'Lihat Detail Penilaian';
                         }
-                    }
-                }, 100); 
+                    });
+                }
+
+                DOMElements.statusModalOverlay.classList.add('show');
             }
 
+            function hideStatusModal() {
+                DOMElements.statusModalOverlay.classList.remove('show');
+                DOMElements.modalStatusCard.innerHTML = ''; // Bersihkan konten modal
+                DOMElements.modalStatusCard.className = 'status-card-modal'; // Reset kelas
+            }
+
+            // Event Listeners
             DOMElements.togglePasswordBtn.addEventListener('click', function() {
-                if (DOMElements.passwordInput.type === 'password') {
-                    DOMElements.passwordInput.type = 'text';
-                    this.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                        </svg>
-                    `;
+                const type = DOMElements.passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                DOMElements.passwordInput.setAttribute('type', type);
+                // Anda bisa mengganti ikon mata di sini jika diinginkan
+            });
+
+            DOMElements.nrpInput.addEventListener('input', function() {
+                if (validateNRP(this.value)) {
+                    hideError(this, DOMElements.nrpError);
                 } else {
-                    DOMElements.passwordInput.type = 'password';
-                    this.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    `;
+                    showError(this, DOMElements.nrpError);
+                }
+            });
+
+            DOMElements.passwordInput.addEventListener('input', function() {
+                if (this.value.length >= 8) {
+                    hideError(this, DOMElements.passwordError);
+                } else {
+                    showError(this, DOMElements.passwordError);
                 }
             });
 
             DOMElements.form.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
-                let isValid = true;
                 const nrp = DOMElements.nrpInput.value.trim();
-                const password = DOMElements.passwordInput.value;
+                const password = DOMElements.passwordInput.value.trim();
 
-                if (!nrp || !validateNRP(nrp)) {
+                let isValid = true;
+                if (!validateNRP(nrp)) {
                     showError(DOMElements.nrpInput, DOMElements.nrpError);
                     isValid = false;
                 } else {
                     hideError(DOMElements.nrpInput, DOMElements.nrpError);
                 }
 
-                if (!password || password.length < 8) {
+                if (password.length < 8) {
                     showError(DOMElements.passwordInput, DOMElements.passwordError);
                     isValid = false;
                 } else {
@@ -544,50 +533,45 @@
                     return;
                 }
 
-                DOMElements.checkStatusBtn.classList.add('animate-bounce-click');
                 DOMElements.checkStatusBtn.disabled = true;
-                DOMElements.checkStatusBtn.textContent = 'Mengecek...';
-                
+                DOMElements.checkStatusBtn.textContent = 'Mengecek Status...';
+                DOMElements.checkStatusBtn.classList.add('animate-bounce-click');
+
                 try {
-                    const applicantsRef = database.ref('applicants');
-                    
-                    const snapshot = await applicantsRef.orderByChild('nrp').equalTo(nrp).once('value');
+                    const snapshot = await database.ref('interview_results').orderByChild('nrp').equalTo(nrp).once('value');
 
                     if (snapshot.exists()) {
                         let found = false;
                         snapshot.forEach(childSnapshot => {
-                            const applicantData = childSnapshot.val();
-                            if (applicantData.password === password) {
+                            const data = childSnapshot.val();
+                            if (data.password === password) {
+                                displayStatus(data.status, data);
                                 found = true;
-                                const statusInterview = applicantData.keteranganInterview || 'Menunggu'; 
-                                displayStatus(statusInterview, applicantData);
+                                return true; // break loop
                             }
                         });
 
                         if (!found) {
-                            displayStatus('Tidak Ditemukan'); 
+                            displayStatus('Data Tidak Ditemukan'); // Password salah
                         }
                     } else {
-                        displayStatus('Tidak Ditemukan'); 
+                        displayStatus('Data Tidak Ditemukan'); // NRP tidak ditemukan
                     }
-
                 } catch (error) {
-                    console.error("Error checking status:", error);
-                    displayStatus('Terjadi Kesalahan');
+                    console.error("Error fetching data:", error);
+                    alert("Terjadi kesalahan saat mengambil data. Silakan coba lagi.");
+                    displayStatus('Data Tidak Ditemukan'); // Atau status error umum
                 } finally {
                     DOMElements.checkStatusBtn.disabled = false;
                     DOMElements.checkStatusBtn.textContent = 'Cek Status';
-                    DOMElements.checkStatusBtn.classList.remove('animate-bounce-click'); 
+                    DOMElements.checkStatusBtn.classList.remove('animate-bounce-click');
                 }
             });
 
-            DOMElements.closeStatusModalBtn.addEventListener('click', () => {
-                DOMElements.statusModalOverlay.classList.remove('show');
-            });
-
-            DOMElements.statusModalOverlay.addEventListener('click', (e) => {
+            DOMElements.closeStatusModalBtn.addEventListener('click', hideStatusModal);
+            DOMElements.statusModalOverlay.addEventListener('click', function(e) {
                 if (e.target === DOMElements.statusModalOverlay) {
-                    DOMElements.statusModalOverlay.classList.remove('show');
+                    hideStatusModal();
                 }
             });
         });
