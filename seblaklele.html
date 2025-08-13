@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Impor & Kelola Kelulusan Tahap Interview</title>
+    <title>Cek Kelulusan Asisten Fisika Laboratorium 1 (Tahap Interview)</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -44,78 +43,153 @@
             cursor: not-allowed;
         }
 
-        .file-input-label {
-            background-color: #f0f0f0;
-            border: 1px dashed #ccc;
-            transition: all 0.3s ease;
-            cursor: pointer;
+        /* Animasi untuk tombol saat diklik */
+        .btn-primary.animate-bounce-click {
+            animation: bounceClick 0.3s ease-in-out;
         }
-        
-        .file-input-label:hover {
-            border-color: #c41e3a;
-        }
-
-        .table-container {
-            max-height: 500px; /* Batasi tinggi tabel */
-            overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
+        @keyframes bounceClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        th {
-            background-color: #f9fafb;
-            font-weight: 600;
-            color: #4b5563;
-            position: sticky;
+        /* Gaya untuk Modal Pop-up */
+        .modal-overlay {
+            position: fixed;
             top: 0;
-            z-index: 10;
-        }
-
-        tr:hover {
-            background-color: #f3f4f6;
-        }
-
-        td input[type="text"], td select, td input[type="number"] { /* Added number type */
+            left: 0;
             width: 100%;
-            padding: 0.25rem 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.25rem;
-            font-size: 0.875rem;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        td input[type="text"]:focus, td select:focus, td input[type="number"]:focus { /* Added number type */
-            outline: none;
-            border-color: #c41e3a;
-            box-shadow: 0 0 0 1px rgba(196, 30, 58, 0.2);
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
-        /* CSS tambahan untuk CSV upload dari ppp.html */
-        .csv-upload {
-            position: relative;
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem; /* Sedikit lebih bulat */
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3); /* Shadow lebih kuat */
+            max-width: 550px; /* Sedikit lebih lebar */
+            width: 90%;
+            transform: scale(0.8); /* Mulai dari skala kecil */
+            opacity: 0; /* Mulai dari transparan */
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease; /* Animasi bounce */
             overflow: hidden;
         }
-        .csv-upload input[type=file] {
-            position: absolute;
-            top: 0;
-            right: 0;
-            min-width: 100%;
-            min-height: 100%;
-            font-size: 100px;
-            text-align: right;
-            filter: alpha(opacity=0);
-            opacity: 0;
-            outline: none;
-            cursor: pointer;
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Gaya untuk status card di dalam modal */
+        .status-card-modal {
+            border-left-width: 6px;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 0;
+            box-shadow: none;
+            text-align: center; /* Pusatkan teks */
+        }
+        .status-lulus { border-color: #22c55e; background-color: #ecfdf5; color: #16a34a; }
+        .status-tidak-lulus { border-color: #ef4444; background-color: #fef2f2; color: #dc2626; }
+        .status-menunggu { border-color: #f59e0b; background-color: #fffbeb; color: #d97706; }
+        .status-not-found { border-color: #6b7280; background-color: #f3f4f6; color: #4b5563; }
+
+        /* Gaya untuk ikon status */
+        .status-icon {
+            width: 64px; /* Ukuran ikon lebih besar */
+            height: 64px;
+            margin: 0 auto 1.5rem auto; /* Pusatkan dan beri margin bawah */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem; /* Ukuran font ikon */
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Animasi pop-in untuk ikon */
+        }
+        .status-lulus .status-icon { background-color: #22c55e; }
+        .status-tidak-lulus .status-icon { background-color: #ef4444; }
+        .status-menunggu .status-icon { background-color: #f59e0b; }
+        .status-not-found .status-icon { background-color: #6b7280; }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        .status-card-modal h4 {
+            font-size: 1.875rem; /* Ukuran judul lebih besar */
+            font-weight: 700; /* Lebih tebal */
+            margin-bottom: 1rem;
+        }
+        .status-card-modal p {
+            font-size: 1.125rem; /* Ukuran paragraf sedikit lebih besar */
+            line-height: 1.6;
+        }
+        .status-card-modal strong {
+            font-weight: 700; /* Pastikan bold benar-benar tebal */
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .score-item {
+            background-color: #f9fafb;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .score-item strong {
             display: block;
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin-bottom: 0.25rem;
+        }
+
+        .score-item span {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* New styles for collapsible score details */
+        .score-details-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .score-details-container.expanded {
+            max-height: 1000px; /* Adjust as needed to fit content */
+            transition: max-height 0.5s ease-in;
+        }
+
+        .toggle-score-details {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #c41e3a;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: inline-block;
         }
     </style>
 </head>
@@ -135,323 +209,47 @@
                     </div>
                 </div>
                 <div class="bg-theme-red px-4 py-2 rounded-md shadow-lg">
-                    <h2 class="text-lg font-semibold">Admin Panel</h2>
+                    <h2 class="text-lg font-semibold">Cek Kelulusan Asisten Fislab 1 2025</h2>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 md:px-6 py-8">
-        <div id="authSection" class="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden p-6">
-            <h3 class="text-xl font-semibold mb-4 text-theme-red">Login Admin</h3>
-            <div class="mb-4">
-                <label for="adminEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Admin</label>
-                <input type="email" id="adminEmail" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
-            </div>
-            <div class="mb-6">
-                <label for="adminPasswordLogin" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" id="adminPasswordLogin" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required>
-                <p id="loginError" class="mt-1 text-sm text-red-600 hidden">Email atau password salah.</p>
-            </div>
-            <button type="button" id="loginBtn" class="btn-primary w-full px-6 py-2 rounded-md font-medium">Login</button>
-        </div>
-
-        <div id="importSection" class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden hidden">
-            <div class="bg-theme-red text-white p-6 flex justify-between items-center">
-                <h2 class="text-2xl font-bold">Impor Data Kelulusan Tahap Interview</h2>
-                <button id="logoutBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Logout</button>
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-theme-red text-white p-6">
+                <h2 class="text-2xl font-bold">Cek Status Kelulusan Tahap Interview</h2>
+                <p class="mt-2">Masukkan NRP dan Password Anda untuk melihat status kelulusan tahap interview.</p>
             </div>
             
             <div class="p-6">
-                <!-- Global Next Step Settings Section -->
-                <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Pengaturan Global Langkah Selanjutnya</h3>
-                    <p class="text-gray-700 mb-3">Link grup komunikasi ini akan berlaku untuk semua pendaftar yang Lolos Tahap Interview.</p>
-                    <form id="globalSettingsForm" class="space-y-3">
-                        <div>
-                            <label for="globalNextStepLink" class="block text-sm font-medium text-gray-700 mb-1">Link Grup Komunikasi Global</label>
-                            <input type="url" id="globalNextStepLink" name="globalNextStepLink" placeholder="Contoh: https://chat.whatsapp.com/your-group-invite"
-                                class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                        </div>
-                        <button type="submit" id="saveGlobalSettingsBtn" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
-                            Simpan Pengaturan Global
-                        </button>
-                        <p id="globalSettingsStatus" class="mt-2 text-sm text-gray-600"></p>
-                    </form>
-                </div>
-
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-2">Format File CSV</h3>
-                    <p class="text-gray-700 mb-2">File CSV harus memiliki header berikut (case-sensitive) dan urutan kolom tidak masalah:</p>
-                    <ul class="list-disc list-inside ml-4 text-gray-600 mb-4">
-                        <li>`Nama`: Nama lengkap pendaftar.</li>
-                        <li>`NRP`: Nomor Induk Mahasiswa (harus 10 digit angka).</li>
-                        <li>`Keterangan Interview`: Status kelulusan tahap interview (`Lolos Interview`, `Tidak Lolos Interview`, atau `Menunggu`).</li>
-                        <li>`Password`: Kata sandi untuk login pendaftar.</li>
-                        <li>`Perkenalan`: Nilai (1-10) untuk Perkenalan.</li>
-                        <li>`KeteranganPerkenalan`: Keterangan untuk nilai Perkenalan.</li>
-                        <li>`Kesibukan`: Nilai (1-10) untuk Kesibukan.</li>
-                        <li>`KeteranganKesibukan`: Keterangan untuk nilai Kesibukan.</li>
-                        <li>`Komitmen`: Nilai (1-10) untuk Komitmen.</li>
-                        <li>`KeteranganKomitmen`: Keterangan untuk nilai Komitmen.</li>
-                        <li>`Praktikum1`: Nilai (1-10) untuk Praktikum Pilihan 1.</li>
-                        <li>`KeteranganPraktikum1`: Keterangan untuk nilai Praktikum Pilihan 1.</li>
-                        <li>`Praktikum2`: Nilai (1-10) untuk Praktikum Pilihan 2.</li>
-                        <li>`KeteranganPraktikum2`: Keterangan untuk nilai Praktikum Pilihan 2.</li>
-                        <li>`LaporanDummy`: Nilai (1-10) untuk Laporan Dummy.</li>
-                        <li>`KeteranganLaporanDummy`: Keterangan untuk nilai Laporan Dummy.</li>
-                        <li>`Ralat`: Nilai (1-10) untuk Ralat.</li>
-                        <li>`KeteranganRalat`: Keterangan untuk nilai Ralat.</li>
-                        <li>`SkemaWaktu`: Nilai (1-10) untuk Skema Waktu.</li>
-                        <li>`KeteranganSkemaWaktu`: Keterangan untuk nilai Skema Waktu.</li>
-                        <li>`KomitmenInputNilai`: Nilai (1-10) untuk Komitmen Input Nilai.</li>
-                        <li>`KeteranganKomitmenInputNilai`: Keterangan untuk nilai Komitmen Input Nilai.</li>
-                        <li>`KeyakinanDiterima`: Nilai (1-10) untuk Keyakinan Diterima.</li>
-                        <li>`KeteranganKeyakinanDiterima`: Keterangan untuk nilai Keyakinan Diterima.</li>
-                        <li>`Keterangan`: Keterangan umum dari admin.</li>
-                    </ul>
-                    <p class="text-gray-700 mb-4">Contoh isi file CSV:</p>
-                    <pre class="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto"><code>Nama,NRP,Keterangan Interview,Password,Perkenalan,KeteranganPerkenalan,Kesibukan,KeteranganKesibukan,Komitmen,KeteranganKomitmen,Praktikum1,KeteranganPraktikum1,Praktikum2,KeteranganPraktikum2,LaporanDummy,KeteranganLaporanDummy,Ralat,KeteranganRalat,SkemaWaktu,KeteranganSkemaWaktu,KomitmenInputNilai,KeteranganKomitmenInputNilai,KeyakinanDiterima,KeteranganKeyakinanDiterima,Keterangan
-Budi Santoso,1234567890,Lolos Interview,passbudi,8,Baik sekali,7,Cukup baik,9,Sangat berkomitmen,8,Penjelasan jelas,7,Penjelasan cukup,9,Memahami format,8,Memahami ralat,7,Skema waktu realistis,9,Sangat berkomitmen,10,Sangat yakin,Pendaftar sangat potensial.
-Siti Aminah,0987654321,Tidak Lolos Interview,passsiti,5,Perlu ditingkatkan,6,Kurang fokus,4,Kurang komitmen,5,Penjelasan kurang,6,Penjelasan kurang,5,Kurang memahami,4,Kurang memahami,5,Skema waktu tidak jelas,6,Kurang berkomitmen,7,Cukup yakin,Perlu belajar lebih banyak.
-Joko Susilo,1122334455,Menunggu,passjoko,7,Cukup baik,7,Cukup baik,7,Cukup berkomitmen,7,Penjelasan cukup,7,Penjelasan cukup,7,Cukup memahami,7,Cukup memahami,7,Skema waktu cukup,7,Cukup berkomitmen,7,Cukup yakin,Menunggu hasil akhir.</code></pre>
-                </div>
-
-                <div class="mb-6">
-                    <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">Pilih File CSV <span class="text-theme-red">*</span></label>
-                    <label for="csvFileInput" class="file-input-label flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md text-gray-500 hover:text-theme-red csv-upload">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a3 3 0 013 3v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                        </svg>
-                        <span id="fileName">Seret & Lepas file CSV di sini atau Klik untuk memilih</span>
-                        <input type="file" id="csvFileInput" accept=".csv,.txt" class="hidden">
-                    </label>
-                    <p id="fileError" class="mt-1 text-sm text-red-600 hidden">Pilih file CSV yang valid.</p>
-                </div>
-
-                <div id="csvPreview" class="mb-6 hidden">
-                    <h3 class="text-lg font-semibold mb-2">Pratinjau Data CSV</h3>
-                    <div class="table-container">
-                        <table class="min-w-full bg-white">
-                            <thead>
-                                <tr>
-                                    <th>Nama</th>
-                                    <th>NRP</th>
-                                    <th>Keterangan Interview</th>
-                                    <th>Password</th>
-                                    <th>Perkenalan</th>
-                                    <th>Kesibukan</th>
-                                    <th>Komitmen</th>
-                                    <th>Praktikum1</th>
-                                    <th>Praktikum2</th>
-                                    <th>LaporanDummy</th>
-                                    <th>Ralat</th>
-                                    <th>SkemaWaktu</th>
-                                    <th>KomitmenInputNilai</th>
-                                    <th>KeyakinanDiterima</th>
-                                    <th>Keterangan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="csvPreviewBody">
-                                <!-- CSV data will be loaded here -->
-                            </tbody>
-                        </table>
+                <form id="checkStatusForm" class="space-y-6">
+                    <div>
+                        <label for="nrpCheck" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
+                        <input type="text" id="nrpCheck" name="nrpCheck" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required pattern="[0-9]{10}" title="NRP harus 10 digit angka">
+                        <p id="nrpCheckError" class="mt-1 text-sm text-red-600 hidden">NRP harus 10 digit angka</p>
                     </div>
-                    <p id="previewError" class="mt-2 text-sm text-red-600 hidden">Data pratinjau tidak valid atau kosong.</p>
-                </div>
-                
-                <div class="mt-6 flex justify-end space-x-2">
-                    <button type="button" id="importCsvButton" class="btn-primary px-6 py-2 rounded-md font-medium" disabled>Pratinjau & Proses</button>
-                    <button type="button" id="confirmImportButton" class="btn-primary px-6 py-2 rounded-md font-medium hidden">Konfirmasi Impor</button>
-                </div>
-
-                <div id="uploadResult" class="mt-8 hidden">
-                    <!-- Upload results will be displayed here -->
-                </div>
-            </div>
-        </div>
-
-        <div id="manageSection" class="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mt-8 hidden">
-            <div class="bg-theme-red text-white p-6 flex justify-between items-center">
-                <h2 class="text-2xl font-bold">Kelola Data Pendaftar</h2>
-                <button id="refreshDataBtn" class="bg-white text-theme-red px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100 transition">Refresh Data</button>
-            </div>
-            <div class="p-6">
-                <!-- Add Candidate Form -->
-                <div class="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Tambah Kandidat Baru</h3>
-                    <form id="addCandidateForm" class="space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label for="newName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
-                                <input type="text" id="newName" name="newName" required 
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
-                                <input type="text" id="newNrp" name="newNrp" required
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
-                                <input type="text" id="newPassword" name="newPassword" required
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newStatusInterview" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Interview <span class="text-theme-red">*</span></label>
-                                <select id="newStatusInterview" name="newStatusInterview" required
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                                    <option value="Lolos Interview">Lolos Interview</option>
-                                    <option value="Tidak Lolos Interview">Tidak Lolos Interview</option>
-                                    <option value="Menunggu">Menunggu</option>
-                                </select>
-                            </div>
-                            <!-- New score inputs -->
-                            <div>
-                                <label for="newPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (1-10)</label>
-                                <input type="number" id="newPerkenalan" name="newPerkenalan" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Perkenalan</label>
-                                <input type="text" id="newKeteranganPerkenalan" name="newKeteranganPerkenalan"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (1-10)</label>
-                                <input type="number" id="newKesibukan" name="newKesibukan" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Kesibukan</label>
-                                <input type="text" id="newKeteranganKesibukan" name="newKeteranganKesibukan"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (1-10)</label>
-                                <input type="number" id="newKomitmen" name="newKomitmen" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen</label>
-                                <input type="text" id="newKeteranganKomitmen" name="newKeteranganKomitmen"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 1 (1-10)</label>
-                                <input type="number" id="newPraktikum1" name="newPraktikum1" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 1</label>
-                                <input type="text" id="newKeteranganPraktikum1" name="newKeteranganPraktikum1"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 2 (1-10)</label>
-                                <input type="number" id="newPraktikum2" name="newPraktikum2" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 2</label>
-                                <input type="text" id="newKeteranganPraktikum2" name="newKeteranganPraktikum2"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (1-10)</label>
-                                <input type="number" id="newLaporanDummy" name="newLaporanDummy" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Laporan Dummy</label>
-                                <input type="text" id="newKeteranganLaporanDummy" name="newKeteranganLaporanDummy"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (1-10)</label>
-                                <input type="number" id="newRalat" name="newRalat" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganRalat" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Ralat</label>
-                                <input type="text" id="newKeteranganRalat" name="newKeteranganRalat"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (1-10)</label>
-                                <input type="number" id="newSkemaWaktu" name="newSkemaWaktu" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Skema Waktu</label>
-                                <input type="text" id="newKeteranganSkemaWaktu" name="newKeteranganSkemaWaktu"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (1-10)</label>
-                                <input type="number" id="newKomitmenInputNilai" name="newKomitmenInputNilai" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen Input Nilai</label>
-                                <input type="text" id="newKeteranganKomitmenInputNilai" name="newKeteranganKomitmenInputNilai"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (1-10)</label>
-                                <input type="number" id="newKeyakinanDiterima" name="newKeyakinanDiterima" min="1" max="10"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeteranganKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Keyakinan Diterima</label>
-                                <input type="text" id="newKeteranganKeyakinanDiterima" name="newKeteranganKeyakinanDiterima"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="newKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Umum Admin</label>
-                                <input type="text" id="newKeterangan" name="newKeterangan"
-                                    class="form-input w-full px-3 py-2 border rounded-md focus:outline-none">
-                            </div>
+                    
+                    <div>
+                        <label for="passwordCheck" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-theme-red">*</span></label>
+                        <div class="relative">
+                            <input type="password" id="passwordCheck" name="passwordCheck" class="form-input w-full px-4 py-2 border rounded-md focus:outline-none" required minlength="8">
+                            <button type="button" id="togglePasswordCheck" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
                         </div>
-                        <button type="submit" class="btn-primary px-4 py-2 rounded-md font-medium mt-4">
-                            Tambah Kandidat
-                        </button>
-                    </form>
-                </div>
+                        <p id="passwordCheckError" class="mt-1 text-sm text-red-600 hidden">Password minimal 8 karakter</p>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <button type="submit" id="checkStatusBtn" class="btn-primary w-full px-6 py-2 rounded-md font-medium">Cek Status</button>
+                    </div>
+                </form>
 
-                <div class="mb-4 flex justify-end space-x-2">
-                    <button id="saveChangesBtn" class="btn-primary px-4 py-2 rounded-md font-medium" disabled>Simpan Perubahan</button>
-                    <button id="deleteSelectedBtn" class="bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition" disabled>Hapus Terpilih</button>
-                </div>
-                <div class="table-container">
-                    <table class="min-w-full bg-white">
-                        <thead>
-                            <tr>
-                                <th class="w-10"><input type="checkbox" id="selectAllCheckbox"></th>
-                                <th>Nama</th>
-                                <th>NRP</th>
-                                <th>Keterangan Interview</th>
-                                <th>Password</th>
-                                <th>Perkenalan</th>
-                                <th>Kesibukan</th>
-                                <th>Komitmen</th>
-                                <th>Praktikum1</th>
-                                <th>Praktikum2</th>
-                                <th>LaporanDummy</th>
-                                <th>Ralat</th>
-                                <th>SkemaWaktu</th>
-                                <th>KomitmenInputNilai</th>
-                                <th>KeyakinanDiterima</th>
-                                <th>Keterangan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="applicantsTableBody">
-                            <!-- Applicant data will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-                <p id="manageDataStatus" class="mt-4 text-sm text-gray-600"></p>
+                <div id="statusResult" class="mt-8 hidden"></div>
             </div>
         </div>
     </main>
@@ -462,179 +260,16 @@ Joko Susilo,1122334455,Menunggu,passjoko,7,Cukup baik,7,Cukup baik,7,Cukup berko
         </div>
     </footer>
 
-    <!-- Edit Candidate Modal -->
-    <div id="editCandidateModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
-            <div class="bg-theme-red text-white p-4 text-center">
-                <h3 class="text-xl font-bold">Edit Kandidat</h3>
-            </div>
+    <!-- Modal Pop-up untuk Hasil Status -->
+    <div id="statusModalOverlay" class="modal-overlay"> 
+        <div id="statusModalContent" class="modal-content">
             <div class="p-6">
-                <form id="editCandidateForm" class="space-y-4">
-                    <input type="hidden" id="editCandidateId">
-                    
-                    <div>
-                        <label for="editName" class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-theme-red">*</span></label>
-                        <input type="text" id="editName" name="editName" required 
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editNrp" class="block text-sm font-medium text-gray-700 mb-1">NRP <span class="text-theme-red">*</span></label>
-                        <input type="text" id="editNrp" name="editNrp" required 
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editStatusInterview" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Interview <span class="text-theme-red">*</span></label>
-                        <select id="editStatusInterview" name="editStatusInterview" required
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                            <option value="Lolos Interview">Lolos Interview</option>
-                            <option value="Tidak Lolos Interview">Tidak Lolos Interview</option>
-                            <option value="Menunggu">Menunggu</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="editPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi <span class="text-theme-red">*</span></label>
-                        <input type="text" id="editPassword" name="editPassword" required
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <!-- Edit score inputs -->
-                    <div>
-                        <label for="editPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Perkenalan (1-10)</label>
-                        <input type="number" id="editPerkenalan" name="editPerkenalan" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganPerkenalan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Perkenalan</label>
-                        <input type="text" id="editKeteranganPerkenalan" name="editKeteranganPerkenalan"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Kesibukan (1-10)</label>
-                        <input type="number" id="editKesibukan" name="editKesibukan" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganKesibukan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Kesibukan</label>
-                        <input type="text" id="editKeteranganKesibukan" name="editKeteranganKesibukan"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Komitmen (1-10)</label>
-                        <input type="number" id="editKomitmen" name="editKomitmen" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganKomitmen" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen</label>
-                        <input type="text" id="editKeteranganKomitmen" name="editKeteranganKomitmen"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 1 (1-10)</label>
-                        <input type="number" id="editPraktikum1" name="editPraktikum1" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganPraktikum1" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 1</label>
-                        <input type="text" id="editKeteranganPraktikum1" name="editKeteranganPraktikum1"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Praktikum Pilihan 2 (1-10)</label>
-                        <input type="number" id="editPraktikum2" name="editPraktikum2" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganPraktikum2" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Praktikum Pilihan 2</label>
-                        <input type="text" id="editKeteranganPraktikum2" name="editKeteranganPraktikum2"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Laporan Dummy (1-10)</label>
-                        <input type="number" id="editLaporanDummy" name="editLaporanDummy" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganLaporanDummy" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Laporan Dummy</label>
-                        <input type="text" id="editKeteranganLaporanDummy" name="editKeteranganLaporanDummy"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editRalat" class="block text-sm font-medium text-gray-700 mb-1">Ralat (1-10)</label>
-                        <input type="number" id="editRalat" name="editRalat" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganRalat" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Ralat</label>
-                        <input type="text" id="editKeteranganRalat" name="editKeteranganRalat"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Skema Waktu (1-10)</label>
-                        <input type="number" id="editSkemaWaktu" name="editSkemaWaktu" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganSkemaWaktu" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Skema Waktu</label>
-                        <input type="text" id="editKeteranganSkemaWaktu" name="editKeteranganSkemaWaktu"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Komitmen Input Nilai (1-10)</label>
-                        <input type="number" id="editKomitmenInputNilai" name="editKomitmenInputNilai" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganKomitmenInputNilai" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Komitmen Input Nilai</label>
-                        <input type="text" id="editKeteranganKomitmenInputNilai" name="editKeteranganKomitmenInputNilai"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keyakinan Diterima (1-10)</label>
-                        <input type="number" id="editKeyakinanDiterima" name="editKeyakinanDiterima" min="1" max="10"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeteranganKeyakinanDiterima" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Keyakinan Diterima</label>
-                        <input type="text" id="editKeteranganKeyakinanDiterima" name="editKeteranganKeyakinanDiterima"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    <div>
-                        <label for="editKeterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan Umum Admin</label>
-                        <input type="text" id="editKeterangan" name="editKeterangan"
-                            class="form-input w-full px-4 py-2 border rounded-md focus:outline-none">
-                    </div>
-                    
-                    <div class="flex space-x-3">
-                        <button type="submit" 
-                            class="flex-1 btn-primary py-2 px-4 rounded-md font-medium">
-                            Simpan
-                        </button>
-                        
-                        <button type="button" id="cancelEdit" 
-                            class="flex-1 bg-gray-300 text-gray-800 hover:bg-gray-400 py-2 px-4 rounded-md font-medium transition-colors duration-300">
-                            Batal
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hayoo Modal (untuk pesan error login admin) -->
-    <div id="hayooModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg max-w-md w-full mx-4 overflow-hidden shadow-lg">
-            <div class="bg-red-500 text-white p-4 text-center">
-                <div class="mx-auto mb-2 w-16 h-16 flex items-center justify-center rounded-full bg-white bg-opacity-20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
+                <div id="modalStatusCard" class="status-card-modal">
+                    <!-- Isi status akan masuk di sini -->
                 </div>
-                <h3 class="text-2xl font-bold">Akses Ditolak!</h3>
-            </div>
-            <div class="p-6 text-center">
-                <p class="text-gray-700 mb-4">Anda tidak memiliki akses untuk masuk ke halaman admin!</p>
-                <button id="closeHayooModal" class="btn-primary w-full py-2 px-4 rounded-md font-medium">
-                    Tutup
-                </button>
+                <div class="mt-6 text-center">
+                    <button id="closeStatusModalBtn" class="btn-primary px-8 py-3 rounded-lg font-semibold text-lg">Tutup</button>
+                </div>
             </div>
         </div>
     </div>
@@ -642,994 +277,318 @@ Joko Susilo,1122334455,Menunggu,passjoko,7,Cukup baik,7,Cukup baik,7,Cukup berko
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", // GANTI DENGAN API KEY ANDA
-            authDomain: "daftaraslab.firebaseapp.com", // GANTI DENGAN AUTH DOMAIN ANDA
-            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", // GANTI DENGAN DATABASE URL REALTIME DATABASE ANDA
-            projectId: "daftaraslab", // GANTI DENGAN PROJECT ID ANDA
-            storageBucket: "daftaraslab.firebasestorage.app", // GANTI DENGAN STORAGE BUCKET ANDA
-            messagingSenderId: "329213682687", // GANTI DENGAN MESSAGING SENDER ID ANDA
-            appId: "1:329213682687:web:a326f7f6effc51b4347dca", // GANTI DENGAN APP ID ANDA
-            measurementId: "G-C9NRKRK2JC" // GANTI DENGAN MEASUREMENT ID ANDA
+            apiKey: "AIzaSyBOIedgrdup4Q4KDiPKl_ING1Pxc-yhhsA", 
+            authDomain: "daftaraslab.firebaseapp.com", 
+            databaseURL: "https://daftaraslab-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "daftaraslab", 
+            storageBucket: "daftaraslab.firebasestorage.app", 
+            messagingSenderId: "329213682687", 
+            appId: "1:329213682687:web:a326f7f6effc51b4347dca", 
+            measurementId: "G-C9NRKRK2JC" 
         };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database(); // Menggunakan Realtime Database
+        const database = firebase.database(); 
+
+        let globalNextStepLink = '#'; // Link untuk langkah selanjutnya (misal: grup WA, pengarahan)
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
-                authSection: document.getElementById('authSection'),
-                importSection: document.getElementById('importSection'),
-                manageSection: document.getElementById('manageSection'),
-                adminEmailInput: document.getElementById('adminEmail'),
-                adminPasswordLoginInput: document.getElementById('adminPasswordLogin'),
-                loginBtn: document.getElementById('loginBtn'),
-                loginError: document.getElementById('loginError'),
-                logoutBtn: document.getElementById('logoutBtn'),
+                form: document.getElementById('checkStatusForm'),
+                nrpInput: document.getElementById('nrpCheck'),
+                passwordInput: document.getElementById('passwordCheck'),
+                togglePasswordBtn: document.getElementById('togglePasswordCheck'),
+                checkStatusBtn: document.getElementById('checkStatusBtn'),
+                statusResultDiv: document.getElementById('statusResult'), 
+                nrpError: document.getElementById('nrpCheckError'),
+                passwordError: document.getElementById('passwordCheckError'),
 
-                // Global Settings
-                globalSettingsForm: document.getElementById('globalSettingsForm'),
-                globalNextStepLink: document.getElementById('globalNextStepLink'),
-                saveGlobalSettingsBtn: document.getElementById('saveGlobalSettingsBtn'),
-                globalSettingsStatus: document.getElementById('globalSettingsStatus'),
-
-                csvFileInput: document.getElementById('csvFileInput'),
-                fileNameDisplay: document.getElementById('fileName'),
-                fileError: document.getElementById('fileError'),
-                csvPreview: document.getElementById('csvPreview'),
-                csvPreviewBody: document.getElementById('csvPreviewBody'),
-                previewError: document.getElementById('previewError'),
-                importCsvButton: document.getElementById('importCsvButton'),
-                confirmImportButton: document.getElementById('confirmImportButton'),
-                uploadResultDiv: document.getElementById('uploadResult'),
-
-                // Elements related to applicant management
-                refreshDataBtn: document.getElementById('refreshDataBtn'),
-                saveChangesBtn: document.getElementById('saveChangesBtn'),
-                deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
-                selectAllCheckbox: document.getElementById('selectAllCheckbox'),
-                applicantsTableBody: document.getElementById('applicantsTableBody'),
-                manageDataStatus: document.getElementById('manageDataStatus'),
-                addCandidateForm: document.getElementById('addCandidateForm'),
-                newName: document.getElementById('newName'),
-                newNrp: document.getElementById('newNrp'),
-                newPassword: document.getElementById('newPassword'),
-                newStatusInterview: document.getElementById('newStatusInterview'),
-                newPerkenalan: document.getElementById('newPerkenalan'),
-                newKeteranganPerkenalan: document.getElementById('newKeteranganPerkenalan'),
-                newKesibukan: document.getElementById('newKesibukan'),
-                newKeteranganKesibukan: document.getElementById('newKeteranganKesibukan'),
-                newKomitmen: document.getElementById('newKomitmen'),
-                newKeteranganKomitmen: document.getElementById('newKeteranganKomitmen'),
-                newPraktikum1: document.getElementById('newPraktikum1'),
-                newKeteranganPraktikum1: document.getElementById('newKeteranganPraktikum1'),
-                newPraktikum2: document.getElementById('newPraktikum2'),
-                newKeteranganPraktikum2: document.getElementById('newKeteranganPraktikum2'),
-                newLaporanDummy: document.getElementById('newLaporanDummy'),
-                newKeteranganLaporanDummy: document.getElementById('newKeteranganLaporanDummy'),
-                newRalat: document.getElementById('newRalat'),
-                newKeteranganRalat: document.getElementById('newKeteranganRalat'),
-                newSkemaWaktu: document.getElementById('newSkemaWaktu'),
-                newKeteranganSkemaWaktu: document.getElementById('newKeteranganSkemaWaktu'),
-                newKomitmenInputNilai: document.getElementById('newKomitmenInputNilai'),
-                newKeteranganKomitmenInputNilai: document.getElementById('newKeteranganKomitmenInputNilai'),
-                newKeyakinanDiterima: document.getElementById('newKeyakinanDiterima'),
-                newKeteranganKeyakinanDiterima: document.getElementById('newKeteranganKeyakinanDiterima'),
-                newKeterangan: document.getElementById('newKeterangan'),
-
-                editCandidateModal: document.getElementById('editCandidateModal'),
-                editCandidateForm: document.getElementById('editCandidateForm'),
-                editCandidateId: document.getElementById('editCandidateId'),
-                editName: document.getElementById('editName'),
-                editNrp: document.getElementById('editNrp'),
-                editStatusInterview: document.getElementById('editStatusInterview'),
-                editPassword: document.getElementById('editPassword'),
-                editPerkenalan: document.getElementById('editPerkenalan'),
-                editKeteranganPerkenalan: document.getElementById('editKeteranganPerkenalan'),
-                editKesibukan: document.getElementById('editKesibukan'),
-                editKeteranganKesibukan: document.getElementById('editKeteranganKesibukan'),
-                editKomitmen: document.getElementById('editKomitmen'),
-                editKeteranganKomitmen: document.getElementById('editKeteranganKomitmen'),
-                editPraktikum1: document.getElementById('editPraktikum1'),
-                editKeteranganPraktikum1: document.getElementById('editKeteranganPraktikum1'),
-                editPraktikum2: document.getElementById('editPraktikum2'),
-                editKeteranganPraktikum2: document.getElementById('editKeteranganPraktikum2'),
-                editLaporanDummy: document.getElementById('editLaporanDummy'),
-                editKeteranganLaporanDummy: document.getElementById('editKeteranganLaporanDummy'),
-                editRalat: document.getElementById('editRalat'),
-                editKeteranganRalat: document.getElementById('editKeteranganRalat'),
-                editSkemaWaktu: document.getElementById('editSkemaWaktu'),
-                editKeteranganSkemaWaktu: document.getElementById('editKeteranganSkemaWaktu'),
-                editKomitmenInputNilai: document.getElementById('editKomitmenInputNilai'),
-                editKeteranganKomitmenInputNilai: document.getElementById('editKeteranganKomitmenInputNilai'),
-                editKeyakinanDiterima: document.getElementById('editKeyakinanDiterima'),
-                editKeteranganKeyakinanDiterima: document.getElementById('editKeteranganKeyakinanDiterima'),
-                editKeterangan: document.getElementById('editKeterangan'),
-                cancelEdit: document.getElementById('cancelEdit'),
-
-                hayooModal: document.getElementById('hayooModal'),
-                closeHayooModal: document.getElementById('closeHayooModal')
+                statusModalOverlay: document.getElementById('statusModalOverlay'),
+                statusModalContent: document.getElementById('statusModalContent'),
+                modalStatusCard: document.getElementById('modalStatusCard'),
+                closeStatusModalBtn: document.getElementById('closeStatusModalBtn')
             };
 
-            let selectedFile = null;
-            let currentApplicantsData = [];
-            let editedApplicants = new Set();
-            let selectedForDeletion = new Set();
-            let parsedCsvData = []; 
-
-            // --- Helper Functions ---
-
-            function showError(element, message) {
-                element.textContent = message;
-                element.classList.remove('hidden');
-            }
-
-            function hideError(element) {
-                element.classList.add('hidden');
-            }
-
-            function validateNRP(nrp) {
-                return /^[0-9]{10}$/.test(nrp);
-            }
-
-            function validateKeteranganInterview(keterangan) {
-                return ['Lolos Interview', 'Tidak Lolos Interview', 'Menunggu'].includes(keterangan);
-            }
-
-            function displayUploadResult(type, message) {
-                let className = '';
-                let title = '';
-                switch (type) {
-                    case 'success':
-                        className = 'border-green-500 bg-green-50 text-green-800';
-                        title = 'Unggah Berhasil!';
-                        break;
-                    case 'error':
-                        className = 'border-red-500 bg-red-50 text-red-800';
-                        title = 'Unggah Gagal!';
-                        break;
-                    case 'warning':
-                        className = 'border-yellow-500 bg-yellow-50 text-yellow-800';
-                        title = 'Peringatan Unggah';
-                        break;
-                }
-                DOMElements.uploadResultDiv.className = `mt-8 p-4 rounded-md border-l-4 ${className}`;
-                DOMElements.uploadResultDiv.innerHTML = `<h4 class="font-bold">${title}</h4><p>${message}</p>`;
-                DOMElements.uploadResultDiv.classList.remove('hidden');
-            }
-
-            function resetImportButtons() {
-                DOMElements.importCsvButton.disabled = false;
-                DOMElements.importCsvButton.textContent = 'Pratinjau & Proses';
-                DOMElements.confirmImportButton.classList.add('hidden');
-            }
-
-            // Fungsi parsing CSV yang disesuaikan
-            function parseCSV(text) {
-                function isBinaryContent(content) {
-                    const nonPrintableChars = content.split('').filter(char => {
-                        const code = char.charCodeAt(0);
-                        return (code < 32 && code !== 9 && code !== 10 && code !== 13) || code > 126;
-                    }).length;
-                    return (nonPrintableChars / content.length) > 0.05;
-                }
-
-                if (isBinaryContent(text)) {
-                    alert('File yang Anda unggah sepertinya bukan file CSV yang valid. File terdeteksi sebagai binary (Excel/ZIP/dll). Pastikan file dalam format CSV (text) dan bukan format binary.');
-                    return [];
-                }
-
-                let cleanedText = '';
-                let inTextData = false;
-                for (let i = 0; i < text.length; i++) {
-                    const charCode = text.charCodeAt(i);
-                    if ((charCode >= 32 && charCode <= 126) || charCode === 9 || charCode === 10 || charCode === 13) {
-                        if (!inTextData) {
-                            inTextData = true;
-                        }
-                        cleanedText += text[i];
-                    } else if (inTextData) {
-                        cleanedText += '\n';
-                        inTextData = false;
-                    }
-                }
-                cleanedText = cleanedText.replace(/\n\s*\n/g, '\n').trim();
-
-                let separator = ',';
-                if (cleanedText.indexOf(';') > -1 && cleanedText.indexOf(',') === -1) {
-                    separator = ';';
-                }
-
-                const lines = cleanedText.split('\n');
-                const result = [];
-
-                if (lines.length > 0) {
-                    const headers = lines[0].split(separator).map(h => h.trim());
-                    const expectedCoreHeaders = ['Nama', 'NRP', 'Keterangan Interview', 'Password'];
-                    const scoreHeaders = [
-                        'Perkenalan', 'KeteranganPerkenalan', 'Kesibukan', 'KeteranganKesibukan',
-                        'Komitmen', 'KeteranganKomitmen', 'Praktikum1', 'KeteranganPraktikum1',
-                        'Praktikum2', 'KeteranganPraktikum2', 'LaporanDummy', 'KeteranganLaporanDummy',
-                        'Ralat', 'KeteranganRalat', 'SkemaWaktu', 'KeteranganSkemaWaktu',
-                        'KomitmenInputNilai', 'KeteranganKomitmenInputNilai', 'KeyakinanDiterima', 'KeteranganKeyakinanDiterima',
-                        'Keterangan'
-                    ];
-
-                    const hasCoreHeaders = expectedCoreHeaders.every(expectedH => 
-                        headers.some(h => h.toLowerCase() === expectedH.toLowerCase())
-                    );
-
-                    if (!hasCoreHeaders) {
-                        alert('Header CSV tidak valid. Harap gunakan minimal: Nama,NRP,Keterangan Interview,Password (urutan tidak masalah).');
-                        return [];
-                    }
-
-                    const headerMap = {};
-                    headers.forEach((h, i) => headerMap[h.toLowerCase()] = i);
-
-                    for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (line === '') continue;
-                        if (line.charCodeAt(0) < 32 || line.charCodeAt(0) > 126) {
-                            continue;
-                        }
-
-                        const values = line.split(separator).map(val => val.trim().replace(/^["']|["']$/g, ''));
-                        
-                        if (values.length === headers.length) {
-                            let keteranganInterviewValue = values[headerMap['keterangan interview']] || '';
-                            // Normalize status values
-                            if (keteranganInterviewValue.toLowerCase() === 'lolos interview') {
-                                keteranganInterviewValue = 'Lolos Interview';
-                            } else if (keteranganInterviewValue.toLowerCase() === 'tidak lolos interview') {
-                                keteranganInterviewValue = 'Tidak Lolos Interview';
-                            } else if (keteranganInterviewValue.toLowerCase() === 'menunggu') {
-                                keteranganInterviewValue = 'Menunggu';
-                            } else {
-                                keteranganInterviewValue = 'Menunggu'; // Default if invalid
-                            }
-
-                            const candidate = {
-                                name: values[headerMap['nama']] || '',
-                                nrp: values[headerMap['nrp']] || '',
-                                keteranganInterview: keteranganInterviewValue,
-                                password: values[headerMap['password']] || '',
-                            };
-
-                            scoreHeaders.forEach(scoreHeader => {
-                                const lowerCaseHeader = scoreHeader.toLowerCase();
-                                if (headerMap.hasOwnProperty(lowerCaseHeader)) {
-                                    candidate[scoreHeader] = values[headerMap[lowerCaseHeader]];
-                                }
-                            });
-
-                            if (candidate.name && validateNRP(candidate.nrp) && validateKeteranganInterview(candidate.keteranganInterview) && candidate.password) {
-                                result.push(candidate);
-                            } else {
-                                console.warn(`Baris dilewati karena data tidak valid: ${line}`);
-                            }
-                        } else {
-                            console.warn(`Baris dilewati karena jumlah kolom tidak sesuai: ${line}`);
-                        }
-                    }
-                }
-                return result;
-            }
-
-            function renderCsvPreview(data) {
-                DOMElements.csvPreviewBody.innerHTML = '';
-                if (data.length === 0) {
-                    showError(DOMElements.previewError, 'Tidak ada data valid untuk pratinjau.');
-                    DOMElements.csvPreview.classList.add('hidden');
-                    DOMElements.confirmImportButton.classList.add('hidden');
-                    return;
-                }
-                hideError(DOMElements.previewError);
-                DOMElements.csvPreview.classList.remove('hidden');
-                DOMElements.confirmImportButton.classList.remove('hidden'); 
-
-                const previewRows = data.slice(0, 10);
-
-                previewRows.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${row.name || '-'}</td>
-                        <td>${row.nrp || '-'}</td>
-                        <td>${row.keteranganInterview || '-'}</td>
-                        <td>${row.password || '-'}</td>
-                        <td>${row.Perkenalan || '-'}</td>
-                        <td>${row.Kesibukan || '-'}</td>
-                        <td>${row.Komitmen || '-'}</td>
-                        <td>${row.Praktikum1 || '-'}</td>
-                        <td>${row.Praktikum2 || '-'}</td>
-                        <td>${row.LaporanDummy || '-'}</td>
-                        <td>${row.Ralat || '-'}</td>
-                        <td>${row.SkemaWaktu || '-'}</td>
-                        <td>${row.KomitmenInputNilai || '-'}</td>
-                        <td>${row.KeyakinanDiterima || '-'}</td>
-                        <td>${row.Keterangan || '-'}</td>
-                    `;
-                    DOMElements.csvPreviewBody.appendChild(tr);
-                });
-
-                if (data.length > 10) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td colspan="15" class="py-2 px-3 text-center text-gray-400">
-                            ... dan ${data.length - 10} data lainnya (total ${data.length} data)
-                        </td>
-                    `;
-                    DOMElements.csvPreviewBody.appendChild(tr);
-                }
-            }
-
-            async function loadApplicantsData() {
-                DOMElements.manageDataStatus.textContent = 'Memuat data...';
-                DOMElements.applicantsTableBody.innerHTML = '';
-                currentApplicantsData = [];
-                editedApplicants.clear();
-                selectedForDeletion.clear();
-                DOMElements.saveChangesBtn.disabled = true;
-                DOMElements.deleteSelectedBtn.disabled = true;
-                DOMElements.selectAllCheckbox.checked = false;
-
-                try {
-                    const snapshot = await database.ref('applicants').once('value');
-                    
-                    if (!snapshot.exists()) {
-                        DOMElements.manageDataStatus.textContent = 'Tidak ada data pendaftar.';
-                        return;
-                    }
-
-                    snapshot.forEach(childSnapshot => {
-                        const data = childSnapshot.val();
-                        currentApplicantsData.push({ id: childSnapshot.key, ...data });
-                    });
-                    renderApplicantsTable();
-                    DOMElements.manageDataStatus.textContent = `Data berhasil dimuat. Total: ${currentApplicantsData.length} pendaftar.`;
-                } catch (error) {
-                    console.error("Error loading applicants data:", error);
-                    DOMElements.manageDataStatus.textContent = `Gagal memuat data: ${error.message}`;
-                }
-            }
-
-            function renderApplicantsTable() {
-                DOMElements.applicantsTableBody.innerHTML = '';
-                currentApplicantsData.forEach(applicant => {
-                    const tr = document.createElement('tr');
-                    tr.dataset.id = applicant.id;
-                    tr.innerHTML = `
-                        <td><input type="checkbox" class="delete-checkbox" data-id="${applicant.id}" ${selectedForDeletion.has(applicant.id) ? 'checked' : ''}></td>
-                        <td><input type="text" class="edit-field" data-field="name" value="${applicant.name || ''}"></td>
-                        <td><input type="text" class="edit-field" data-field="nrp" value="${applicant.nrp || ''}"></td>
-                        <td>
-                            <select class="edit-field" data-field="keteranganInterview">
-                                <option value="Lolos Interview" ${applicant.keteranganInterview === 'Lolos Interview' ? 'selected' : ''}>Lolos Interview</option>
-                                <option value="Tidak Lolos Interview" ${applicant.keteranganInterview === 'Tidak Lolos Interview' ? 'selected' : ''}>Tidak Lolos Interview</option>
-                                <option value="Menunggu" ${applicant.keteranganInterview === 'Menunggu' ? 'selected' : ''}>Menunggu</option>
-                            </select>
-                        </td>
-                        <td><input type="text" class="edit-field" data-field="password" value="${applicant.password || ''}"></td>
-                        <td><input type="number" class="edit-field" data-field="Perkenalan" value="${applicant.Perkenalan || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="Kesibukan" value="${applicant.Kesibukan || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="Komitmen" value="${applicant.Komitmen || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="Praktikum1" value="${applicant.Praktikum1 || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="Praktikum2" value="${applicant.Praktikum2 || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="LaporanDummy" value="${applicant.LaporanDummy || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="Ralat" value="${applicant.Ralat || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="SkemaWaktu" value="${applicant.SkemaWaktu || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="KomitmenInputNilai" value="${applicant.KomitmenInputNilai || ''}" min="1" max="10"></td>
-                        <td><input type="number" class="edit-field" data-field="KeyakinanDiterima" value="${applicant.KeyakinanDiterima || ''}" min="1" max="10"></td>
-                        <td><input type="text" class="edit-field" data-field="Keterangan" value="${applicant.Keterangan || ''}"></td>
-                        <td>
-                            <button class="edit-button bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition" data-id="${applicant.id}">Edit</button>
-                            <button class="delete-single-button bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition" data-id="${applicant.id}">Hapus</button>
-                        </td>
-                    `;
-                    DOMElements.applicantsTableBody.appendChild(tr);
-                });
-
-                DOMElements.applicantsTableBody.querySelectorAll('.edit-field').forEach(input => {
-                    input.addEventListener('change', (e) => {
-                        const docId = e.target.closest('tr').dataset.id;
-                        const fieldPath = e.target.dataset.field; 
-                        const value = e.target.value;
-
-                        const applicantIndex = currentApplicantsData.findIndex(app => app.id === docId);
-                        if (applicantIndex > -1) {
-                            currentApplicantsData[applicantIndex][fieldPath] = value;
-                            editedApplicants.add(docId);
-                            DOMElements.saveChangesBtn.disabled = false;
-                        }
-                    });
-                });
-
-                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', (e) => {
-                        const docId = e.target.dataset.id;
-                        if (e.target.checked) {
-                            selectedForDeletion.add(docId);
-                        } else {
-                            selectedForDeletion.delete(docId);
-                        }
-                        DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
-                        DOMElements.selectAllCheckbox.checked = selectedForDeletion.size === currentApplicantsData.length && currentApplicantsData.length > 0;
-                    });
-                });
-
-                DOMElements.applicantsTableBody.querySelectorAll('.delete-single-button').forEach(button => {
-                    button.addEventListener('click', async (e) => {
-                        const docId = e.target.dataset.id;
-                        if (confirm(`Anda yakin ingin menghapus pendaftar ini (ID: ${docId})?`)) {
-                            try {
-                                await database.ref('applicants/' + docId).remove();
-                                DOMElements.manageDataStatus.textContent = `Pendaftar ${docId} berhasil dihapus.`;
-                                loadApplicantsData(); 
-                            } catch (error) {
-                                console.error("Error deleting single applicant:", error);
-                                DOMElements.manageDataStatus.textContent = `Gagal menghapus pendaftar: ${error.message}`;
-                            }
-                        }
-                    });
-                });
-
-                DOMElements.applicantsTableBody.querySelectorAll('.edit-button').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const docId = e.target.dataset.id;
-                        const applicant = currentApplicantsData.find(app => app.id === docId);
-                        if (applicant) {
-                            DOMElements.editCandidateId.value = applicant.id;
-                            DOMElements.editName.value = applicant.name || '';
-                            DOMElements.editNrp.value = applicant.nrp || '';
-                            DOMElements.editStatusInterview.value = applicant.keteranganInterview || 'Menunggu';
-                            DOMElements.editPassword.value = applicant.password || '';
-                            DOMElements.editPerkenalan.value = applicant.Perkenalan || '';
-                            DOMElements.editKeteranganPerkenalan.value = applicant.KeteranganPerkenalan || '';
-                            DOMElements.editKesibukan.value = applicant.Kesibukan || '';
-                            DOMElements.editKeteranganKesibukan.value = applicant.KeteranganKesibukan || '';
-                            DOMElements.editKomitmen.value = applicant.Komitmen || '';
-                            DOMElements.editKeteranganKomitmen.value = applicant.KeteranganKomitmen || '';
-                            DOMElements.editPraktikum1.value = applicant.Praktikum1 || '';
-                            DOMElements.editKeteranganPraktikum1.value = applicant.KeteranganPraktikum1 || '';
-                            DOMElements.editPraktikum2.value = applicant.Praktikum2 || '';
-                            DOMElements.editKeteranganPraktikum2.value = applicant.KeteranganPraktikum2 || '';
-                            DOMElements.editLaporanDummy.value = applicant.LaporanDummy || '';
-                            DOMElements.editKeteranganLaporanDummy.value = applicant.KeteranganLaporanDummy || '';
-                            DOMElements.editRalat.value = applicant.Ralat || '';
-                            DOMElements.editKeteranganRalat.value = applicant.KeteranganRalat || '';
-                            DOMElements.editSkemaWaktu.value = applicant.SkemaWaktu || '';
-                            DOMElements.editKeteranganSkemaWaktu.value = applicant.KeteranganSkemaWaktu || '';
-                            DOMElements.editKomitmenInputNilai.value = applicant.KomitmenInputNilai || '';
-                            DOMElements.editKeteranganKomitmenInputNilai.value = applicant.KeteranganKomitmenInputNilai || '';
-                            DOMElements.editKeyakinanDiterima.value = applicant.KeyakinanDiterima || '';
-                            DOMElements.editKeteranganKeyakinanDiterima.value = applicant.KeteranganKeyakinanDiterima || '';
-                            DOMElements.editKeterangan.value = applicant.Keterangan || '';
-                            DOMElements.editCandidateModal.classList.remove('hidden');
-                        }
-                    });
-                });
-            }
-
-            // --- Global Settings Functions ---
+            // Load global settings on page load
             async function loadGlobalSettings() {
                 try {
                     const snapshot = await database.ref('settings/globalNextStepDetails').once('value');
                     if (snapshot.exists()) {
                         const settings = snapshot.val();
-                        DOMElements.globalNextStepLink.value = settings.nextStepLink || '';
+                        globalNextStepLink = settings.nextStepLink || '#';
+                        console.log("Global next step settings loaded:", settings);
                     } else {
-                        DOMElements.globalNextStepLink.value = '';
+                        console.log("No global next step settings found.");
                     }
-                    DOMElements.globalSettingsStatus.textContent = 'Pengaturan global dimuat.';
                 } catch (error) {
-                    console.error("Error loading global settings:", error);
-                    DOMElements.globalSettingsStatus.textContent = `Gagal memuat pengaturan global: ${error.message}`;
+                    console.error("Error loading global next step settings:", error);
                 }
             }
+            loadGlobalSettings(); // Call this function when the DOM is loaded
 
-            DOMElements.globalSettingsForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                DOMElements.saveGlobalSettingsBtn.disabled = true;
-                DOMElements.saveGlobalSettingsBtn.textContent = 'Menyimpan...';
-                DOMElements.globalSettingsStatus.textContent = 'Menyimpan pengaturan...';
+            function showError(inputElement, errorElement) {
+                inputElement.classList.add('border-red-500');
+                errorElement.classList.remove('hidden');
+            }
 
-                const settings = {
-                    nextStepLink: DOMElements.globalNextStepLink.value,
-                };
+            function hideError(inputElement, errorElement) {
+                inputElement.classList.remove('border-red-500'); 
+                errorElement.classList.add('hidden');
+            }
 
-                try {
-                    await database.ref('settings/globalNextStepDetails').set(settings);
-                    DOMElements.globalSettingsStatus.textContent = 'Pengaturan global berhasil disimpan!';
-                } catch (error) {
-                    console.error("Error saving global settings:", error);
-                    DOMElements.globalSettingsStatus.textContent = `Gagal menyimpan pengaturan global: ${error.message}`;
-                } finally {
-                    DOMElements.saveGlobalSettingsBtn.disabled = false;
-                    DOMElements.saveGlobalSettingsBtn.textContent = 'Simpan Pengaturan Global';
-                }
-            });
+            function validateNRP(nrp) {
+                const re = /^[0-9]{10}$/;
+                return re.test(nrp);
+            }
 
+            function displayStatus(status, data = {}) {
+                let content = '';
+                let className = '';
+                let title = '';
+                let iconSvg = '';
+                const applicantName = `<strong>${data.name || 'pendaftar'}</strong>`; 
 
-            // --- Authentication State Listener ---
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    DOMElements.authSection.classList.add('hidden');
-                    DOMElements.importSection.classList.remove('hidden');
-                    DOMElements.manageSection.classList.remove('hidden');
-                    loadApplicantsData();
-                    loadGlobalSettings();
-                    console.log("Admin logged in:", user.email);
-                } else {
-                    DOMElements.authSection.classList.remove('hidden');
-                    DOMElements.importSection.classList.add('hidden');
-                    DOMElements.manageSection.classList.add('hidden');
-                    console.log("Admin logged out.");
-                }
-            });
+                DOMElements.modalStatusCard.className = 'status-card-modal'; 
 
-            // --- Event Listeners ---
-
-            DOMElements.loginBtn.addEventListener('click', async () => {
-                const email = DOMElements.adminEmailInput.value;
-                const password = DOMElements.adminPasswordLoginInput.value;
-
-                if (!email || !password) {
-                    showError(DOMElements.loginError, 'Email dan password harus diisi.');
-                    return;
-                }
-
-                DOMElements.loginBtn.disabled = true;
-                DOMElements.loginBtn.textContent = 'Logging in...';
-                hideError(DOMElements.loginError);
-
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                } catch (error) {
-                    console.error("Login error:", error);
-                    DOMElements.hayooModal.classList.remove('hidden');
-                } finally {
-                    DOMElements.loginBtn.disabled = false;
-                    DOMElements.loginBtn.textContent = 'Login';
-                }
-            });
-
-            DOMElements.logoutBtn.addEventListener('click', async () => {
-                try {
-                    await auth.signOut();
-                } catch (error) {
-                    console.error("Logout error:", error);
-                    alert("Gagal logout. Silakan coba lagi.");
-                }
-            });
-
-            DOMElements.closeHayooModal.addEventListener('click', () => {
-                DOMElements.hayooModal.classList.add('hidden');
-            });
-
-            DOMElements.csvFileInput.addEventListener('change', function(event) {
-                selectedFile = event.target.files[0];
-                if (selectedFile) {
-                    if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv') || selectedFile.name.endsWith('.txt')) {
-                        DOMElements.fileNameDisplay.textContent = selectedFile.name;
-                        hideError(DOMElements.fileError);
+                switch (status) {
+                    case 'Lolos Interview':
+                        title = 'Selamat, Anda Lolos Tahap Interview!';
+                        className = 'status-lulus';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
                         
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const text = e.target.result;
-                            parsedCsvData = parseCSV(text); 
-                            renderCsvPreview(parsedCsvData);
-                        };
-                        reader.readAsText(selectedFile);
+                        const currentNextStepLink = globalNextStepLink;
 
-                    } else {
-                        showError(DOMElements.fileError, 'Hanya file CSV atau TXT yang diizinkan.');
-                        selectedFile = null;
-                        DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
-                        DOMElements.csvPreview.classList.add('hidden');
-                        DOMElements.confirmImportButton.classList.add('hidden');
-                    }
-                } else {
-                    DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
-                    hideError(DOMElements.fileError);
-                    DOMElements.csvPreview.classList.add('hidden');
-                    DOMElements.confirmImportButton.classList.add('hidden');
-                }
-                DOMElements.importCsvButton.disabled = !selectedFile;
-            });
+                        let scoreDetailsHtml = '';
+                        let totalScoreSum = 0;
+                        let validScoreCount = 0; // Untuk menghitung berapa kriteria yang memiliki nilai valid
 
-            DOMElements.importCsvButton.addEventListener('click', function() {
-                if (!selectedFile) {
-                    showError(DOMElements.fileError, 'Pilih file CSV terlebih dahulu.');
-                    return;
-                }
-                DOMElements.csvFileInput.dispatchEvent(new Event('change'));
-            });
+                        const scores = [
+                            { label: 'Perkenalan, kelebihan dan kekurangan', value: data.Perkenalan, keterangan: data.KeteranganPerkenalan },
+                            { label: 'Kesibukan akademik, dan non-akademik', value: data.Kesibukan, keterangan: data.KeteranganKesibukan },
+                            { label: 'Skala prioritas/komitmen', value: data.Komitmen, keterangan: data.KeteranganKomitmen },
+                            { label: 'Penjelasan judul praktikum pilihan 1', value: data.Praktikum1, keterangan: data.KeteranganPraktikum1 },
+                            { label: 'Penjelasan judul praktikum pilihan 2', value: data.Praktikum2, keterangan: data.KeteranganPraktikum2 },
+                            { label: 'Yang diketahui mengenai format laporan Dummy POMITS', value: data.LaporanDummy, keterangan: data.KeteranganLaporanDummy },
+                            { label: 'Yang diketahui mengenai ralat yang digunakan pada laporan POMITS', value: data.Ralat, keterangan: data.KeteranganRalat },
+                            { label: 'Skema pembagian waktu saat praktikum', value: data.SkemaWaktu, keterangan: data.KeteranganSkemaWaktu },
+                            { label: 'Komitmen dalam ketepatan untuk menginput nilai', value: data.KomitmenInputNilai, keterangan: data.KeteranganKomitmenInputNilai },
+                            { label: 'Seberapa yakin diterima jadi aslab?', value: data.KeyakinanDiterima, keterangan: data.KeteranganKeyakinanDiterima }
+                        ];
 
-            DOMElements.confirmImportButton.addEventListener('click', async function() {
-                if (!parsedCsvData || parsedCsvData.length === 0) {
-                    alert('Tidak ada data yang diimpor.');
-                    return;
-                }
-
-                DOMElements.confirmImportButton.disabled = true;
-                DOMElements.confirmImportButton.textContent = 'Mengimpor...';
-                DOMElements.uploadResultDiv.classList.add('hidden');
-                DOMElements.uploadResultDiv.innerHTML = '';
-
-                const applicantsRef = database.ref('applicants'); 
-                let importCount = 0;
-                let errorCount = 0;
-
-                displayUploadResult('warning', `Memulai import ${parsedCsvData.length} data...`);
-
-                const batchSize = 50;
-                const totalBatches = Math.ceil(parsedCsvData.length / batchSize);
-
-                for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-                    const startIdx = batchIndex * batchSize;
-                    const endIdx = Math.min(startIdx + batchSize, parsedCsvData.length);
-                    const currentBatch = parsedCsvData.slice(startIdx, endIdx);
-
-                    const promises = currentBatch.map(applicant => {
-                        const dataToSave = {
-                            name: applicant.name,
-                            nrp: applicant.nrp,
-                            keteranganInterview: applicant.keteranganInterview,
-                            password: applicant.password,
-                            code: 'N/A', 
-                            timestamp: firebase.database.ServerValue.TIMESTAMP,
-                            Perkenalan: applicant.Perkenalan ? parseFloat(applicant.Perkenalan) : null,
-                            KeteranganPerkenalan: applicant.KeteranganPerkenalan || null,
-                            Kesibukan: applicant.Kesibukan ? parseFloat(applicant.Kesibukan) : null,
-                            KeteranganKesibukan: applicant.KeteranganKesibukan || null,
-                            Komitmen: applicant.Komitmen ? parseFloat(applicant.Komitmen) : null,
-                            KeteranganKomitmen: applicant.KeteranganKomitmen || null,
-                            Praktikum1: applicant.Praktikum1 ? parseFloat(applicant.Praktikum1) : null,
-                            KeteranganPraktikum1: applicant.KeteranganPraktikum1 || null,
-                            Praktikum2: applicant.Praktikum2 ? parseFloat(applicant.Praktikum2) : null,
-                            KeteranganPraktikum2: applicant.KeteranganPraktikum2 || null,
-                            LaporanDummy: applicant.LaporanDummy ? parseFloat(applicant.LaporanDummy) : null,
-                            KeteranganLaporanDummy: applicant.KeteranganLaporanDummy || null,
-                            Ralat: applicant.Ralat ? parseFloat(applicant.Ralat) : null,
-                            KeteranganRalat: applicant.KeteranganRalat || null,
-                            SkemaWaktu: applicant.SkemaWaktu ? parseFloat(applicant.SkemaWaktu) : null,
-                            KeteranganSkemaWaktu: applicant.KeteranganSkemaWaktu || null,
-                            KomitmenInputNilai: applicant.KomitmenInputNilai ? parseFloat(applicant.KomitmenInputNilai) : null,
-                            KeteranganKomitmenInputNilai: applicant.KeteranganKomitmenInputNilai || null,
-                            KeyakinanDiterima: applicant.KeyakinanDiterima ? parseFloat(applicant.KeyakinanDiterima) : null,
-                            KeteranganKeyakinanDiterima: applicant.KeteranganKeyakinanDiterima || null,
-                            Keterangan: applicant.Keterangan || null
-                        };
-
-                        // Validasi nilai 1-10 untuk setiap kriteria skor
-                        const scoreFields = ['Perkenalan', 'Kesibukan', 'Komitmen', 'Praktikum1', 'Praktikum2', 'LaporanDummy', 'Ralat', 'SkemaWaktu', 'KomitmenInputNilai', 'KeyakinanDiterima'];
-                        for (const field of scoreFields) {
-                            if (dataToSave[field] !== null && (isNaN(dataToSave[field]) || dataToSave[field] < 1 || dataToSave[field] > 10)) {
-                                console.warn(`Nilai ${field} tidak valid (harus 1-10) untuk NRP ${dataToSave.nrp}. Akan diabaikan atau diatur ke null.`);
-                                dataToSave[field] = null; // Set to null if invalid
+                        scores.forEach(score => {
+                            const scoreValue = parseFloat(score.value);
+                            // Pastikan nilai adalah angka dan dalam rentang 1-10
+                            if (!isNaN(scoreValue) && scoreValue >= 1 && scoreValue <= 10) {
+                                totalScoreSum += scoreValue;
+                                validScoreCount++;
+                                scoreDetailsHtml += `
+                                    <div class="score-item">
+                                        <strong>${score.label}</strong>
+                                        <span>${scoreValue}</span>
+                                        ${score.keterangan ? `<p class="text-xs text-gray-600 mt-1">${score.keterangan}</p>` : ''}
+                                    </div>
+                                `;
                             }
+                        });
+
+                        // Nilai total adalah penjumlahan dari semua nilai kriteria yang valid
+                        const finalTotalScore = validScoreCount > 0 ? totalScoreSum : 'N/A';
+
+                        let keteranganAdmin = '';
+                        if (data.Keterangan) {
+                            keteranganAdmin = `
+                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Keterangan Admin:</h5>
+                                <p class="text-base text-gray-700 text-left">${data.Keterangan}</p>
+                            `;
                         }
 
-                        if (!dataToSave.name || !validateNRP(dataToSave.nrp) || !validateKeteranganInterview(dataToSave.keteranganInterview) || !dataToSave.password) {
-                            console.error("Data tidak valid (Nama/NRP/Keterangan Interview/Password kosong/salah format):", applicant);
-                            errorCount++;
-                            return Promise.resolve(); 
-                        }
-
-                        // Check if applicant with same NRP already exists
-                        return applicantsRef.orderByChild('nrp').equalTo(dataToSave.nrp).once('value')
-                            .then(snapshot => {
-                                if (snapshot.exists()) {
-                                    // Update existing applicant
-                                    const existingApplicantKey = Object.keys(snapshot.val())[0];
-                                    return applicantsRef.child(existingApplicantKey).update(dataToSave);
-                                } else {
-                                    // Add new applicant
-                                    return applicantsRef.push(dataToSave);
-                                }
-                            })
-                            .then(() => {
-                                importCount++;
-                            })
-                            .catch(error => {
-                                console.error("Error saat mengimpor/memperbarui data:", error);
-                                errorCount++;
-                            });
-                    });
-                    await Promise.all(promises); 
+                        content = `
+                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> sebagai Asisten Fisika Laboratorium 1!</p>
+                            <p class="text-base font-semibold mb-2">Langkah selanjutnya:</p>
+                            <ul class="list-disc list-inside ml-4 mb-4 text-gray-700 text-left">
+                                <li>Silahkan masuk ke grup WhatsApp khusus asisten dibawah ini (DILARANG KERAS MEMBAGIKAN LINK GRUP KE SIAPAPUN)</li>
+                                <li>Segala informasi akan dikoordinasikan melalui grup tersebut</li>
+                            </ul>
+                            <p class="text-base mb-4">Silakan bergabung ke grup berikut untuk informasi lebih lanjut:</p>
+                            ${currentNextStepLink !== '#' ? `
+                                <a href="${currentNextStepLink}" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                                        <path d="M15 7v2a4 4 0 01-4 4H9.024l-2.555 2.555A1 1 0 015 15.5v-5.029a1 1 0 01.832-.986l3.597-.832A4 4 0 0115 7z" />
+                                    </svg>
+                                    Gabung Grup Komunikasi
+                                </a>
+                            ` : `<p class="text-sm text-gray-500 mb-4">Link grup komunikasi belum tersedia.</p>`}
+                            
+                            <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Nilai Total Interview: <span class="text-theme-red">${finalTotalScore}</span></h5>
+                            <p class="toggle-score-details" id="toggleScoreDetails">Lihat Detail Penilaian</p>
+                            <div id="scoreDetailsContainer" class="score-details-container">
+                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Detail Penilaian Interview:</h5>
+                                <div class="score-grid">
+                                    ${scoreDetailsHtml}
+                                </div>
+                            </div>
+                            ${keteranganAdmin}
+                        `;
+                        break;
+                    case 'Tidak Lolos Interview':
+                        title = 'Mohon Maaf';
+                        className = 'status-tidak-lulus';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
+                        content = `
+                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> tahap interview sebagai Asisten Fisika Laboratorium 1.</p>
+                            <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan usaha Anda. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
+                        `;
+                        break;
+                    case 'Menunggu':
+                        title = 'Status Pendaftaran';
+                        className = 'status-menunggu';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
+                        content = `
+                            <p class="text-base mb-4">Halo ${applicantName}, status kelulusan tahap interview Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
+                            <p class="text-base mb-4">Mohon bersabar, informasi lebih lanjut akan segera diumumkan.</p>
+                        `;
+                        break;
+                    case 'Tidak Ditemukan':
+                    default:
+                        title = 'Data Tidak Ditemukan';
+                        className = 'status-not-found';
+                        iconSvg = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        `;
+                        content = `
+                            <p class="text-base mb-4">NRP atau Password yang Anda masukkan salah, atau data pendaftaran tidak ditemukan.</p>
+                            <p class="text-base mb-4">Mohon periksa kembali NRP dan Password Anda, atau pastikan Anda sudah mendaftar.</p>
+                        `;
+                        break;
                 }
 
-                if (errorCount === 0) {
-                    displayUploadResult('success', `Import selesai! ${importCount} data berhasil diimpor/diperbarui.`);
-                } else {
-                    displayUploadResult('warning', `Import selesai dengan ${importCount} data berhasil diimpor/diperbarui dan ${errorCount} data gagal/dilewati.`);
-                }
+                DOMElements.modalStatusCard.classList.add(className);
+                DOMElements.modalStatusCard.innerHTML = `
+                    <div class="status-icon">${iconSvg}</div>
+                    <h4 class="text-xl font-bold mb-2">${title}</h4>
+                    ${content}
+                `;
                 
-                selectedFile = null;
-                DOMElements.csvFileInput.value = '';
-                DOMElements.fileNameDisplay.textContent = 'Seret & Lepas file CSV di sini atau Klik untuk memilih';
-                DOMElements.csvPreview.classList.add('hidden'); 
-                resetImportButtons();
-                loadApplicantsData(); 
-            });
-
-            DOMElements.refreshDataBtn.addEventListener('click', loadApplicantsData);
-
-            DOMElements.selectAllCheckbox.addEventListener('change', (e) => {
-                const isChecked = e.target.checked;
-                DOMElements.applicantsTableBody.querySelectorAll('.delete-checkbox').forEach(checkbox => {
-                    checkbox.checked = isChecked;
-                    const docId = checkbox.dataset.id;
-                    if (isChecked) {
-                        selectedForDeletion.add(docId);
-                    } else {
-                        selectedForDeletion.delete(docId);
+                setTimeout(() => {
+                    DOMElements.statusModalOverlay.classList.add('show');
+                    if (status === 'Lolos Interview') {
+                        const toggleBtn = document.getElementById('toggleScoreDetails');
+                        const scoreContainer = document.getElementById('scoreDetailsContainer');
+                        if (toggleBtn && scoreContainer) {
+                            toggleBtn.addEventListener('click', () => {
+                                scoreContainer.classList.toggle('expanded');
+                                toggleBtn.textContent = scoreContainer.classList.contains('expanded') ? 'Sembunyikan Detail Penilaian' : 'Lihat Detail Penilaian';
+                            });
+                        }
                     }
-                });
-                DOMElements.deleteSelectedBtn.disabled = selectedForDeletion.size === 0;
-                DOMElements.selectAllCheckbox.checked = selectedForDeletion.size === currentApplicantsData.length && currentApplicantsData.length > 0;
+                }, 100); 
+            }
+
+            DOMElements.togglePasswordBtn.addEventListener('click', function() {
+                if (DOMElements.passwordInput.type === 'password') {
+                    DOMElements.passwordInput.type = 'text';
+                    this.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                    `;
+                } else {
+                    DOMElements.passwordInput.type = 'password';
+                    this.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    `;
+                }
             });
 
-            DOMElements.saveChangesBtn.addEventListener('click', async () => {
-                if (editedApplicants.size === 0) {
-                    DOMElements.manageDataStatus.textContent = 'Tidak ada perubahan untuk disimpan.';
+            DOMElements.form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                let isValid = true;
+                const nrp = DOMElements.nrpInput.value.trim();
+                const password = DOMElements.passwordInput.value;
+
+                if (!nrp || !validateNRP(nrp)) {
+                    showError(DOMElements.nrpInput, DOMElements.nrpError);
+                    isValid = false;
+                } else {
+                    hideError(DOMElements.nrpInput, DOMElements.nrpError);
+                }
+
+                if (!password || password.length < 8) {
+                    showError(DOMElements.passwordInput, DOMElements.passwordError);
+                    isValid = false;
+                } else {
+                    hideError(DOMElements.passwordInput, DOMElements.passwordError);
+                }
+
+                if (!isValid) {
                     return;
                 }
 
-                DOMElements.saveChangesBtn.disabled = true;
-                DOMElements.saveChangesBtn.textContent = 'Menyimpan...';
-                DOMElements.manageDataStatus.textContent = 'Menyimpan perubahan...';
+                DOMElements.checkStatusBtn.classList.add('animate-bounce-click');
+                DOMElements.checkStatusBtn.disabled = true;
+                DOMElements.checkStatusBtn.textContent = 'Mengecek...';
+                
+                try {
+                    const applicantsRef = database.ref('applicants');
+                    
+                    const snapshot = await applicantsRef.orderByChild('nrp').equalTo(nrp).once('value');
 
-                let updateCount = 0;
-                let errorCount = 0;
-
-                for (const docId of editedApplicants) {
-                    const applicant = currentApplicantsData.find(app => app.id === docId);
-                    if (applicant) {
-                        if (!validateNRP(applicant.nrp)) {
-                            console.error(`NRP tidak valid untuk ${applicant.name}: ${applicant.nrp}`);
-                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: NRP tidak valid untuk ${applicant.name}.`;
-                            errorCount++;
-                            continue;
-                        }
-                        if (!validateKeteranganInterview(applicant.keteranganInterview)) {
-                            console.error(`Keterangan Interview tidak valid untuk ${applicant.name}: ${applicant.keteranganInterview}`);
-                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Keterangan Interview tidak valid untuk ${applicant.name}.`;
-                            errorCount++;
-                            continue;
-                        }
-                        if (!applicant.password) {
-                            console.error(`Password kosong untuk ${applicant.name}`);
-                            DOMElements.manageDataStatus.textContent = `Gagal menyimpan: Password kosong untuk ${applicant.name}.`;
-                            errorCount++;
-                            continue;
-                        }
-
-                        try {
-                            const updateData = {
-                                name: applicant.name,
-                                nrp: applicant.nrp,
-                                keteranganInterview: applicant.keteranganInterview,
-                                password: applicant.password,
-                                code: applicant.code || 'N/A',
-                                Perkenalan: applicant.Perkenalan ? parseFloat(applicant.Perkenalan) : null,
-                                KeteranganPerkenalan: applicant.KeteranganPerkenalan || null,
-                                Kesibukan: applicant.Kesibukan ? parseFloat(applicant.Kesibukan) : null,
-                                KeteranganKesibukan: applicant.KeteranganKesibukan || null,
-                                Komitmen: applicant.Komitmen ? parseFloat(applicant.Komitmen) : null,
-                                KeteranganKomitmen: applicant.KeteranganKomitmen || null,
-                                Praktikum1: applicant.Praktikum1 ? parseFloat(applicant.Praktikum1) : null,
-                                KeteranganPraktikum1: applicant.KeteranganPraktikum1 || null,
-                                Praktikum2: applicant.Praktikum2 ? parseFloat(applicant.Praktikum2) : null,
-                                KeteranganPraktikum2: applicant.KeteranganPraktikum2 || null,
-                                LaporanDummy: applicant.LaporanDummy ? parseFloat(applicant.LaporanDummy) : null,
-                                KeteranganLaporanDummy: applicant.KeteranganLaporanDummy || null,
-                                Ralat: applicant.Ralat ? parseFloat(applicant.Ralat) : null,
-                                KeteranganRalat: applicant.KeteranganRalat || null,
-                                SkemaWaktu: applicant.SkemaWaktu ? parseFloat(applicant.SkemaWaktu) : null,
-                                KeteranganSkemaWaktu: applicant.KeteranganSkemaWaktu || null,
-                                KomitmenInputNilai: applicant.KomitmenInputNilai ? parseFloat(applicant.KomitmenInputNilai) : null,
-                                KeteranganKomitmenInputNilai: applicant.KeteranganKomitmenInputNilai || null,
-                                KeyakinanDiterima: applicant.KeyakinanDiterima ? parseFloat(applicant.KeyakinanDiterima) : null,
-                                KeteranganKeyakinanDiterima: applicant.KeteranganKeyakinanDiterima || null,
-                                Keterangan: applicant.Keterangan || null
-                            };
-
-                            // Validasi nilai 1-10 untuk setiap kriteria skor sebelum update
-                            const scoreFields = ['Perkenalan', 'Kesibukan', 'Komitmen', 'Praktikum1', 'Praktikum2', 'LaporanDummy', 'Ralat', 'SkemaWaktu', 'KomitmenInputNilai', 'KeyakinanDiterima'];
-                            for (const field of scoreFields) {
-                                if (updateData[field] !== null && (isNaN(updateData[field]) || updateData[field] < 1 || updateData[field] > 10)) {
-                                    console.warn(`Nilai ${field} tidak valid (harus 1-10) untuk NRP ${applicant.nrp}. Akan diabaikan atau diatur ke null.`);
-                                    updateData[field] = null; // Set to null if invalid
-                                }
+                    if (snapshot.exists()) {
+                        let found = false;
+                        snapshot.forEach(childSnapshot => {
+                            const applicantData = childSnapshot.val();
+                            if (applicantData.password === password) {
+                                found = true;
+                                const statusInterview = applicantData.keteranganInterview || 'Menunggu'; 
+                                displayStatus(statusInterview, applicantData);
                             }
+                        });
 
-                            await database.ref('applicants/' + docId).update(updateData);
-                            updateCount++;
-                        } catch (error) {
-                            console.error("Error saving changes for", docId, ":", error);
-                            errorCount++;
+                        if (!found) {
+                            displayStatus('Tidak Ditemukan'); 
                         }
+                    } else {
+                        displayStatus('Tidak Ditemukan'); 
                     }
-                }
 
-                if (errorCount === 0) {
-                    DOMElements.manageDataStatus.textContent = `Perubahan berhasil disimpan! ${updateCount} data diupdate.`;
-                    editedApplicants.clear();
-                    DOMElements.saveChangesBtn.disabled = true;
-                } else {
-                    DOMElements.manageDataStatus.textContent = `Selesai menyimpan. ${updateCount} data diupdate, ${errorCount} data gagal.`;
-                }
-                DOMElements.saveChangesBtn.textContent = 'Simpan Perubahan';
-                loadApplicantsData(); 
-            });
-
-            DOMElements.deleteSelectedBtn.addEventListener('click', async () => {
-                if (selectedForDeletion.size === 0) {
-                    DOMElements.manageDataStatus.textContent = 'Tidak ada data yang dipilih untuk dihapus.';
-                    return;
-                }
-
-                if (!confirm(`Anda yakin ingin menghapus ${selectedForDeletion.size} pendaftar yang dipilih?`)) {
-                    return;
-                }
-
-                DOMElements.deleteSelectedBtn.disabled = true;
-                DOMElements.deleteSelectedBtn.textContent = 'Menghapus...';
-                DOMElements.manageDataStatus.textContent = 'Menghapus data terpilih...';
-
-                let deleteCount = 0;
-                let errorCount = 0;
-
-                for (const docId of selectedForDeletion) {
-                    try {
-                        await database.ref('applicants/' + docId).remove();
-                        deleteCount++;
-                    } catch (error) {
-                        console.error("Error deleting selected applicant:", docId, error);
-                        errorCount++;
-                    }
-                }
-
-                if (errorCount === 0) {
-                    DOMElements.manageDataStatus.textContent = `${deleteCount} pendaftar berhasil dihapus.`;
-                } else {
-                    DOMElements.manageDataStatus.textContent = `Selesai menghapus. ${deleteCount} pendaftar berhasil dihapus, ${errorCount} gagal.`;
-                }
-                selectedForDeletion.clear();
-                DOMElements.deleteSelectedBtn.disabled = true;
-                DOMElements.selectAllCheckbox.checked = false;
-                DOMElements.deleteSelectedBtn.textContent = 'Hapus Terpilih';
-                loadApplicantsData(); 
-            });
-
-            DOMElements.addCandidateForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const newCandidate = {
-                    name: DOMElements.newName.value,
-                    nrp: DOMElements.newNrp.value,
-                    password: DOMElements.newPassword.value,
-                    code: 'N/A', 
-                    keteranganInterview: DOMElements.newStatusInterview.value, 
-                    timestamp: firebase.database.ServerValue.TIMESTAMP,
-                    Perkenalan: DOMElements.newPerkenalan.value ? parseFloat(DOMElements.newPerkenalan.value) : null,
-                    KeteranganPerkenalan: DOMElements.newKeteranganPerkenalan.value || null,
-                    Kesibukan: DOMElements.newKesibukan.value ? parseFloat(DOMElements.newKesibukan.value) : null,
-                    KeteranganKesibukan: DOMElements.newKeteranganKesibukan.value || null,
-                    Komitmen: DOMElements.newKomitmen.value ? parseFloat(DOMElements.newKomitmen.value) : null,
-                    KeteranganKomitmen: DOMElements.newKeteranganKomitmen.value || null,
-                    Praktikum1: DOMElements.newPraktikum1.value ? parseFloat(DOMElements.newPraktikum1.value) : null,
-                    KeteranganPraktikum1: DOMElements.newKeteranganPraktikum1.value || null,
-                    Praktikum2: DOMElements.newPraktikum2.value ? parseFloat(DOMElements.newPraktikum2.value) : null,
-                    KeteranganPraktikum2: DOMElements.newKeteranganPraktikum2.value || null,
-                    LaporanDummy: DOMElements.newLaporanDummy.value ? parseFloat(DOMElements.newLaporanDummy.value) : null,
-                    KeteranganLaporanDummy: DOMElements.newKeteranganLaporanDummy.value || null,
-                    Ralat: DOMElements.newRalat.value ? parseFloat(DOMElements.newRalat.value) : null,
-                    KeteranganRalat: DOMElements.newKeteranganRalat.value || null,
-                    SkemaWaktu: DOMElements.newSkemaWaktu.value ? parseFloat(DOMElements.newSkemaWaktu.value) : null,
-                    KeteranganSkemaWaktu: DOMElements.newKeteranganSkemaWaktu.value || null,
-                    KomitmenInputNilai: DOMElements.newKomitmenInputNilai.value ? parseFloat(DOMElements.newKomitmenInputNilai.value) : null,
-                    KeteranganKomitmenInputNilai: DOMElements.newKeteranganKomitmenInputNilai.value || null,
-                    KeyakinanDiterima: DOMElements.newKeyakinanDiterima.value ? parseFloat(DOMElements.newKeyakinanDiterima.value) : null,
-                    KeteranganKeyakinanDiterima: DOMElements.newKeteranganKeyakinanDiterima.value || null,
-                    Keterangan: DOMElements.newKeterangan.value || null
-                };
-
-                if (!validateNRP(newCandidate.nrp)) {
-                    alert('NRP harus 10 digit angka.');
-                    return;
-                }
-                if (!newCandidate.name || !newCandidate.password || !validateKeteranganInterview(newCandidate.keteranganInterview)) {
-                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan Interview harus "Lolos Interview", "Tidak Lolos Interview", atau "Menunggu".');
-                    return;
-                }
-
-                // Validasi nilai 1-10 untuk setiap kriteria skor
-                const scoreFields = ['Perkenalan', 'Kesibukan', 'Komitmen', 'Praktikum1', 'Praktikum2', 'LaporanDummy', 'Ralat', 'SkemaWaktu', 'KomitmenInputNilai', 'KeyakinanDiterima'];
-                for (const field of scoreFields) {
-                    if (newCandidate[field] !== null && (isNaN(newCandidate[field]) || newCandidate[field] < 1 || newCandidate[field] > 10)) {
-                        alert(`Nilai ${field} tidak valid. Harap masukkan angka antara 1 dan 10.`);
-                        return;
-                    }
-                }
-
-                try {
-                    await database.ref('applicants').push(newCandidate);
-                    alert('Kandidat berhasil ditambahkan!');
-                    DOMElements.addCandidateForm.reset();
-                    loadApplicantsData(); 
                 } catch (error) {
-                    console.error("Error adding candidate:", error);
-                    alert('Gagal menambahkan kandidat: ' + error.message);
+                    console.error("Error checking status:", error);
+                    displayStatus('Terjadi Kesalahan');
+                } finally {
+                    DOMElements.checkStatusBtn.disabled = false;
+                    DOMElements.checkStatusBtn.textContent = 'Cek Status';
+                    DOMElements.checkStatusBtn.classList.remove('animate-bounce-click'); 
                 }
             });
 
-            DOMElements.editCandidateForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const candidateId = DOMElements.editCandidateId.value;
-                const updatedCandidate = {
-                    name: DOMElements.editName.value,
-                    nrp: DOMElements.editNrp.value,
-                    keteranganInterview: DOMElements.editStatusInterview.value, 
-                    password: DOMElements.editPassword.value,
-                    code: 'N/A', 
-                    Perkenalan: DOMElements.editPerkenalan.value ? parseFloat(DOMElements.editPerkenalan.value) : null,
-                    KeteranganPerkenalan: DOMElements.editKeteranganPerkenalan.value || null,
-                    Kesibukan: DOMElements.editKesibukan.value ? parseFloat(DOMElements.editKesibukan.value) : null,
-                    KeteranganKesibukan: DOMElements.editKeteranganKesibukan.value || null,
-                    Komitmen: DOMElements.editKomitmen.value ? parseFloat(DOMElements.editKomitmen.value) : null,
-                    KeteranganKomitmen: DOMElements.editKeteranganKomitmen.value || null,
-                    Praktikum1: DOMElements.editPraktikum1.value ? parseFloat(DOMElements.editPraktikum1.value) : null,
-                    KeteranganPraktikum1: DOMElements.editKeteranganPraktikum1.value || null,
-                    Praktikum2: DOMElements.editPraktikum2.value ? parseFloat(DOMElements.editPraktikum2.value) : null,
-                    KeteranganPraktikum2: DOMElements.editKeteranganPraktikum2.value || null,
-                    LaporanDummy: DOMElements.editLaporanDummy.value ? parseFloat(DOMElements.editLaporanDummy.value) : null,
-                    KeteranganLaporanDummy: DOMElements.editKeteranganLaporanDummy.value || null,
-                    Ralat: DOMElements.editRalat.value ? parseFloat(DOMElements.editRalat.value) : null,
-                    KeteranganRalat: DOMElements.editKeteranganRalat.value || null,
-                    SkemaWaktu: DOMElements.editSkemaWaktu.value ? parseFloat(DOMElements.editSkemaWaktu.value) : null,
-                    KeteranganSkemaWaktu: DOMElements.editKeteranganSkemaWaktu.value || null,
-                    KomitmenInputNilai: DOMElements.editKomitmenInputNilai.value ? parseFloat(DOMElements.editKomitmenInputNilai.value) : null,
-                    KeteranganKomitmenInputNilai: DOMElements.editKeteranganKomitmenInputNilai.value || null,
-                    KeyakinanDiterima: DOMElements.editKeyakinanDiterima.value ? parseFloat(DOMElements.editKeyakinanDiterima.value) : null,
-                    KeteranganKeyakinanDiterima: DOMElements.editKeteranganKeyakinanDiterima.value || null,
-                    Keterangan: DOMElements.editKeterangan.value || null
-                };
-
-                if (!validateNRP(updatedCandidate.nrp)) {
-                    alert('NRP harus 10 digit angka.');
-                    return;
-                }
-                if (!updatedCandidate.name || !updatedCandidate.password || !validateKeteranganInterview(updatedCandidate.keteranganInterview)) {
-                    alert('Semua kolom bertanda (*) harus diisi dan Keterangan Interview harus "Lolos Interview", "Tidak Lolos Interview", atau "Menunggu".');
-                    return;
-                }
-
-                // Validasi nilai 1-10 untuk setiap kriteria skor
-                const scoreFields = ['Perkenalan', 'Kesibukan', 'Komitmen', 'Praktikum1', 'Praktikum2', 'LaporanDummy', 'Ralat', 'SkemaWaktu', 'KomitmenInputNilai', 'KeyakinanDiterima'];
-                for (const field of scoreFields) {
-                    if (updatedCandidate[field] !== null && (isNaN(updatedCandidate[field]) || updatedCandidate[field] < 1 || updatedCandidate[field] > 10)) {
-                        alert(`Nilai ${field} tidak valid. Harap masukkan angka antara 1 dan 10.`);
-                        return;
-                    }
-                }
-
-                try {
-                    await database.ref('applicants/' + candidateId).update(updatedCandidate);
-                    alert('Kandidat berhasil diperbarui!');
-                    DOMElements.editCandidateModal.classList.add('hidden');
-                    loadApplicantsData(); 
-                } catch (error) {
-                    console.error("Error updating candidate:", error);
-                    alert('Gagal memperbarui kandidat: ' + error.message);
-                }
+            DOMElements.closeStatusModalBtn.addEventListener('click', () => {
+                DOMElements.statusModalOverlay.classList.remove('show');
             });
 
-            DOMElements.cancelEdit.addEventListener('click', () => {
-                DOMElements.editCandidateModal.classList.add('hidden');
+            DOMElements.statusModalOverlay.addEventListener('click', (e) => {
+                if (e.target === DOMElements.statusModalOverlay) {
+                    DOMElements.statusModalOverlay.classList.remove('show');
+                }
             });
         });
     </script>
