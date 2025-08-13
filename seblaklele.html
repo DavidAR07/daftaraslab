@@ -81,10 +81,11 @@
             box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3); /* Shadow lebih kuat */
             max-width: 550px; /* Sedikit lebih lebar */
             width: 90%;
+            max-height: 80vh; /* Batasi tinggi modal */
+            overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
             transform: scale(0.8); /* Mulai dari skala kecil */
             opacity: 0; /* Mulai dari transparan */
             transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease; /* Animasi bounce */
-            overflow: hidden;
         }
 
         .modal-overlay.show .modal-content {
