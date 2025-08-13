@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cek Kelulusan Asisten Fisika Laboratorium 1</title>
+    <title>Cek Kelulusan Asisten Fisika Laboratorium 1 (Tahap Interview)</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -81,11 +81,10 @@
             box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3); /* Shadow lebih kuat */
             max-width: 550px; /* Sedikit lebih lebar */
             width: 90%;
-            max-height: 80vh; /* Batasi tinggi modal */
-            overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi */
             transform: scale(0.8); /* Mulai dari skala kecil */
             opacity: 0; /* Mulai dari transparan */
             transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.4s ease; /* Animasi bounce */
+            overflow: hidden;
         }
 
         .modal-overlay.show .modal-content {
@@ -143,6 +142,55 @@
         .status-card-modal strong {
             font-weight: 700; /* Pastikan bold benar-benar tebal */
         }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .score-item {
+            background-color: #f9fafb;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .score-item strong {
+            display: block;
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin-bottom: 0.25rem;
+        }
+
+        .score-item span {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* New styles for collapsible score details */
+        .score-details-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .score-details-container.expanded {
+            max-height: 1000px; /* Adjust as needed to fit content */
+            transition: max-height 0.5s ease-in;
+        }
+
+        .toggle-score-details {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #c41e3a;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -170,8 +218,8 @@
     <main class="container mx-auto px-4 md:px-6 py-8">
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
             <div class="bg-theme-red text-white p-6">
-                <h2 class="text-2xl font-bold">Cek Status Pendaftaran Asisten</h2>
-                <p class="mt-2">Masukkan NRP dan Password Anda untuk melihat status kelulusan.</p>
+                <h2 class="text-2xl font-bold">Cek Status Kelulusan Tahap Interview</h2>
+                <p class="mt-2">Masukkan NRP dan Password Anda untuk melihat status kelulusan tahap interview.</p>
             </div>
             
             <div class="p-6">
@@ -243,8 +291,7 @@
         const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database(); 
 
-        let globalZoomLink = '#';
-        let globalTechnicalDocLink = '#';
+        let globalNextStepLink = '#'; // Link untuk langkah selanjutnya (misal: grup WA, pengarahan)
 
         document.addEventListener('DOMContentLoaded', function() {
             const DOMElements = {
@@ -266,17 +313,16 @@
             // Load global settings on page load
             async function loadGlobalSettings() {
                 try {
-                    const snapshot = await database.ref('settings/globalInterviewDetails').once('value');
+                    const snapshot = await database.ref('settings/globalNextStepDetails').once('value');
                     if (snapshot.exists()) {
                         const settings = snapshot.val();
-                        globalZoomLink = settings.zoomLink || '#';
-                        globalTechnicalDocLink = settings.technicalDocLink || '#';
-                        console.log("Global settings loaded:", settings);
+                        globalNextStepLink = settings.nextStepLink || '#';
+                        console.log("Global next step settings loaded:", settings);
                     } else {
-                        console.log("No global settings found.");
+                        console.log("No global next step settings found.");
                     }
                 } catch (error) {
-                    console.error("Error loading global settings:", error);
+                    console.error("Error loading global next step settings:", error);
                 }
             }
             loadGlobalSettings(); // Call this function when the DOM is loaded
@@ -296,27 +342,6 @@
                 return re.test(nrp);
             }
 
-            // Helper function to format datetime-local string
-            function formatDateTimeForDisplay(dateTimeString) {
-                if (!dateTimeString) {
-                    return { date: 'Akan diinformasikan kemudian (Cek secara berkala)', time: '' };
-                }
-                try {
-                    const date = new Date(dateTimeString);
-                    if (isNaN(date.getTime())) { // Check for invalid date
-                        return { date: 'Format tanggal/waktu tidak valid', time: '' };
-                    }
-                    const optionsDate = { day: '2-digit', month: '2-digit', year: 'numeric' };
-                    const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false };
-                    const formattedDate = date.toLocaleDateString('id-ID', optionsDate);
-                    const formattedTime = date.toLocaleTimeString('id-ID', optionsTime);
-                    return { date: formattedDate, time: formattedTime };
-                } catch (e) {
-                    console.error("Error formatting date time:", e);
-                    return { date: 'Akan diinformasikan kemudian (Cek secara berkala)', time: '' };
-                }
-            }
-
             function displayStatus(status, data = {}) {
                 let content = '';
                 let className = '';
@@ -327,8 +352,8 @@
                 DOMElements.modalStatusCard.className = 'status-card-modal'; 
 
                 switch (status) {
-                    case 'Lolos':
-                        title = 'Selamat, Anda Lolos Tahap Pemberkasan!';
+                    case 'Lolos Interview':
+                        title = 'Selamat, Anda Lolos Tahap Interview!';
                         className = 'status-lulus';
                         iconSvg = `
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -336,37 +361,82 @@
                             </svg>
                         `;
                         
-                        // Ambil detail interview dari data pendaftar
-                        const formattedInterview = formatDateTimeForDisplay(data.interviewDetails?.time);
-                        const interviewDate = formattedInterview.date;
-                        const interviewTime = formattedInterview.time || 'Akan diinformasikan kemudian (Cek secara berkala)';
-                        const breakoutRoom = data.interviewDetails?.breakoutRoom || 'Akan diinformasikan kemudian (Cek secara berkala)';
-                        
-                        // Gunakan link global
-                        const currentZoomLink = globalZoomLink;
-                        const currentTechnicalDocLink = globalTechnicalDocLink;
+                        const currentNextStepLink = globalNextStepLink;
+
+                        let scoreDetailsHtml = '';
+                        let totalScoreSum = 0;
+                        let validScoreCount = 0; // Untuk menghitung berapa kriteria yang memiliki nilai valid
+
+                        const scores = [
+                            { label: 'Perkenalan, kelebihan dan kekurangan', value: data.Perkenalan, keterangan: data.KeteranganPerkenalan },
+                            { label: 'Kesibukan akademik, dan non-akademik', value: data.Kesibukan, keterangan: data.KeteranganKesibukan },
+                            { label: 'Skala prioritas/komitmen', value: data.Komitmen, keterangan: data.KeteranganKomitmen },
+                            { label: 'Penjelasan judul praktikum pilihan 1', value: data.Praktikum1, keterangan: data.KeteranganPraktikum1 },
+                            { label: 'Penjelasan judul praktikum pilihan 2', value: data.Praktikum2, keterangan: data.KeteranganPraktikum2 },
+                            { label: 'Yang diketahui mengenai format laporan Dummy POMITS', value: data.LaporanDummy, keterangan: data.KeteranganLaporanDummy },
+                            { label: 'Yang diketahui mengenai ralat yang digunakan pada laporan POMITS', value: data.Ralat, keterangan: data.KeteranganRalat },
+                            { label: 'Skema pembagian waktu saat praktikum', value: data.SkemaWaktu, keterangan: data.KeteranganSkemaWaktu },
+                            { label: 'Komitmen dalam ketepatan untuk menginput nilai', value: data.KomitmenInputNilai, keterangan: data.KeteranganKomitmenInputNilai },
+                            { label: 'Seberapa yakin diterima jadi aslab?', value: data.KeyakinanDiterima, keterangan: data.KeteranganKeyakinanDiterima }
+                        ];
+
+                        scores.forEach(score => {
+                            const scoreValue = parseFloat(score.value);
+                            // Pastikan nilai adalah angka dan dalam rentang 1-10
+                            if (!isNaN(scoreValue) && scoreValue >= 1 && scoreValue <= 10) {
+                                totalScoreSum += scoreValue;
+                                validScoreCount++;
+                                scoreDetailsHtml += `
+                                    <div class="score-item">
+                                        <strong>${score.label}</strong>
+                                        <span>${scoreValue}</span>
+                                        ${score.keterangan ? `<p class="text-xs text-gray-600 mt-1">${score.keterangan}</p>` : ''}
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        // Nilai total adalah penjumlahan dari semua nilai kriteria yang valid
+                        const finalTotalScore = validScoreCount > 0 ? totalScoreSum : 'N/A';
+
+                        let keteranganAdmin = '';
+                        if (data.Keterangan) {
+                            keteranganAdmin = `
+                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Keterangan Admin:</h5>
+                                <p class="text-base text-gray-700 text-left">${data.Keterangan}</p>
+                            `;
+                        }
 
                         content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> tahap pemberkasan sebagai calon Asisten Fisika Laboratorium 1.</p>
-                            <p class="text-base font-semibold mb-2">Selanjutnya, Anda diundang untuk mengikuti tahap interview:</p>
+                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>Lolos</strong> sebagai Asisten Fisika Laboratorium 1!</p>
+                            <p class="text-base font-semibold mb-2">Langkah selanjutnya:</p>
                             <ul class="list-disc list-inside ml-4 mb-4 text-gray-700 text-left">
-                                <li><strong>Tanggal:</strong> ${interviewDate}</li>
-                                <li><strong>Waktu:</strong> ${interviewTime}</li>
-                                <li><strong>Breakout Room:</strong> ${breakoutRoom}</li>
-                                <li><strong>Link Zoom:</strong> ${currentZoomLink !== '#' ? `<a href="${currentZoomLink}" target="_blank" class="text-blue-600 hover:underline">${currentZoomLink}</a>` : 'Link belum tersedia'}</li>
+                                <li>Silahkan masuk ke grup WhatsApp khusus asisten dibawah ini (DILARANG KERAS MEMBAGIKAN LINK GRUP KE SIAPAPUN)</li>
+                                <li>Segala informasi akan dikoordinasikan melalui grup tersebut</li>
                             </ul>
-                            <p class="text-base mb-4">Mohon persiapkan diri Anda dengan baik. Untuk panduan teknis interview, silakan lihat pada dokumen berikut:</p>
-                            ${currentTechnicalDocLink !== '#' ? `
-                                <a href="${currentTechnicalDocLink}" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center">
+                            <p class="text-base mb-4">Silakan bergabung ke grup berikut untuk informasi lebih lanjut:</p>
+                            ${currentNextStepLink !== '#' ? `
+                                <a href="${currentNextStepLink}" target="_blank" class="btn-primary px-4 py-2 rounded-md font-medium inline-flex items-center mb-4">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd" />
+                                        <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                                        <path d="M15 7v2a4 4 0 01-4 4H9.024l-2.555 2.555A1 1 0 015 15.5v-5.029a1 1 0 01.832-.986l3.597-.832A4 4 0 0115 7z" />
                                     </svg>
-                                    Lihat Dokumen Teknis Interview
+                                    Gabung Grup Komunikasi
                                 </a>
-                            ` : `<p class="text-sm text-gray-500">Dokumen teknis belum tersedia.</p>`}
+                            ` : `<p class="text-sm text-gray-500 mb-4">Link grup komunikasi belum tersedia.</p>`}
+                            
+                            <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Nilai Total Interview: <span class="text-theme-red">${finalTotalScore}</span></h5>
+                            <p class="toggle-score-details" id="toggleScoreDetails">Lihat Detail Penilaian</p>
+                            <div id="scoreDetailsContainer" class="score-details-container">
+                                <h5 class="text-lg font-semibold mt-4 mb-2 text-gray-800 text-center">Detail Penilaian Interview:</h5>
+                                <div class="score-grid">
+                                    ${scoreDetailsHtml}
+                                </div>
+                            </div>
+                            ${keteranganAdmin}
                         `;
                         break;
-                    case 'Tidak Lolos':
+                    case 'Tidak Lolos Interview':
                         title = 'Mohon Maaf';
                         className = 'status-tidak-lulus';
                         iconSvg = `
@@ -375,8 +445,8 @@
                             </svg>
                         `;
                         content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> sebagai Asisten Fisika Laboratorium 1.</p>
-                            <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan minat Anda untuk mendaftar. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
+                            <p class="text-base mb-4">Halo ${applicantName}, Anda dinyatakan <strong>TIDAK LOLOS</strong> tahap interview sebagai Asisten Fisika Laboratorium 1.</p>
+                            <p class="text-base mb-4">Terima kasih banyak atas partisipasi dan usaha Anda. Tetap semangat dan semoga sukses di kesempatan lainnya!</p>
                         `;
                         break;
                     case 'Menunggu':
@@ -388,7 +458,7 @@
                             </svg>
                         `;
                         content = `
-                            <p class="text-base mb-4">Halo ${applicantName}, status pendaftaran Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
+                            <p class="text-base mb-4">Halo ${applicantName}, status kelulusan tahap interview Anda saat ini adalah <strong>MENUNGGU</strong> pengumuman.</p>
                             <p class="text-base mb-4">Mohon bersabar, informasi lebih lanjut akan segera diumumkan.</p>
                         `;
                         break;
@@ -417,6 +487,16 @@
                 
                 setTimeout(() => {
                     DOMElements.statusModalOverlay.classList.add('show');
+                    if (status === 'Lolos Interview') {
+                        const toggleBtn = document.getElementById('toggleScoreDetails');
+                        const scoreContainer = document.getElementById('scoreDetailsContainer');
+                        if (toggleBtn && scoreContainer) {
+                            toggleBtn.addEventListener('click', () => {
+                                scoreContainer.classList.toggle('expanded');
+                                toggleBtn.textContent = scoreContainer.classList.contains('expanded') ? 'Sembunyikan Detail Penilaian' : 'Lihat Detail Penilaian';
+                            });
+                        }
+                    }
                 }, 100); 
             }
 
@@ -479,8 +559,8 @@
                             const applicantData = childSnapshot.val();
                             if (applicantData.password === password) {
                                 found = true;
-                                const status = applicantData.keterangan || 'Menunggu'; 
-                                displayStatus(status, applicantData);
+                                const statusInterview = applicantData.keteranganInterview || 'Menunggu'; 
+                                displayStatus(statusInterview, applicantData);
                             }
                         });
 
