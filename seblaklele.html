@@ -170,7 +170,7 @@
     <main class="container mx-auto px-4 md:px-6 py-8">
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
             <div class="bg-theme-red text-white p-6">
-                <h2 class="text-2xl font-bold">Cek Status Kelulusan Tahap Interview</h2>
+                <h2 class="text-2xl font-bold">Cek Status Lolos Aslab Fislab I</h2>
                 <p class="mt-2">Masukkan NRP dan Password Anda untuk melihat status kelulusan tahap interview.</p>
             </div>
             
@@ -197,7 +197,7 @@
                     </div>
                     
                     <div class="mt-6">
-                        <button type="submit" id="checkStatusBtn" class="btn-primary w-full px-6 py-2 rounded-md font-medium">Cek Status</button>
+                        <button type="submit" id="checkStatusBtn" class="btn-primary w-full px-6 py-2 rounded-md font-medium">GASKEENNN</button>
                     </div>
                 </form>
 
@@ -317,9 +317,9 @@
                             <p class="text-gray-700 mb-4">Halo ${applicantName},</p>
                             <p class="text-gray-700 mb-4">Berdasarkan hasil interview, Anda dinyatakan <strong>Lolos Tahap Interview</strong> sebagai Asisten Fisika Laboratorium 1.</p>
                             <p class="text-gray-700 mb-4">Nilai akhir Anda adalah <strong>${data.finalScore !== null ? data.finalScore : 'N/A'}</strong>.</p>
-                            ${data.notes ? `<p class="text-gray-700 mb-4">Catatan: ${data.notes}</p>` : ''}
-                            <p class="text-gray-700">Silakan bergabung ke grup komunikasi untuk informasi selanjutnya:</p>
-                            <a href="${globalNextStepLink}" target="_blank" class="btn-primary mt-4 inline-block px-6 py-2 rounded-md font-medium">Gabung Grup Komunikasi</a>
+                            ${data.notes ? `<p class="text-gray-700 mb-4">Keterangan dari penguji: ${data.notes}</p>` : ''}
+                            <p class="text-gray-700">Silahkan segera bergabung ke grup WhatsApp khusus aslab bright system:</p>
+                            <a href="${globalNextStepLink}" target="_blank" class="btn-primary mt-4 inline-block px-6 py-2 rounded-md font-medium">GASSS MASUKK</a>
                         `;
                         break;
                     case 'Tidak Lolos Interview':
@@ -336,7 +336,7 @@
                             <p class="text-gray-700 mb-4">Halo ${applicantName},</p>
                             <p class="text-gray-700 mb-4">Terima kasih atas partisipasi Anda dalam seleksi Asisten Fisika Laboratorium 1. Berdasarkan hasil interview, Anda dinyatakan <strong>Belum Lolos Tahap Interview</strong>.</p>
                             <p class="text-gray-700 mb-4">Nilai akhir Anda adalah <strong>${data.finalScore !== null ? data.finalScore : 'N/A'}</strong>.</p>
-                            ${data.notes ? `<p class="text-gray-700 mb-4">Catatan: ${data.notes}</p>` : ''}
+                            ${data.notes ? `<p class="text-gray-700 mb-4">Keterangan dari penguji: ${data.notes}</p>` : ''}
                             <p class="text-gray-700">Jangan berkecil hati, terus semangat dan tingkatkan kemampuan Anda. Sampai jumpa di kesempatan berikutnya!</p>
                         `;
                         break;
